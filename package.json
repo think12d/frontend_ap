@@ -6,9 +6,9 @@
   "scripts": {
   "dev:user": "vite --host 0.0.0.0",
   "dev:admin": "vite --mode admin --host 0.0.0.0",
-  "build": "npx --yes tsc -b && npx --yes vite build",
-  "build:user": "npx --yes tsc -b && npx --yes vite build",
-  "build:admin": "tsc -b && vite build --mode admin",
+  "build": "node node_modules/typescript/bin/tsc -b && node node_modules/vite/bin/vite.js build",
+  "build:user": "node node_modules/typescript/bin/tsc -b && node node_modules/vite/bin/vite.js build",
+  "build:admin": "node node_modules/typescript/bin/tsc -b && node node_modules/vite/bin/vite.js build --mode admin",
   "preview": "vite preview"
 },
   "dependencies": {
