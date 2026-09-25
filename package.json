@@ -6,6 +6,7 @@
   "scripts": {
   "dev:user": "vite --host 0.0.0.0",
   "dev:admin": "vite --mode admin --host 0.0.0.0",
+  "build": "npx --yes tsc -b && npx --yes vite build",
   "build:user": "npx --yes tsc -b && npx --yes vite build",
   "build:admin": "tsc -b && vite build --mode admin",
   "preview": "vite preview"
