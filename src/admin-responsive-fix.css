@@ -1,0 +1,320 @@
+/* =========================================================================
+   ADMIN DASHBOARD — RESPONSIVE FIX
+   =========================================================================
+   Import this file AFTER styles.css (see src/main.tsx) so these rules win
+   the cascade without needing !important or fighting existing selectors.
+
+   Breakpoints used throughout this file:
+     ≤ 599px   phone
+     600–767px large phone / phablet
+     768–1023px tablet
+     1024–1279px small laptop
+     ≥ 1280px  laptop / desktop
+
+   What this fixes (verified against the current codebase, not guessed):
+     1. .admin-sidebar was `position: fixed; transform: translateX(-105%)`
+        at EVERY width, including desktop/laptop (min-width:981px rule at
+        styles.css:3059 never turned it back on). Admins on a laptop had
+        no visible sidebar at all unless they clicked the hamburger.
+        -> Below, the sidebar becomes a normal, always-visible column on
+           screens ≥1024px, and stays an off-canvas drawer below that.
+     2. .admin-access-table-head / .admin-access-row (the user list on
+        /admin/user-access) is a fixed 5-column CSS grid with no mobile
+        fallback anywhere in styles.css — it will overflow on any phone.
+        The JSX already renders <span class="admin-cell-label"> for each
+        cell (e.g. "Courses", "Access", "Last active") for exactly this
+        purpose, but .admin-cell-label has NO CSS rule at all right now,
+        so it just prints as plain run-on text on every screen size.
+        -> Below: hidden on desktop (where the header row already labels
+           columns), shown as a small caption above each value on mobile,
+           where the row becomes a stacked card.
+     3. .admin-grid-header / .admin-grid-row (course-access table inside
+        a user's detail page) and .login-history-header / .login-history-row
+        are the same problem: fixed multi-column grids, no responsive
+        fallback, and no per-cell labels in the markup to hook into.
+        -> Below: turned into labelled stacked cards on mobile using
+           ::before labels (column order is fixed in the code, so this is
+           safe), with a horizontal-scroll fallback as a safety net.
+     4. .admin-summary-grid (always 3 columns) and .admin-detail-layout
+        (always a fixed 1.2fr / 0.9fr two-column split) have no responsive
+        rule anywhere — both get cramped/overflow on phone and tablet.
+     5. .admin-metric-grid / .admin-stats (4 columns) only ever drop to 2
+        columns at ≤980px — cramped on narrow phones. Added a 1-column
+        step for very small screens.
+     6. .admin-form-grid (always 2 columns) never collapses to 1 column.
+   ========================================================================= */
+
+/* -------------------------------------------------------------------------
+   1. Sidebar / shell layout
+   ---------------------------------------------------------------------- */
+
+/* Below 1024px: keep the existing off-canvas drawer behaviour, just make
+   sure it's consistent and the backdrop/menu button always exist. */
+@media (max-width: 1023px) {
+  .admin-menu-button {
+    display: inline-flex;
+  }
+  .admin-shell {
+    display: block;
+  }
+  .admin-sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    z-index: 80;
+    transform: translateX(-105%);
+    transition: transform 220ms ease-out;
+  }
+  .admin-sidebar.is-open {
+    transform: translateX(0);
+  }
+  .admin-main {
+    width: 100%;
+  }
+}
+
+/* 1024px and up: persistent, always-visible sidebar as a real grid column.
+   This is the actual fix for "the laptop view has no sidebar". */
+@media (min-width: 1024px) {
+  .admin-menu-button,
+  .admin-drawer-backdrop {
+    display: none !important;
+  }
+
+  .admin-shell {
+    display: grid;
+    grid-template-columns: 264px minmax(0, 1fr);
+    align-items: start;
+    min-height: 100vh;
+  }
+
+  .admin-sidebar {
+    position: sticky;
+    top: 0;
+    inset: auto;
+    z-index: 1;
+    width: 100%;
+    height: 100vh;
+    transform: none !important;
+    box-shadow: none;
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .admin-main {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
+/* Small laptop band: keep the sidebar but a little narrower so content
+   has more room between 1024–1279px. */
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .admin-shell {
+    grid-template-columns: 224px minmax(0, 1fr);
+  }
+}
+
+/* -------------------------------------------------------------------------
+   2. Admin user-access table -> stacked cards on phone/phablet
+   ---------------------------------------------------------------------- */
+
+.admin-cell-label {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .admin-access-table-head {
+    display: none;
+  }
+
+  .admin-access-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    padding: 16px;
+  }
+
+  .admin-access-cell {
+    display: grid;
+    gap: 2px;
+    padding: 8px 0;
+    border-top: 1px solid rgba(19, 54, 79, 0.06);
+  }
+
+  .admin-cell-label {
+    display: block;
+    color: var(--text-secondary);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .admin-access-head-action {
+    display: none;
+  }
+
+  .admin-access-actions {
+    justify-content: stretch;
+    padding-top: 10px;
+  }
+
+  .admin-access-actions .button {
+    width: 100%;
+    justify-content: center;
+    min-height: 44px;
+  }
+}
+
+/* -------------------------------------------------------------------------
+   3. Course-access grid + login-history grid -> stacked cards on mobile
+   ---------------------------------------------------------------------- */
+
+@media (max-width: 767px) {
+  .admin-grid-header,
+  .login-history-header {
+    display: none;
+  }
+
+  .admin-grid-row,
+  .login-history-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding: 14px 16px;
+    border: 1px solid rgba(19, 54, 79, 0.08);
+    border-radius: 12px;
+    margin-bottom: 10px;
+  }
+
+  .admin-grid-row span,
+  .login-history-row span {
+    display: grid;
+    gap: 2px;
+  }
+
+  /* Column order in the JSX is fixed, so labelling by position is safe. */
+  .admin-grid-row span:nth-child(1)::before { content: "Course"; }
+  .admin-grid-row span:nth-child(2)::before { content: "Access type"; }
+  .admin-grid-row span:nth-child(3)::before { content: "Live"; }
+  .admin-grid-row span:nth-child(4)::before { content: "Expiry"; }
+  .admin-grid-row span:nth-child(5)::before { content: "Status"; }
+
+  .login-history-row span:nth-child(1)::before { content: "Date / time"; }
+  .login-history-row span:nth-child(2)::before { content: "Device"; }
+  .login-history-row span:nth-child(3)::before { content: "Browser"; }
+  .login-history-row span:nth-child(4)::before { content: "Status"; }
+
+  .admin-grid-row span::before,
+  .login-history-row span::before {
+    color: var(--text-secondary);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+}
+
+/* Safety net for the 768–1023px band: don't stack (there's enough room),
+   but let the grid scroll horizontally instead of overflowing the page
+   if a value is unexpectedly wide. */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .admin-access-grid-table,
+  .login-history-table {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .admin-grid-header,
+  .admin-grid-row {
+    min-width: 640px;
+  }
+  .login-history-header,
+  .login-history-row {
+    min-width: 480px;
+  }
+}
+
+/* -------------------------------------------------------------------------
+   4. Summary grid + detail layout (two-column split pages)
+   ---------------------------------------------------------------------- */
+
+@media (max-width: 1023px) {
+  .admin-detail-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .admin-summary-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (min-width: 641px) and (max-width: 1023px) {
+  .admin-summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* -------------------------------------------------------------------------
+   5. Metric / stat grids — add a true 1-column step for small phones
+   ---------------------------------------------------------------------- */
+
+@media (max-width: 479px) {
+  .admin-metric-grid,
+  .admin-stats {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* -------------------------------------------------------------------------
+   6. Form grid — collapse to a single column below tablet width
+   ---------------------------------------------------------------------- */
+
+@media (max-width: 767px) {
+  .admin-form-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* -------------------------------------------------------------------------
+   7. General safety nets across the admin area
+   ---------------------------------------------------------------------- */
+
+@media (max-width: 767px) {
+  /* Auth/login split screen: stack instead of side-by-side. */
+  .admin-auth-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  /* Hero + quicklink rows: don't let flex items force horizontal scroll. */
+  .admin-hero {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .admin-quicklink-row {
+    flex-wrap: wrap;
+  }
+
+  /* Modals: full-width sheet with breathing room on small screens. */
+  .admin-confirm-modal {
+    width: min(94vw, 440px);
+    padding: 18px 16px;
+  }
+
+  /* Any table-like element we haven't explicitly handled above still gets
+     a horizontal-scroll fallback instead of breaking page layout. */
+  .admin-table-panel {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Comfortable minimum tap targets for admin action buttons on touch
+   devices (phone + tablet). */
+@media (max-width: 1023px) {
+  .admin-nav a,
+  .admin-tab-button,
+  .admin-logout,
+  .admin-learner-link {
+    min-height: 44px;
+  }
+}
