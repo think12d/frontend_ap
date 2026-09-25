@@ -4513,7 +4513,7 @@ const testimonials = [
     status: "Cleared UGC NET JRF",
   },
   {
-    name: "Amartya Barman",
+    name: "Anushka",
     affiliation: "DU",
     text: "Covered the syllabus in great detail with extra focus on question solving and pattern. Apart from the classes, personal guidance on calls was also provided frequently. Highly recommended.",
     status: "Cleared UGC NET JRF",
@@ -8331,7 +8331,7 @@ function Testimonials() {
 }
 
 function NameMarquee() {
-  const proverb = "Learn deeply, practice consistently, perform confidently.";
+  const proverb = "JRF CRACK KARNA HAI — SAMJHO DONE HAI! 🔥.";
   const repeats = Array(3).fill(0);
   return (
     <div className="proverb-marquee-wrap">
