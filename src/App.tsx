@@ -3791,9 +3791,9 @@ function CoursePage({ user }: { user: User | null }) {
     course.offer_price_paise > 0 &&
     course.offer_price_paise < course.price_paise,
   );
-  const totalModuleTopics = course.modules.reduce(
-  (sum, item) => sum + item.topics.length, 0
-);
+  const totalModuleTopics = (course.modules || []).reduce(
+  (sum, item) => sum + (item.topics?.length || 0), 0
+);   // ✅
   const visibleModules = modulePageData?.items ?? [];
   const normalizedModuleSearch = moduleSearch.trim().toLowerCase();
   const filteredVisibleModules = visibleModules.flatMap((module) => {
@@ -3851,7 +3851,7 @@ function CoursePage({ user }: { user: User | null }) {
         </div>
         <div className="course-stamp">
           <Library size={24} />
-          <b>{course.modules.length || 1}</b>
+          <b>{(course.modules || []).length || 1}</b>   
           <span>modules</span>
         </div>
       </div>
@@ -4532,7 +4532,7 @@ function FlagshipCard({ user, course }: { user: User | null; course: Course | nu
   0,
 );
   const featureList = [
-    `${course.modules.length} structured modules`,
+    `${(course.modules || []).length} structured modules`,
     `${totalResources} study resources`,
     course.access_duration_days === 0 ? "Lifetime access" : `${course.access_duration_days} days access`,
     course.max_students ? `${course.max_students} learner seats` : "Flexible learning",
