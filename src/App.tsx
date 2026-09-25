@@ -2647,10 +2647,9 @@ function batchTypeLabel(course: Course) {
       : "Batch";
 }
 function CourseCard({ course }: { course: Course }) {
-  const topicCount = course.modules.reduce(
-    (sum, module) => sum + module.topics.length,
-    0,
-  );
+  const topicCount = (course.modules || []).reduce(
+  (sum, module) => sum + (module.topics?.length || 0), 0
+);
   const status = course.availability_status;
   const enrolled = status === "enrolled" || course.is_enrolled;
   const unavailable = ["closed", "full"].includes(status || "");
@@ -3793,9 +3792,8 @@ function CoursePage({ user }: { user: User | null }) {
     course.offer_price_paise < course.price_paise,
   );
   const totalModuleTopics = course.modules.reduce(
-    (sum, item) => sum + item.topics.length,
-    0,
-  );
+  (sum, item) => sum + item.topics.length, 0
+);
   const visibleModules = modulePageData?.items ?? [];
   const normalizedModuleSearch = moduleSearch.trim().toLowerCase();
   const filteredVisibleModules = visibleModules.flatMap((module) => {
@@ -4312,10 +4310,10 @@ function ModuleBlock({
   completedTopicIds: number[];
 }) {
   const [open, setOpen] = useState(false);
-  const resourceCount = module.topics.reduce(
-    (total, topic) => total + (topic.resources?.length ?? 0),
-    0,
-  );
+ const resourceCount = module.topics.reduce(
+  (total, topic) => total + (topic.resources?.length ?? 0), 0
+);
+
 
   return (
     <div className={`module-card ${open ? "module-card-open" : ""}`}>
@@ -4524,12 +4522,15 @@ const testimonials = [
 
 function FlagshipCard({ user, course }: { user: User | null; course: Course | null }) {
   if (!course) return null;
-  const totalResources = course.modules.reduce(
-    (count, module) =>
-      count +
-      module.topics.reduce((topicCount, topic) => topicCount + topic.resources.length, 0),
-    0,
-  );
+  const totalResources = (course.modules || []).reduce(
+  (count, module) =>
+    count +
+    (module.topics || []).reduce(
+      (topicCount, topic) => topicCount + (topic.resources?.length || 0),
+      0,
+    ),
+  0,
+);
   const featureList = [
     `${course.modules.length} structured modules`,
     `${totalResources} study resources`,
