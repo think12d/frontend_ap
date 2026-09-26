@@ -2389,20 +2389,7 @@ function Home({ user }: { user: User | null }) {
             </Link>
           </div>
         </div>
-        <div className="hero-orbit">
-          <div className="orbit-ring ring-one" />
-          <div className="orbit-ring ring-two" />
-          <div className="orbit-core">
-            <Sparkles size={25} />
-            <span>
-              JRF HUNTERS
-              <br />
-              <small>NET 2025</small>
-            </span>
-          </div>
-          <div className="orbit-tag tag-top">01 · WATCH</div>
-          <div className="orbit-tag tag-bottom">04 · MASTER</div>
-        </div>
+        
       </section>
       <section className="metric-row">
         <Metric
