@@ -2667,6 +2667,7 @@ function Home({ user }: { user: User | null }) {
             display: flex;
             flex-wrap: wrap;
             gap: 14px;
+            justify-content: flex-end;
           }
 
           .hero-btn {
@@ -2716,47 +2717,50 @@ function Home({ user }: { user: User | null }) {
   box-shadow: 0 16px 36px rgba(245,180,0,0.55), inset 0 1px 0 rgba(255,255,255,0.6);
 }
 
-@media (max-width: 640px) {
-  .hero-premium-actions { flex-direction: column; width: 100%; }
-  .hero-btn { width: 100%; justify-content: center; }
+.hero-premium-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  justify-content: flex-end;
 }
 
-          @media (max-width: 900px) {
-            .hero-premium {
-              padding: 40px 32px;
-              min-height: 420px;
-            }
-          }
+@media (max-width: 900px) {
+  .hero-premium {
+    padding: 40px 32px;
+    min-height: 420px;
+  }
+}
 
-          @media (max-width: 640px) {
-            .hero-premium {
-              padding: 32px 22px;
-              min-height: 380px;
-              border-radius: 20px;
-              align-items: flex-end;
-            }
-            .hero-premium-copy {
-              max-width: 100%;
-            }
-            .hero-premium-actions {
-              flex-direction: column;
-              width: 100%;
-            }
-            .hero-btn {
-              width: 100%;
-              justify-content: center;
-            }
-            .hero-glow-orb {
-              display: none;
-            }
-          }
+@media (max-width: 640px) {
+  .hero-premium {
+    padding: 32px 22px;
+    min-height: 380px;
+    border-radius: 20px;
+    align-items: flex-end;
+  }
+  .hero-premium-copy {
+    max-width: 100%;
+  }
+  .hero-premium-actions {
+    flex-direction: column;
+    width: 100%;
+    justify-content: flex-start;
+  }
+  .hero-btn {
+    width: 100%;
+    justify-content: center;
+  }
+  .hero-glow-orb {
+    display: none;
+  }
+}
 
-          @media (max-width: 380px) {
-            .hero-premium {
-              padding: 24px 16px;
-              min-height: 340px;
-            }
-          }
+@media (max-width: 380px) {
+  .hero-premium {
+    padding: 24px 16px;
+    min-height: 340px;
+  }
+}
         `}</style>
 
         <div className="hero-glow-orb one" />
