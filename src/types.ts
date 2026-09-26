@@ -406,12 +406,17 @@ export type RazorpayOrder = {
 
 export type PremiumAccess = {
   premium_access: boolean;
+  mock_test_access: boolean;
   premium_expires_at?: string | null;
   free_live_available: boolean;
   free_mock_available: boolean;
+  free_mock_attempts_used: number;
+  free_mock_attempts_remaining: number;
+  free_mock_attempt_limit: number;
   razorpay_configured: boolean;
   razorpay_mode?: "live" | "test" | "unknown";
   mock_mode: boolean;
   premium_price_paise: number;
+  mock_test_price_paise: number;
   currency: string;
 };
