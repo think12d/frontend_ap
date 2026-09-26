@@ -2356,41 +2356,44 @@ function Home({ user }: { user: User | null }) {
 
   return (
     <div className="container home-page">
-      <section className="hero-card">
-        <div className="hero-copy">
-          <div className="eyebrow">
-            <span className="live-pulse" />
-            Master Paper 1
-          </div>
-          <h1>
-            Master Paper 1. <br />
-            <em>Achieve JRF Success.</em>
-          </h1>
-          <p>
-            India's premier platform for UGC NET & JRF History, providing
-            institutional-grade rigour and research-backed pedagogy.
-          </p>
-          <div className="hero-actions">
-            <Link
-              className="button button-lime"
-              to={`/course/${defaultCourseSlug}`}
-            >
-              Explore Courses
-              <ArrowRight size={17} />
-            </Link>
-            <Link
-              className="button button-dark"
-              to={user ? `/course/${defaultCourseSlug}` : "/login"}
-            >
-              Start Learning
-            </Link>
-            <Link className="button" to="/mock-tests">
-              Take Free Mock Test
-            </Link>
-          </div>
-        </div>
-        
-      </section>
+     <section
+  className="hero-card"
+  style={{
+    backgroundImage:
+      "linear-gradient(rgba(6, 20, 18, 0.55), rgba(6, 20, 18, 0.55)), url('assets/hero_image.png')",
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    backgroundRepeat: "no-repeat",
+    color: "#fff",
+  }}
+>
+  <div className="hero-copy">
+    <div className="eyebrow">
+      <span className="live-pulse" />
+      Master Paper 1
+    </div>
+    <h1>
+      Master Paper 1. <br />
+      <em>Achieve JRF Success.</em>
+    </h1>
+    <p>
+      India's premier platform for UGC NET & JRF History, providing
+      institutional-grade rigour and research-backed pedagogy.
+    </p>
+    <div className="hero-actions">
+      <Link className="button button-lime" to={`/course/${defaultCourseSlug}`}>
+        Explore Courses
+        <ArrowRight size={17} />
+      </Link>
+      <Link className="button button-dark" to={user ? `/course/${defaultCourseSlug}` : "/login"}>
+        Start Learning
+      </Link>
+      <Link className="button" to="/mock-tests">
+        Take Free Mock Test
+      </Link>
+    </div>
+  </div>
+</section>
       <section className="metric-row">
         <Metric
           icon={<BookOpen />}
@@ -8309,7 +8312,6 @@ function SiteFooter() {
     </footer>
   );
 }
-
 function Testimonials() {
   const sectionRef = useRef<HTMLDivElement | null>(null);
   const [visible, setVisible] = useState(false);
@@ -8333,7 +8335,10 @@ function Testimonials() {
   }, []);
 
   return (
-    <div className="container testimonial-section" ref={sectionRef}>
+    <div
+      className={`container testimonial-section ${visible ? "is-visible" : ""}`}
+      ref={sectionRef}
+    >
       <style>{`
         .testimonial-section .section-heading {
           opacity: 0;
@@ -8517,39 +8522,37 @@ function Testimonials() {
         }
       `}</style>
 
-      <div className={`testimonial-section-inner ${visible ? "is-visible" : ""}`}>
-        <div className="section-heading">
-          <div>
-            <span className="eyebrow">TESTIMONIALS</span>
-            <h2>Success Stories from Our Students</h2>
-          </div>
-          <span className="muted">Real learners — concise feedback</span>
+      <div className="section-heading">
+        <div>
+          <span className="eyebrow">TESTIMONIALS</span>
+          <h2>Success Stories from Our Students</h2>
         </div>
+        <span className="muted">Real learners — concise feedback</span>
+      </div>
 
-        <div className="testimonial-row">
-          {testimonials.map((t) => (
-            <div className="testimonial-card" key={t.name}>
-              <div className="testimonial-quote">"{t.text}"</div>
-              <div className="testimonial-meta">
-                <div className="testimonial-initials">
-                  {t.name
-                    .split(" ")
-                    .map((p) => p[0])
-                    .slice(0, 2)
-                    .join("")
-                    .toUpperCase()}
-                </div>
-                <div className="testimonial-by">
-                  <strong>{t.name}</strong>
-                  <small>{t.affiliation}</small>
-                  {t.status && (
-                    <div className="testimonial-status">{t.status}</div>
-                  )}
-                </div>
+      <div className="testimonial-row">
+        {testimonials.map((t) => (
+          <div className="testimonial-card" key={t.name}>
+            <div className="testimonial-quote">"{t.text}"</div>
+            <div className="testimonial-meta">
+              <div className="testimonial-initials">
+                {t.name
+                  .split(" ")
+                  .map((p) => p[0])
+                  .slice(0, 2)
+                  .join("")
+                  .toUpperCase()}
+              </div>
+              <div className="testimonial-by">
+                <strong>{t.name}</strong>
+                <small>{t.affiliation}</small>
+                {t.status && (
+                  <div className="testimonial-status">{t.status}</div>
+                )}
               </div>
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
       </div>
     </div>
   );
