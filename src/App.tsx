@@ -2547,19 +2547,20 @@ function Home({ user }: { user: User | null }) {
           }
 
           .hero-premium::before {
-            content: "";
-            position: absolute;
-            inset: 0;
-            z-index: -2;
-            background-image: url('/assets/hero_image.png');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            transform: scale(1.06);
-          }
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background-image: url('/assets/hero_image.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  transform: scale(1.06);
+}
 
           .hero-premium::after {
             content: "";
+            display: none;
             position: absolute;
             inset: 0;
             z-index: -1;
@@ -2570,6 +2571,7 @@ function Home({ user }: { user: User | null }) {
           }
 
           .hero-glow-orb {
+          display: none;
             position: absolute;
             border-radius: 50%;
             filter: blur(60px);
