@@ -164,7 +164,182 @@ function readQuizDraft(user: User | null): QuizDraftState | null {
     return null;
   }
 }
+function MetricRow({
+  items,
+}: {
+  items: { icon: ReactNode; value: string; label: string }[];
+}) {
+  const sectionRef = useRef<HTMLDivElement | null>(null);
+  const [visible, setVisible] = useState(false);
 
+  useEffect(() => {
+    const node = sectionRef.current;
+    if (!node) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setVisible(true);
+            observer.disconnect();
+          }
+        });
+      },
+      { threshold: 0.2 },
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div
+      className={`metric-row-premium ${visible ? "is-visible" : ""}`}
+      ref={sectionRef}
+    >
+      <style>{`
+        .metric-row-premium {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 18px;
+          margin: 28px 0;
+        }
+        @media (max-width: 900px) {
+          .metric-row-premium {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 14px;
+          }
+        }
+        @media (max-width: 480px) {
+          .metric-row-premium {
+            grid-template-columns: 1fr;
+            gap: 12px;
+          }
+        }
+
+        .metric-card-premium {
+          position: relative;
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          padding: 22px 22px;
+          border-radius: 18px;
+          overflow: hidden;
+          isolation: isolate;
+          background: linear-gradient(155deg, #0c2a27 0%, #103a35 55%, #0c2a27 100%);
+          border: 1px solid rgba(41,230,201,0.18);
+          box-shadow: 0 10px 28px rgba(4,16,15,0.25);
+          opacity: 0;
+          transform: translateY(20px);
+          transition: transform 0.35s cubic-bezier(0.16,1,0.3,1), box-shadow 0.35s ease, border-color 0.35s ease;
+        }
+
+        .metric-card-premium::before {
+          content: "";
+          position: absolute;
+          inset: 0;
+          z-index: -1;
+          background: radial-gradient(circle at 85% 15%, rgba(31,182,168,0.35), transparent 55%);
+          opacity: 0.8;
+        }
+
+        .metric-row-premium.is-visible .metric-card-premium {
+          animation: metricPremiumIn 0.65s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        .metric-row-premium.is-visible .metric-card-premium:nth-child(1) { animation-delay: 0.05s; }
+        .metric-row-premium.is-visible .metric-card-premium:nth-child(2) { animation-delay: 0.15s; }
+        .metric-row-premium.is-visible .metric-card-premium:nth-child(3) { animation-delay: 0.25s; }
+        .metric-row-premium.is-visible .metric-card-premium:nth-child(4) { animation-delay: 0.35s; }
+
+        @keyframes metricPremiumIn {
+          0% { opacity: 0; transform: translateY(20px); }
+          100% { opacity: 1; transform: translateY(0); }
+        }
+
+        .metric-card-premium:hover {
+          transform: translateY(-6px);
+          box-shadow: 0 20px 40px rgba(4,16,15,0.4), 0 0 0 1px rgba(41,230,201,0.3);
+          border-color: rgba(41,230,201,0.4);
+        }
+
+        .metric-icon-premium {
+          flex-shrink: 0;
+          position: relative;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 50px;
+          height: 50px;
+          border-radius: 14px;
+          background: linear-gradient(135deg, #1fb6a8, #29e6c9);
+          color: #06231f;
+          box-shadow: 0 8px 20px rgba(31,182,168,0.45);
+        }
+
+        .metric-icon-premium::after {
+          content: "";
+          position: absolute;
+          inset: -6px;
+          border-radius: 18px;
+          border: 1px solid rgba(41,230,201,0.3);
+          opacity: 0;
+          transition: opacity 0.3s ease, inset 0.3s ease;
+        }
+        .metric-card-premium:hover .metric-icon-premium::after {
+          opacity: 1;
+          inset: -9px;
+        }
+
+        .metric-copy-premium {
+          display: flex;
+          flex-direction: column;
+          gap: 3px;
+          min-width: 0;
+        }
+        .metric-copy-premium b {
+          font-size: clamp(18px, 2.2vw, 23px);
+          line-height: 1.1;
+          color: #fff;
+          font-weight: 800;
+          letter-spacing: -0.01em;
+        }
+        .metric-copy-premium small {
+          font-size: 12.5px;
+          color: rgba(255,255,255,0.6);
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        @media (max-width: 480px) {
+          .metric-card-premium {
+            padding: 16px 18px;
+          }
+          .metric-icon-premium {
+            width: 44px;
+            height: 44px;
+          }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .metric-card-premium {
+            animation: none !important;
+            opacity: 1 !important;
+            transform: none !important;
+          }
+        }
+      `}</style>
+
+      {items.map((item, index) => (
+        <div className="metric-card-premium" key={index}>
+          <span className="metric-icon-premium">{item.icon}</span>
+          <div className="metric-copy-premium">
+            <b>{item.value}</b>
+            <small>{item.label}</small>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
 function persistQuizDraft(user: User | null, draft: QuizDraftState | null): void {
   if (typeof window === "undefined") return;
   const key = quizDraftKey(user);
@@ -2356,54 +2531,260 @@ function Home({ user }: { user: User | null }) {
 
   return (
     <div className="container home-page">
-     <section
-  className="hero-card"
-  style={{
-    backgroundImage:
-      "linear-gradient(rgba(6, 20, 18, 0.55), rgba(6, 20, 18, 0.55)), url('assets/hero_image.png')",
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-    backgroundRepeat: "no-repeat",
-    color: "#fff",
-  }}
->
-  <div className="hero-copy">
-    <div className="eyebrow">
-      <span className="live-pulse" />
-      Master Paper 1
-    </div>
-    <h1>
-      Master Paper 1. <br />
-      <em>Achieve JRF Success.</em>
-    </h1>
-    <p>
-      India's premier platform for UGC NET & JRF History, providing
-      institutional-grade rigour and research-backed pedagogy.
-    </p>
-    <div className="hero-actions">
-      <Link className="button button-lime" to={`/course/${defaultCourseSlug}`}>
-        Explore Courses
-        <ArrowRight size={17} />
-      </Link>
-      <Link className="button button-dark" to={user ? `/course/${defaultCourseSlug}` : "/login"}>
-        Start Learning
-      </Link>
-      <Link className="button" to="/mock-tests">
-        Take Free Mock Test
-      </Link>
-    </div>
-  </div>
-</section>
-      <section className="metric-row">
-        <Metric
-          icon={<BookOpen />}
-          value={`${total}`}
-          label="structured course"
-        />
-        <Metric icon={<Radio />} value="LIVE" label="Meet classes" />
-        <Metric icon={<Bot />} value="RAG" label="syllabus-grounded AI" />
-        <Metric icon={<Users />} value="24/7" label="peer learning" />
+      <section className="hero-premium">
+        <style>{`
+          .hero-premium {
+            position: relative;
+            border-radius: 28px;
+            overflow: hidden;
+            min-height: 460px;
+            display: flex;
+            align-items: center;
+            padding: 56px 56px;
+            box-sizing: border-box;
+            color: #fff;
+            isolation: isolate;
+          }
+
+          .hero-premium::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            z-index: -2;
+            background-image: url('/assets/hero_image.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            transform: scale(1.06);
+          }
+
+          .hero-premium::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            z-index: -1;
+            background:
+              radial-gradient(circle at 15% 20%, rgba(31,182,168,0.35), transparent 45%),
+              radial-gradient(circle at 90% 85%, rgba(19,143,156,0.4), transparent 50%),
+              linear-gradient(120deg, rgba(4,16,15,0.88) 0%, rgba(8,28,26,0.72) 45%, rgba(4,16,15,0.9) 100%);
+          }
+
+          .hero-glow-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(60px);
+            opacity: 0.5;
+            pointer-events: none;
+            z-index: -1;
+          }
+          .hero-glow-orb.one {
+            width: 260px;
+            height: 260px;
+            top: -60px;
+            right: 8%;
+            background: radial-gradient(circle, #1fb6a8, transparent 70%);
+            animation: heroFloat 8s ease-in-out infinite;
+          }
+          .hero-glow-orb.two {
+            width: 200px;
+            height: 200px;
+            bottom: -40px;
+            left: 6%;
+            background: radial-gradient(circle, #f5b400, transparent 70%);
+            opacity: 0.25;
+            animation: heroFloat 10s ease-in-out infinite reverse;
+          }
+          @keyframes heroFloat {
+            0%, 100% { transform: translateY(0px) translateX(0px); }
+            50% { transform: translateY(-22px) translateX(14px); }
+          }
+
+          .hero-premium-copy {
+            position: relative;
+            z-index: 1;
+            max-width: 640px;
+            width: 100%;
+          }
+
+          .hero-premium-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.22);
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+          }
+          .hero-premium-badge .dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #29e6c9;
+            box-shadow: 0 0 0 4px rgba(41,230,201,0.25);
+            animation: heroPulseDot 1.8s ease-in-out infinite;
+          }
+          @keyframes heroPulseDot {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.4); opacity: 0.6; }
+          }
+
+          .hero-premium h1 {
+            font-size: clamp(30px, 5vw, 52px);
+            line-height: 1.12;
+            margin: 0 0 18px;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+          }
+          .hero-premium h1 em {
+            font-style: normal;
+            background: linear-gradient(120deg, #29e6c9, #7fe8d4 50%, #f5b400);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+          }
+
+          .hero-premium p {
+            font-size: clamp(14px, 1.6vw, 17px);
+            line-height: 1.65;
+            max-width: 520px;
+            color: rgba(255,255,255,0.85);
+            margin: 0 0 28px;
+          }
+
+          .hero-premium-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+          }
+
+          .hero-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 13px 24px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 14.5px;
+            text-decoration: none;
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+            white-space: nowrap;
+          }
+          .hero-btn-primary {
+            background: linear-gradient(135deg, #1fb6a8, #29e6c9);
+            color: #06231f;
+            box-shadow: 0 10px 28px rgba(31,182,168,0.4);
+          }
+          .hero-btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 16px 36px rgba(31,182,168,0.55);
+          }
+          .hero-btn-ghost {
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(6px);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.28);
+          }
+          .hero-btn-ghost:hover {
+            background: rgba(255,255,255,0.16);
+            transform: translateY(-3px);
+          }
+          .hero-btn-text {
+            background: transparent;
+            color: rgba(255,255,255,0.85);
+            border: 1px solid rgba(255,255,255,0.18);
+          }
+          .hero-btn-text:hover {
+            color: #fff;
+            border-color: rgba(255,255,255,0.4);
+          }
+
+          @media (max-width: 900px) {
+            .hero-premium {
+              padding: 40px 32px;
+              min-height: 420px;
+            }
+          }
+
+          @media (max-width: 640px) {
+            .hero-premium {
+              padding: 32px 22px;
+              min-height: 380px;
+              border-radius: 20px;
+              align-items: flex-end;
+            }
+            .hero-premium-copy {
+              max-width: 100%;
+            }
+            .hero-premium-actions {
+              flex-direction: column;
+              width: 100%;
+            }
+            .hero-btn {
+              width: 100%;
+              justify-content: center;
+            }
+            .hero-glow-orb {
+              display: none;
+            }
+          }
+
+          @media (max-width: 380px) {
+            .hero-premium {
+              padding: 24px 16px;
+              min-height: 340px;
+            }
+          }
+        `}</style>
+
+        <div className="hero-glow-orb one" />
+        <div className="hero-glow-orb two" />
+
+        <div className="hero-premium-copy">
+          <div className="hero-premium-badge">
+            <span className="dot" />
+            Master Paper 1
+          </div>
+          <h1>
+            Master Paper 1. <br />
+            <em>Achieve JRF Success.</em>
+          </h1>
+          <p>
+            India's premier platform for UGC NET & JRF History, providing
+            institutional-grade rigour and research-backed pedagogy.
+          </p>
+          <div className="hero-premium-actions">
+            <Link className="hero-btn hero-btn-primary" to={`/course/${defaultCourseSlug}`}>
+              Explore Courses
+              <ArrowRight size={17} />
+            </Link>
+            <Link
+              className="hero-btn hero-btn-ghost"
+              to={user ? `/course/${defaultCourseSlug}` : "/login"}
+            >
+              Start Learning
+            </Link>
+            <Link className="hero-btn hero-btn-text" to="/mock-tests">
+              Take Free Mock Test
+            </Link>
+          </div>
+        </div>
       </section>
+
+      <MetricRow
+        items={[
+          { icon: <BookOpen size={22} />, value: `${total}`, label: "Structured courses" },
+          { icon: <Radio size={22} />, value: "LIVE", label: "Meet classes" },
+          { icon: <Bot size={22} />, value: "RAG", label: "Syllabus-grounded AI" },
+          { icon: <Users size={22} />, value: "24/7", label: "Peer learning" },
+        ]}
+      />
+
       <FlagshipCard user={user} course={featuredCourse} />
       <DemoVideo />
       <LibraryLaunch />
@@ -2562,7 +2943,6 @@ function Home({ user }: { user: User | null }) {
     </div>
   );
 }
-
 function LibraryLaunch() {
   return (
     <section className="library-launch-grid">
@@ -8328,227 +8708,335 @@ function Testimonials() {
           }
         });
       },
-      { threshold: 0.15 },
+      { threshold: 0.1 },
     );
     observer.observe(node);
     return () => observer.disconnect();
   }, []);
 
+  // Duplicate the list so the marquee loops seamlessly
+  const loopItems = [...testimonials, ...testimonials];
+
   return (
     <div
-      className={`container testimonial-section ${visible ? "is-visible" : ""}`}
+      className={`testimonial-showcase ${visible ? "is-visible" : ""}`}
       ref={sectionRef}
     >
       <style>{`
-        .testimonial-section .section-heading {
-          opacity: 0;
-          transform: translateX(-40px);
-          animation: testimonialHeadingIn 0.7s ease forwards;
-          animation-play-state: paused;
-        }
-        .testimonial-section.is-visible .section-heading {
-          animation-play-state: running;
-        }
-        @keyframes testimonialHeadingIn {
-          to { opacity: 1; transform: translateX(0); }
-        }
-
-        .testimonial-row {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-          gap: 22px;
-          margin-top: 20px;
-        }
-
-        .testimonial-card {
+        .testimonial-showcase {
           position: relative;
+          padding: 56px 0 40px;
+          margin: 20px 0;
           overflow: hidden;
-          padding: 28px 26px 24px;
-          border-radius: 20px;
-          background: linear-gradient(155deg, rgba(255,255,255,0.92), rgba(246,248,240,0.85));
-          border: 1px solid rgba(19, 143, 156, 0.14);
-          box-shadow: 0 10px 30px rgba(15, 40, 35, 0.06);
-          opacity: 0;
-          transform: translateX(-70px);
-          transition: transform 0.35s ease, box-shadow 0.35s ease;
-          will-change: transform, opacity;
         }
 
-        .testimonial-section.is-visible .testimonial-card {
-          animation: testimonialSlideIn 0.75s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-
-        .testimonial-section.is-visible .testimonial-card:nth-child(1) { animation-delay: 0.05s; }
-        .testimonial-section.is-visible .testimonial-card:nth-child(2) { animation-delay: 0.25s; }
-        .testimonial-section.is-visible .testimonial-card:nth-child(3) { animation-delay: 0.45s; }
-
-        @keyframes testimonialSlideIn {
-          0% {
-            opacity: 0;
-            transform: translateX(-70px);
-          }
-          60% {
-            opacity: 1;
-            transform: translateX(6px);
-          }
-          100% {
-            opacity: 1;
-            transform: translateX(0);
-          }
-        }
-
-        /* diagonal flash sweep */
-        .testimonial-card::before {
+        .testimonial-showcase::before,
+        .testimonial-showcase::after {
           content: "";
           position: absolute;
           top: 0;
-          left: -150%;
-          width: 60%;
-          height: 100%;
-          background: linear-gradient(
-            120deg,
-            transparent 0%,
-            rgba(255, 255, 255, 0.55) 45%,
-            rgba(255, 255, 255, 0.85) 50%,
-            rgba(255, 255, 255, 0.55) 55%,
-            transparent 100%
-          );
-          transform: skewX(-20deg);
+          bottom: 0;
+          width: 90px;
+          z-index: 3;
           pointer-events: none;
+        }
+        .testimonial-showcase::before {
+          left: 0;
+          background: linear-gradient(90deg, var(--tsg-bg, #fbfdfc) 10%, transparent);
+        }
+        .testimonial-showcase::after {
+          right: 0;
+          background: linear-gradient(270deg, var(--tsg-bg, #fbfdfc) 10%, transparent);
+        }
+
+        .testimonial-showcase-head {
+          text-align: center;
+          max-width: 640px;
+          margin: 0 auto 40px;
+          padding: 0 20px;
           opacity: 0;
+          transform: translateY(-24px);
+        }
+        .testimonial-showcase.is-visible .testimonial-showcase-head {
+          animation: tsHeadIn 0.8s cubic-bezier(0.16,1,0.3,1) forwards;
+        }
+        @keyframes tsHeadIn {
+          to { opacity: 1; transform: translateY(0); }
         }
 
-        .testimonial-section.is-visible .testimonial-card::before {
-          animation: testimonialFlash 1.1s ease forwards;
+        .testimonial-showcase-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          padding: 6px 16px;
+          border-radius: 999px;
+          background: linear-gradient(135deg, rgba(19,143,156,0.12), rgba(31,182,168,0.12));
+          border: 1px solid rgba(19, 143, 156, 0.25);
+          color: #0d7a6c;
+          font-size: 11.5px;
+          font-weight: 800;
+          letter-spacing: 0.08em;
+          margin-bottom: 14px;
+        }
+        .testimonial-showcase-badge .dot {
+          width: 6px;
+          height: 6px;
+          border-radius: 50%;
+          background: #17b8a4;
+          box-shadow: 0 0 0 3px rgba(23,184,164,0.25);
+          animation: tsPulseDot 1.8s ease-in-out infinite;
+        }
+        @keyframes tsPulseDot {
+          0%, 100% { transform: scale(1); opacity: 1; }
+          50% { transform: scale(1.35); opacity: 0.6; }
         }
 
-        .testimonial-section.is-visible .testimonial-card:nth-child(1)::before { animation-delay: 0.35s; }
-        .testimonial-section.is-visible .testimonial-card:nth-child(2)::before { animation-delay: 0.55s; }
-        .testimonial-section.is-visible .testimonial-card:nth-child(3)::before { animation-delay: 0.75s; }
-
-        @keyframes testimonialFlash {
-          0% { left: -150%; opacity: 0; }
-          10% { opacity: 1; }
-          60% { opacity: 1; }
-          100% { left: 130%; opacity: 0; }
+        .testimonial-showcase-head h2 {
+          font-size: clamp(24px, 3.4vw, 36px);
+          margin: 0 0 10px;
+          background: linear-gradient(135deg, #0f2b26, #138f9c 65%, #17b8a4);
+          -webkit-background-clip: text;
+          background-clip: text;
+          -webkit-text-fill-color: transparent;
+          font-weight: 800;
+          letter-spacing: -0.02em;
+        }
+        .testimonial-showcase-head p {
+          color: #5c6b66;
+          font-size: 14.5px;
+          line-height: 1.6;
+          margin: 0;
         }
 
-        .testimonial-card:hover {
-          transform: translateY(-6px) !important;
-          box-shadow: 0 18px 38px rgba(15, 40, 35, 0.14);
+        .testimonial-marquee-track {
+          display: flex;
+          gap: 22px;
+          width: max-content;
+          animation: tsScroll 42s linear infinite;
+        }
+        .testimonial-showcase:hover .testimonial-marquee-track {
+          animation-play-state: paused;
+        }
+        @keyframes tsScroll {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
         }
 
-        .testimonial-card::after {
+        .testimonial-glow-card {
+          position: relative;
+          flex: 0 0 auto;
+          width: min(360px, 84vw);
+          border-radius: 22px;
+          padding: 2px;
+          background: linear-gradient(135deg, rgba(19,143,156,0.35), rgba(255,255,255,0) 40%, rgba(31,182,168,0.3));
+        }
+
+        .testimonial-glow-card-inner {
+          position: relative;
+          height: 100%;
+          border-radius: 20px;
+          padding: 26px 24px 22px;
+          background: linear-gradient(160deg, rgba(255,255,255,0.98), rgba(247,250,248,0.94));
+          backdrop-filter: blur(6px);
+          overflow: hidden;
+          transition: transform 0.4s cubic-bezier(0.16,1,0.3,1), box-shadow 0.4s ease;
+          box-shadow: 0 8px 24px rgba(15,40,35,0.06);
+        }
+
+        .testimonial-glow-card:hover .testimonial-glow-card-inner {
+          transform: translateY(-8px) scale(1.02);
+          box-shadow: 0 24px 48px rgba(15,40,35,0.16), 0 0 0 1px rgba(19,143,156,0.15);
+        }
+
+        .testimonial-glow-card-inner::before {
           content: "\\201C";
           position: absolute;
-          top: -6px;
-          right: 18px;
-          font-size: 88px;
+          top: -18px;
+          right: 6px;
+          font-size: 110px;
           line-height: 1;
           font-family: Georgia, serif;
-          color: rgba(19, 143, 156, 0.12);
+          font-weight: 700;
+          background: linear-gradient(135deg, rgba(19,143,156,0.14), rgba(19,143,156,0.03));
+          -webkit-background-clip: text;
+          background-clip: text;
+          -webkit-text-fill-color: transparent;
           pointer-events: none;
+          user-select: none;
         }
 
-        .testimonial-quote {
+        .ts-stars {
+          display: flex;
+          gap: 3px;
+          margin-bottom: 14px;
           position: relative;
           z-index: 1;
-          font-size: 15px;
-          line-height: 1.65;
-          color: #26332e;
-          margin-bottom: 20px;
-          font-style: italic;
+        }
+        .ts-star {
+          width: 14px;
+          height: 14px;
+          color: #f5b400;
         }
 
-        .testimonial-meta {
+        .ts-quote {
+          position: relative;
+          z-index: 1;
+          font-size: 14.5px;
+          line-height: 1.7;
+          color: #33413c;
+          margin: 0 0 22px;
+          min-height: 132px;
+        }
+
+        .ts-meta {
           position: relative;
           z-index: 1;
           display: flex;
           align-items: center;
-          gap: 12px;
+          gap: 13px;
           padding-top: 16px;
-          border-top: 1px dashed rgba(19, 143, 156, 0.2);
+          border-top: 1px solid rgba(19,143,156,0.12);
         }
 
-        .testimonial-initials {
-          width: 44px;
-          height: 44px;
+        .ts-avatar-ring {
+          position: relative;
+          width: 48px;
+          height: 48px;
+          flex-shrink: 0;
           border-radius: 50%;
+          padding: 2px;
+          background: conic-gradient(from 0deg, #138f9c, #1fb6a8, #f5b400, #138f9c);
+          animation: tsRingSpin 5s linear infinite;
+        }
+        @keyframes tsRingSpin {
+          to { transform: rotate(360deg); }
+        }
+        .ts-avatar-inner {
+          width: 100%;
+          height: 100%;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #0e5f68, #138f9c);
           display: flex;
           align-items: center;
           justify-content: center;
-          font-weight: 700;
-          font-size: 14px;
           color: #fff;
-          background: linear-gradient(135deg, #138f9c, #1fb6a8);
-          box-shadow: 0 6px 14px rgba(19, 143, 156, 0.35);
-          flex-shrink: 0;
+          font-weight: 800;
+          font-size: 15px;
+          border: 2px solid #fbfdfc;
         }
 
-        .testimonial-by {
+        .ts-by {
           display: flex;
           flex-direction: column;
-          gap: 2px;
+          gap: 3px;
+          min-width: 0;
         }
-        .testimonial-by strong {
+        .ts-by strong {
           font-size: 14.5px;
           color: #16211d;
+          font-weight: 700;
         }
-        .testimonial-by small {
-          font-size: 12.5px;
+        .ts-by small {
+          font-size: 12px;
           color: #6b7a75;
         }
-        .testimonial-status {
-          margin-top: 4px;
-          display: inline-block;
+        .ts-status {
+          margin-top: 3px;
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
           width: fit-content;
-          font-size: 11px;
-          font-weight: 700;
+          font-size: 10.5px;
+          font-weight: 800;
           letter-spacing: 0.02em;
           color: #0d7a6c;
-          background: rgba(19, 143, 156, 0.12);
-          padding: 3px 9px;
+          background: linear-gradient(135deg, rgba(19,143,156,0.14), rgba(31,182,168,0.14));
+          padding: 3px 9px 3px 7px;
           border-radius: 999px;
         }
 
+        @media (max-width: 640px) {
+          .testimonial-showcase {
+            padding: 40px 0 28px;
+          }
+          .testimonial-showcase::before,
+          .testimonial-showcase::after {
+            width: 36px;
+          }
+          .testimonial-glow-card {
+            width: min(300px, 82vw);
+          }
+          .testimonial-glow-card-inner {
+            padding: 20px 18px 18px;
+          }
+          .ts-quote {
+            min-height: 150px;
+            font-size: 13.5px;
+          }
+          .testimonial-marquee-track {
+            animation-duration: 32s;
+          }
+        }
+
         @media (prefers-reduced-motion: reduce) {
-          .testimonial-card,
-          .testimonial-section .section-heading,
-          .testimonial-card::before {
-            animation: none !important;
+          .testimonial-marquee-track {
+            animation: none;
+            flex-wrap: wrap;
+            justify-content: center;
+          }
+          .ts-avatar-ring {
+            animation: none;
+          }
+          .testimonial-showcase-head {
             opacity: 1 !important;
             transform: none !important;
           }
         }
       `}</style>
 
-      <div className="section-heading">
-        <div>
-          <span className="eyebrow">TESTIMONIALS</span>
-          <h2>Success Stories from Our Students</h2>
-        </div>
-        <span className="muted">Real learners — concise feedback</span>
+      <div className="testimonial-showcase-head">
+        <span className="testimonial-showcase-badge">
+          <span className="dot" />
+          REAL RESULTS
+        </span>
+        <h2>Loved by JRF aspirants everywhere</h2>
+        <p>
+          Hear directly from learners who turned focused preparation into
+          cleared exams and confident results.
+        </p>
       </div>
 
-      <div className="testimonial-row">
-        {testimonials.map((t) => (
-          <div className="testimonial-card" key={t.name}>
-            <div className="testimonial-quote">"{t.text}"</div>
-            <div className="testimonial-meta">
-              <div className="testimonial-initials">
-                {t.name
-                  .split(" ")
-                  .map((p) => p[0])
-                  .slice(0, 2)
-                  .join("")
-                  .toUpperCase()}
+      <div className="testimonial-marquee-track">
+        {loopItems.map((t, index) => (
+          <div className="testimonial-glow-card" key={`${t.name}-${index}`}>
+            <div className="testimonial-glow-card-inner">
+              <div className="ts-stars">
+                {Array.from({ length: 5 }).map((_, starIndex) => (
+                  <Sparkles className="ts-star" key={starIndex} fill="#f5b400" strokeWidth={0} />
+                ))}
               </div>
-              <div className="testimonial-by">
-                <strong>{t.name}</strong>
-                <small>{t.affiliation}</small>
-                {t.status && (
-                  <div className="testimonial-status">{t.status}</div>
-                )}
+              <p className="ts-quote">"{t.text}"</p>
+              <div className="ts-meta">
+                <div className="ts-avatar-ring">
+                  <div className="ts-avatar-inner">
+                    {t.name
+                      .split(" ")
+                      .map((p) => p[0])
+                      .slice(0, 2)
+                      .join("")
+                      .toUpperCase()}
+                  </div>
+                </div>
+                <div className="ts-by">
+                  <strong>{t.name}</strong>
+                  <small>{t.affiliation}</small>
+                  {t.status && (
+                    <span className="ts-status">
+                      <CheckCircle2 size={10} />
+                      {t.status}
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
           </div>
