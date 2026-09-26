@@ -214,24 +214,32 @@ function MetricRow({
             gap: 12px;
           }
         }
+.metric-card-premium {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;   /* icon stays left, text pushes right */
+  gap: 16px;
+  padding: 22px 24px;
+  border-radius: 18px;
+  overflow: hidden;
+  isolation: isolate;
+  background: linear-gradient(155deg, #0c2a27 0%, #103a35 55%, #0c2a27 100%);
+  border: 1px solid rgba(41,230,201,0.18);
+  box-shadow: 0 10px 28px rgba(4,16,15,0.25);
+  opacity: 0;
+  transform: translateY(20px);
+  transition: transform 0.35s cubic-bezier(0.16,1,0.3,1), box-shadow 0.35s ease, border-color 0.35s ease;
+}
 
-        .metric-card-premium {
-          position: relative;
-          display: flex;
-          align-items: center;
-          gap: 16px;
-          padding: 22px 22px;
-          border-radius: 18px;
-          overflow: hidden;
-          isolation: isolate;
-          background: linear-gradient(155deg, #0c2a27 0%, #103a35 55%, #0c2a27 100%);
-          border: 1px solid rgba(41,230,201,0.18);
-          box-shadow: 0 10px 28px rgba(4,16,15,0.25);
-          opacity: 0;
-          transform: translateY(20px);
-          transition: transform 0.35s cubic-bezier(0.16,1,0.3,1), box-shadow 0.35s ease, border-color 0.35s ease;
-        }
-
+.metric-copy-premium {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;   /* right-align the value + label */
+  gap: 3px;
+  min-width: 0;
+  text-align: right;
+}
         .metric-card-premium::before {
           content: "";
           position: absolute;
@@ -288,13 +296,7 @@ function MetricRow({
           inset: -9px;
         }
 
-        .metric-copy-premium {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  min-width: 0;
-  text-align: right;
-}
+        
 
 .metric-copy-premium b {
   font-size: clamp(18px, 2.2vw, 23px);
@@ -2668,45 +2670,56 @@ function Home({ user }: { user: User | null }) {
           }
 
           .hero-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 13px 24px;
-            border-radius: 12px;
-            font-weight: 700;
-            font-size: 14.5px;
-            text-decoration: none;
-            transition: transform 0.25s ease, box-shadow 0.25s ease;
-            white-space: nowrap;
-          }
-          .hero-btn-primary {
-            background: linear-gradient(135deg, #1fb6a8, #29e6c9);
-            color: #06231f;
-            box-shadow: 0 10px 28px rgba(31,182,168,0.4);
-          }
-          .hero-btn-primary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 16px 36px rgba(31,182,168,0.55);
-          }
-          .hero-btn-ghost {
-            background: rgba(255,255,255,0.08);
-            backdrop-filter: blur(6px);
-            color: #fff;
-            border: 1px solid rgba(255,255,255,0.28);
-          }
-          .hero-btn-ghost:hover {
-            background: rgba(255,255,255,0.16);
-            transform: translateY(-3px);
-          }
-          .hero-btn-text {
-            background: transparent;
-            color: rgba(255,255,255,0.85);
-            border: 1px solid rgba(255,255,255,0.18);
-          }
-          .hero-btn-text:hover {
-            color: #fff;
-            border-color: rgba(255,255,255,0.4);
-          }
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 26px;
+  border-radius: 14px;
+  font-weight: 700;
+  font-size: 14.5px;
+  text-decoration: none;
+  border: 1px solid transparent;
+  transition: transform 0.25s cubic-bezier(0.16,1,0.3,1), box-shadow 0.25s ease, background 0.25s ease;
+  white-space: nowrap;
+}
+.hero-btn:active { transform: translateY(-1px) scale(0.98); }
+
+.hero-btn-primary {
+  background: linear-gradient(135deg, #1fb6a8, #29e6c9);
+  color: #06231f;
+  box-shadow: 0 10px 28px rgba(31,182,168,0.45), inset 0 1px 0 rgba(255,255,255,0.4);
+}
+.hero-btn-primary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 18px 40px rgba(31,182,168,0.6), inset 0 1px 0 rgba(255,255,255,0.5);
+}
+
+.hero-btn-secondary {
+  background: rgba(255,255,255,0.06);
+  backdrop-filter: blur(8px);
+  color: #fff;
+  border-color: rgba(255,255,255,0.35);
+}
+.hero-btn-secondary:hover {
+  background: rgba(255,255,255,0.16);
+  border-color: rgba(255,255,255,0.6);
+  transform: translateY(-3px);
+}
+
+.hero-btn-accent {
+  background: linear-gradient(135deg, #f5b400, #ffd25c);
+  color: #3a2600;
+  box-shadow: 0 10px 26px rgba(245,180,0,0.4), inset 0 1px 0 rgba(255,255,255,0.5);
+}
+.hero-btn-accent:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 36px rgba(245,180,0,0.55), inset 0 1px 0 rgba(255,255,255,0.6);
+}
+
+@media (max-width: 640px) {
+  .hero-premium-actions { flex-direction: column; width: 100%; }
+  .hero-btn { width: 100%; justify-content: center; }
+}
 
           @media (max-width: 900px) {
             .hero-premium {
@@ -2749,21 +2762,22 @@ function Home({ user }: { user: User | null }) {
         <div className="hero-glow-orb one" />
         <div className="hero-glow-orb two" />
           <div className="hero-premium-actions">
-            <Link className="hero-btn hero-btn-primary" to={`/course/${defaultCourseSlug}`}>
-              Explore Courses
-              <ArrowRight size={17} />
-            </Link>
-            <Link
-              className="hero-btn hero-btn-primary"
-              to={user ? `/course/${defaultCourseSlug}` : "/login"}
-            >
-              Start Learning
-            </Link>
-            <Link className="hero-btn hero-btn-primary" to="/mock-tests">
-              Take Free Mock Test
-            </Link>
-          </div>
-       
+  <Link className="hero-btn hero-btn-primary" to={`/course/${defaultCourseSlug}`}>
+    Explore Courses
+    <ArrowRight size={17} />
+  </Link>
+  <Link
+    className="hero-btn hero-btn-secondary"
+    to={user ? `/course/${defaultCourseSlug}` : "/login"}
+  >
+    <Play size={15} />
+    Start Learning
+  </Link>
+  <Link className="hero-btn hero-btn-accent" to="/mock-tests">
+    <Sparkles size={15} />
+    Take Free Mock Test
+  </Link>
+</div>       
       </section>
 
       <MetricRow
