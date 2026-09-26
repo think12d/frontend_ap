@@ -354,7 +354,7 @@ function PremiumPaywall({
 }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  if (!access || access.premium_access) return null;
+  if (!access || (feature === "mock" ? access.mock_test_access : access.premium_access)) return null;
   const freeAvailable = feature === "mock" ? access.free_mock_available : false;
   const start = () => {
     setBusy(true);
@@ -368,19 +368,20 @@ function PremiumPaywall({
         setBusy(false);
         setError(message);
       },
+      feature === "mock" ? { product: "mock_test_unlimited_access" } : {},
     );
   };
   return (
     <div className="notice premium-paywall">
-      <b>{freeAvailable ? "One free use included" : "Paid access required"}</b>
+      <b>{freeAvailable ? `${access.free_mock_attempts_remaining} free mock attempts remaining` : "Paid access required"}</b>
       <span>
         {freeAvailable
-          ? `Try one ${feature === "mock" ? "mock test" : "live class"} free. Unlock once for continued access to live classes and mock tests.`
+          ? "Use your remaining free mock tests before choosing unlimited access."
           : feature === "library"
             ? "The question archive and recorded classes unlock after a successful paid course enrollment or premium payment."
             : feature === "recorded"
               ? "Recorded classes are available after a successful paid course enrollment or premium payment."
-              : "Your free use has been used. Unlock continued access to live classes and mock tests."}
+              : "Your free mock-test attempts are used. One successful payment unlocks unlimited mock-test access."}
       </span>
       {!access.razorpay_configured && !access.mock_mode ? (
         <small>Razorpay is not configured on the server.</small>
@@ -395,7 +396,7 @@ function PremiumPaywall({
             ? "Opening payment…"
             : access.mock_mode
               ? "Complete mock payment"
-              : `Unlock premium · ${access.currency} ${(access.premium_price_paise / 100).toLocaleString("en-IN")}`}
+                : `Unlock ${feature === "mock" ? "mock tests" : "premium"} · ${access.currency} ${((feature === "mock" ? access.mock_test_price_paise : access.premium_price_paise) / 100).toLocaleString("en-IN")}`}
         </button>
       )}
       {error && <small>{error}</small>}
@@ -547,35 +548,41 @@ function AppContent() {
       <Route element={<LearnerShell user={user} onLogout={logout} />}>
         <Route path="/" element={<Home user={user} />} />
         <Route path="/courses" element={<Home user={user} />} />
-        <Route path="/registered-courses" element={<RegisteredCoursesPage user={user} />} />
-        <Route path="/dashboard" element={<DashboardPage user={user} />} />
-        <Route path="/my-learning" element={<MyLearningPage user={user} />} />
-        <Route path="/notifications" element={<NotificationsPage user={user} />} />
-        <Route path="/notification-settings" element={<NotificationSettingsPage user={user} />} />
         <Route path="/profile" element={<ComingSoonPage title="Profile" description="Profile editing is not backed by a server endpoint yet, so this area is intentionally kept as a placeholder until the backend exposes the profile API." />} />
         <Route path="/certificates" element={<ComingSoonPage title="Certificates" description="Certificate listing is not yet backed by a dedicated endpoint, so this area is intentionally kept as a placeholder until the backend exposes the certificate API." />} />
         <Route path="/course/:slug" element={<CoursePage user={user} />} />
-        <Route path="/payment/course/:slug" element={<PaymentPage user={user} />} />
-        <Route path="/ai-lab" element={<AiLabWithImage user={user} />} />
-        <Route path="/study-planner" element={<StudyPlanner user={user} />} />
-        <Route path="/jrf-strategy" element={<JRFStrategyBuilder user={user} />} />
-        <Route path="/mock-tests" element={<MockTests user={user} />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<ContactPage />} />
-        <Route path="/question-bank" element={<QuestionBankPage user={user} />} />
-        <Route path="/recorded-classes" element={<RecordedVideoLibraryPage user={user} />} />
         <Route path="/terms" element={<LegalPage page="terms" />} />
         <Route path="/privacy" element={<LegalPage page="privacy" />} />
         <Route path="/refunds" element={<LegalPage page="refunds" />} />
         <Route path="/grievances" element={<LegalPage page="grievances" />} />
-        <Route path="/live" element={<UnifiedLivePage user={user} />} />
-        <Route path="/live/:liveClassId" element={<FullLiveClassPage user={user} />} />
+        <Route element={<RequireUser user={user} />}>
+          <Route path="/registered-courses" element={<RegisteredCoursesPage user={user} />} />
+          <Route path="/dashboard" element={<DashboardPage user={user} />} />
+          <Route path="/my-learning" element={<MyLearningPage user={user} />} />
+          <Route path="/notifications" element={<NotificationsPage user={user} />} />
+          <Route path="/notification-settings" element={<NotificationSettingsPage user={user} />} />
+          <Route path="/payment/course/:slug" element={<PaymentPage user={user} />} />
+          <Route path="/ai-lab" element={<AiLabWithImage user={user} />} />
+          <Route path="/study-planner" element={<StudyPlanner user={user} />} />
+          <Route path="/jrf-strategy" element={<JRFStrategyBuilder user={user} />} />
+          <Route path="/mock-tests" element={<MockTests user={user} />} />
+          <Route path="/question-bank" element={<QuestionBankPage user={user} />} />
+          <Route path="/recorded-classes" element={<RecordedVideoLibraryPage user={user} />} />
+          <Route path="/live" element={<UnifiedLivePage user={user} />} />
+          <Route path="/live/:liveClassId" element={<FullLiveClassPage user={user} />} />
+        </Route>
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 
   return routes;
+}
+
+function RequireUser({ user }: { user: User | null }) {
+  return user ? <Outlet /> : <Navigate to="/login" replace />;
 }
 
 function App() {
@@ -1528,7 +1535,7 @@ function LearnerShell({
         <Link className="brand" to="/">
           <span className="brand-mark">
             <img
-              src="assets/logo.jpeg"
+              src="/dist/assets/logo.jpeg"
               alt="JRF HUNTERS"
               style={{ width: 34, height: 34, borderRadius: 10 }}
               onError={(e) => {
@@ -2242,7 +2249,7 @@ function AdminUserAccessDetailPage({ user }: { user: User | null }) {
 function TopicLiveOutput({ topic, compact = false }: { topic: Topic; compact?: boolean }) {
   const [query, setQuery] = useState(`Give me a real-time exam-focused explanation of ${topic.title}.`);
   const [answer, setAnswer] = useState<{ answer: string; sources: { resource_id: number; excerpt: string }[]; mode: string } | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   const ask = async (event: FormEvent) => {
@@ -2300,10 +2307,12 @@ function Home({ user }: { user: User | null }) {
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
   const [subjects, setSubjects] = useState<string[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [retry, setRetry] = useState(0);
 
   useEffect(() => {
+    let active = true;
     setError("");
     setLoading(true);
     const route = user ? "/courses/dashboard" : "/courses";
@@ -2314,22 +2323,32 @@ function Home({ user }: { user: User | null }) {
     if (searchTerm.trim()) params.set("search", searchTerm.trim());
     if (subjectFilter && subjectFilter !== "all") params.set("subject", subjectFilter);
     Promise.all([
-      api<Course | null>("/courses/pinned"),
+      api<Course | null>("/courses/pinned").catch(() => null),
       api<PaginatedCourseListResponse>(`${route}?${params.toString()}`),
     ])
       .then(([pinned, response]) => {
-        setPinnedCourse(pinned ?? response.items[0] ?? null);
-        setCourses(response.items.map((item) => ({ ...item, modules: [] })));
-        setTotal(response.total);
+        if (!active) return;
+        const items = Array.isArray(response.items) ? response.items : [];
+        const responseSubjects = Array.isArray(response.subjects) ? response.subjects : [];
+        setPinnedCourse(pinned ?? items[0] ?? null);
+        setCourses(items.map((item) => ({ ...item, modules: [] })));
+        setTotal(Number.isFinite(response.total) ? response.total : items.length);
         setTotalPages(response.total_pages || 1);
-        setSubjects(response.subjects || []);
-        if (subjectFilter !== "all" && !response.subjects.includes(subjectFilter)) {
+        setSubjects(responseSubjects);
+        if (subjectFilter !== "all" && !responseSubjects.includes(subjectFilter)) {
           setSubjectFilter("all");
         }
       })
-      .catch((e) => setError(e.message))
-      .finally(() => setLoading(false));
-  }, [user, page, limit, searchTerm, subjectFilter]);
+      .catch((cause) => {
+        if (active) setError((cause as Error).message || "Unable to load courses right now.");
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [user, page, limit, searchTerm, subjectFilter, retry]);
 
   const featuredCourse = pinnedCourse ?? courses[0] ?? null;
   const defaultCourseSlug = featuredCourse?.slug || "aagaz-batch-paper-1";
@@ -2388,7 +2407,7 @@ function Home({ user }: { user: User | null }) {
       <section className="metric-row">
         <Metric
           icon={<BookOpen />}
-          value={total ? `${total}` : "01"}
+          value={`${total}`}
           label="structured course"
         />
         <Metric icon={<Radio />} value="LIVE" label="Meet classes" />
@@ -2441,16 +2460,23 @@ function Home({ user }: { user: User | null }) {
         </div>
       </div>
       {error ? (
-        <div className="notice">
-          <strong>API not connected.</strong> Start the FastAPI service to load
-          your curriculum. <span>{error}</span>
+        <div className="notice" role="alert">
+          <strong>Courses are temporarily unavailable.</strong>
+          <span>{error}</span>
+          <button className="button button-small button-outline" type="button" onClick={() => setRetry((value) => value + 1)}>
+            Retry
+          </button>
         </div>
       ) : null}
       {loading ? (
         <div className="notice">Loading courses…</div>
       ) : null}
       {!loading && !error && !courses.length ? (
-        <div className="notice">No courses match your current search or filter.</div>
+        <div className="notice">
+          {searchTerm.trim() || subjectFilter !== "all"
+            ? "No courses match your current search or filter."
+            : "No courses are currently published."}
+        </div>
       ) : null}
       <section className="course-grid">
         {!loading && courses.length ? (
@@ -2647,25 +2673,41 @@ function batchTypeLabel(course: Course) {
       : "Batch";
 }
 function CourseCard({ course }: { course: Course }) {
-  const topicCount = (course.modules || []).reduce(
-  (sum, module) => sum + (module.topics?.length || 0), 0
-);
+  const [failedImageUrl, setFailedImageUrl] = useState("");
+  const topicCount = course.topic_count ?? course.modules.reduce(
+    (sum, module) => sum + module.topics.length,
+    0,
+  );
   const status = course.availability_status;
   const enrolled = status === "enrolled" || course.is_enrolled;
   const unavailable = ["closed", "full"].includes(status || "");
+  const imageUrl = course.cover_image_url?.trim();
+  const showImage = Boolean(imageUrl && imageUrl !== failedImageUrl);
   return (
     <Link to={`/course/${course.slug}`} className="course-card">
-      <div className="course-art art-sage">
-        <span>
-          {batchTypeLabel(course).toUpperCase()}
-          <br />
-          <b>
-            {course.subject
-              ? course.subject.split(" ")[0].slice(0, 8).toUpperCase()
-              : "UGC NET"}
-          </b>
-        </span>
-        <span className="art-number">{course.is_featured ? "★" : "01"}</span>
+      <div className={`course-art art-sage${showImage ? " has-image" : ""}`}>
+        {showImage && imageUrl ? (
+          <img
+            className="course-art-image"
+            src={imageUrl}
+            alt=""
+            loading="lazy"
+            onError={() => setFailedImageUrl(imageUrl)}
+          />
+        ) : (
+          <>
+            <span>
+              {batchTypeLabel(course).toUpperCase()}
+              <br />
+              <b>
+                {course.subject
+                  ? course.subject.split(" ")[0].slice(0, 8).toUpperCase()
+                  : "UGC NET"}
+              </b>
+            </span>
+            <span className="art-number">{course.is_featured ? "★" : "01"}</span>
+          </>
+        )}
       </div>
       <div className="course-card-copy">
         <span className="eyebrow">
@@ -3000,7 +3042,7 @@ function Login({ onLogin }: { onLogin: (user: User) => void }) {
         <Link className="brand" to="/">
           <span className="brand-mark">
             <img
-              src="assets/logo.jpeg"
+              src="/dist/assets/logo.jpeg"
               alt="JRF HUNTERS"
               style={{ width: 34, height: 34, borderRadius: 10 }}
               onError={(event) => {
@@ -3791,9 +3833,10 @@ function CoursePage({ user }: { user: User | null }) {
     course.offer_price_paise > 0 &&
     course.offer_price_paise < course.price_paise,
   );
-  const totalModuleTopics = (course.modules || []).reduce(
-  (sum, item) => sum + (item.topics?.length || 0), 0
-);   // ✅
+  const totalModuleTopics = course.modules.reduce(
+    (sum, item) => sum + item.topics.length,
+    0,
+  );
   const visibleModules = modulePageData?.items ?? [];
   const normalizedModuleSearch = moduleSearch.trim().toLowerCase();
   const filteredVisibleModules = visibleModules.flatMap((module) => {
@@ -3851,7 +3894,7 @@ function CoursePage({ user }: { user: User | null }) {
         </div>
         <div className="course-stamp">
           <Library size={24} />
-          <b>{(course.modules || []).length || 1}</b>   
+          <b>{course.modules.length || 1}</b>
           <span>modules</span>
         </div>
       </div>
@@ -4310,10 +4353,10 @@ function ModuleBlock({
   completedTopicIds: number[];
 }) {
   const [open, setOpen] = useState(false);
- const resourceCount = module.topics.reduce(
-  (total, topic) => total + (topic.resources?.length ?? 0), 0
-);
-
+  const resourceCount = module.topics.reduce(
+    (total, topic) => total + (topic.resources?.length ?? 0),
+    0,
+  );
 
   return (
     <div className={`module-card ${open ? "module-card-open" : ""}`}>
@@ -4513,7 +4556,7 @@ const testimonials = [
     status: "Cleared UGC NET JRF",
   },
   {
-    name: "Anushka",
+    name: "Amartya Barman",
     affiliation: "DU",
     text: "Covered the syllabus in great detail with extra focus on question solving and pattern. Apart from the classes, personal guidance on calls was also provided frequently. Highly recommended.",
     status: "Cleared UGC NET JRF",
@@ -4522,17 +4565,14 @@ const testimonials = [
 
 function FlagshipCard({ user, course }: { user: User | null; course: Course | null }) {
   if (!course) return null;
-  const totalResources = (course.modules || []).reduce(
-  (count, module) =>
-    count +
-    (module.topics || []).reduce(
-      (topicCount, topic) => topicCount + (topic.resources?.length || 0),
-      0,
-    ),
-  0,
-);
+  const totalResources = course.modules.reduce(
+    (count, module) =>
+      count +
+      module.topics.reduce((topicCount, topic) => topicCount + topic.resources.length, 0),
+    0,
+  );
   const featureList = [
-    `${(course.modules || []).length} structured modules`,
+    `${course.modules.length} structured modules`,
     `${totalResources} study resources`,
     course.access_duration_days === 0 ? "Lifetime access" : `${course.access_duration_days} days access`,
     course.max_students ? `${course.max_students} learner seats` : "Flexible learning",
@@ -4598,7 +4638,7 @@ function FlagshipCard({ user, course }: { user: User | null; course: Course | nu
       </div>
       <div className="course-stamp">
         <img
-          src="assets/logo.jpeg"
+          src="/dist/assets/logo.jpeg"
           alt="logo"
           style={{ width: 74 }}
           onError={(e) => (e.currentTarget.style.display = "none")}
@@ -4914,13 +4954,6 @@ function QuizStudio({ user }: { user: User | null }) {
     const topicSelection = topics.map((topic) => topic.id);
     if (!topicSelection.length) {
       setMessage("Select at least one UGC NET topic.");
-      return;
-    }
-    if (access && !access.premium_access && !access.free_mock_available) {
-      setPaymentRequired(true);
-      setMessage(
-        "Your free mock test has been used. Unlock premium access to continue.",
-      );
       return;
     }
     setLoading(true);
@@ -6888,7 +6921,7 @@ function About() {
         <div className="mentor-profile-card panel">
           <div className="mentor-profile-image-wrap">
             <img
-              src="assets/image1.jpeg"
+              src="/dist/assets/image1.jpeg"
               alt="Amit Mehra"
               className="mentor-image"
               onError={(e) => (e.currentTarget.style.display = "none")}
@@ -8227,7 +8260,7 @@ function SiteFooter() {
           <Link className="brand" to="/">
             <span className="brand-mark">
               <img
-                src="assets/logo.jpeg"
+                src="/dist/assets/logo.jpeg"
                 alt="JRF HUNTERS"
                 style={{ width: 34, height: 34, borderRadius: 10 }}
               />
@@ -8331,7 +8364,7 @@ function Testimonials() {
 }
 
 function NameMarquee() {
-  const proverb = "JRF CRACK KARNA HAI — SAMJHO DONE HAI! 🔥.";
+  const proverb = "Learn deeply, practice consistently, perform confidently.";
   const repeats = Array(3).fill(0);
   return (
     <div className="proverb-marquee-wrap">
@@ -8866,6 +8899,11 @@ function Admin({ user }: { user: User | null }) {
   const [maxStudents, setMaxStudents] = useState("");
   const [featured, setFeatured] = useState(false);
   const [displayOrder, setDisplayOrder] = useState("0");
+  const [courseImageFile, setCourseImageFile] = useState<File | null>(null);
+  const [courseImageUrl, setCourseImageUrl] = useState<string | null>(null);
+  const [mockPriceRupees, setMockPriceRupees] = useState("");
+  const [freeMockAttempts, setFreeMockAttempts] = useState("");
+  const [savingMockSettings, setSavingMockSettings] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
   const [fileInputKey, setFileInputKey] = useState(0);
   const [moduleName, setModuleName] = useState("");
@@ -9002,6 +9040,16 @@ function Admin({ user }: { user: User | null }) {
     const timer = window.setInterval(poll, 15000);
     return () => window.clearInterval(timer);
   }, [user]);
+
+  useEffect(() => {
+    if (user?.role !== "admin") return;
+    void api<{ price_paise: number; free_attempt_limit: number }>("/admin/settings/mock-test")
+      .then((configuration) => {
+        setMockPriceRupees((configuration.price_paise / 100).toString());
+        setFreeMockAttempts(String(configuration.free_attempt_limit));
+      })
+      .catch(() => undefined);
+  }, [user?.id]);
 
   const current = courses.find((course) => course.id === Number(selected));
   const subjects = Array.from(
@@ -9144,6 +9192,8 @@ function Admin({ user }: { user: User | null }) {
 
   const resetCourseForm = () => {
     setEditingCourseId(null);
+    setCourseImageFile(null);
+    setCourseImageUrl(null);
     setName("");
     setSlug("");
     setSubject("");
@@ -9216,11 +9266,19 @@ function Admin({ user }: { user: User | null }) {
         is_featured: featured,
         display_order: Number(displayOrder) || 0,
       });
-      if (editingCourseId)
+      let savedCourseId = editingCourseId;
+      if (editingCourseId) {
         await api(`/courses/${editingCourseId}`, { method: "PATCH", body });
-      else {
+      } else {
         const created = await api<Course>("/courses", { method: "POST", body });
+        savedCourseId = created.id;
         setSelected(String(created.id));
+        if (courseImageFile) setEditingCourseId(created.id);
+      }
+      if (courseImageFile && savedCourseId) {
+        const imageForm = new FormData();
+        imageForm.append("file", courseImageFile);
+        await api(`/courses/${savedCourseId}/image`, { method: "POST", body: imageForm });
       }
       resetCourseForm();
       await refresh();
@@ -9232,6 +9290,38 @@ function Admin({ user }: { user: User | null }) {
     } catch (cause) {
       setMessage((cause as Error).message);
       adminError("Course save failed", cause, "Unable to save course changes.");
+    }
+  };
+
+  const saveMockSettings = async (event: FormEvent) => {
+    event.preventDefault();
+    const parsedPrice = Number(mockPriceRupees);
+    const parsedAttempts = Number(freeMockAttempts);
+    if (!Number.isFinite(parsedPrice) || parsedPrice < 1)
+      return setMessage("Enter a mock-test price of at least ₹1.");
+    if (!Number.isInteger(parsedAttempts) || parsedAttempts < 0 || parsedAttempts > 100)
+      return setMessage("Free attempts must be a whole number from 0 to 100.");
+    setSavingMockSettings(true);
+    try {
+      const configuration = await api<{ price_paise: number; free_attempt_limit: number }>(
+        "/admin/settings/mock-test",
+        {
+          method: "PATCH",
+          body: JSON.stringify({
+            price_paise: Math.round(parsedPrice * 100),
+            free_attempt_limit: parsedAttempts,
+          }),
+        },
+      );
+      setMockPriceRupees((configuration.price_paise / 100).toString());
+      setFreeMockAttempts(String(configuration.free_attempt_limit));
+      setMessage("Mock-test access settings saved.");
+      adminSuccess("Settings saved", "Mock-test price and free-attempt limit were updated.");
+    } catch (cause) {
+      setMessage((cause as Error).message);
+      adminError("Settings save failed", cause, "Unable to save mock-test settings.");
+    } finally {
+      setSavingMockSettings(false);
     }
   };
 
@@ -9261,6 +9351,8 @@ function Admin({ user }: { user: User | null }) {
 
   const editCourse = (course: Course) => {
     setEditingCourseId(course.id);
+    setCourseImageFile(null);
+    setCourseImageUrl(course.cover_image_url || null);
     setSelected(String(course.id));
     setName(course.title);
     setSlug(course.slug);
@@ -9870,6 +9962,46 @@ function Admin({ user }: { user: User | null }) {
         </div>
       )}
 
+      <section className="panel admin-mock-settings">
+        <div className="section-heading compact">
+          <div>
+            <span className="eyebrow">MOCK TEST ACCESS</span>
+            <h2>Price and free attempts</h2>
+          </div>
+        </div>
+        <form className="admin-mock-settings-form" onSubmit={saveMockSettings}>
+          <div className="inline-builder">
+            <label>
+              Unlimited access price (INR)
+              <input
+                type="number"
+                min="1"
+                step="0.01"
+                value={mockPriceRupees}
+                onChange={(event) => setMockPriceRupees(event.target.value)}
+                required
+              />
+            </label>
+            <label>
+              Free attempts per user
+              <input
+                type="number"
+                min="0"
+                max="100"
+                step="1"
+                value={freeMockAttempts}
+                onChange={(event) => setFreeMockAttempts(event.target.value)}
+                required
+              />
+            </label>
+          </div>
+          <div className="form-action-row">
+            <button className="button button-dark" type="submit" disabled={savingMockSettings}>
+              <Save size={14} /> {savingMockSettings ? "Saving..." : "Save settings"}
+            </button>
+          </div>
+        </form>
+      </section>
       <section className="admin-course-list">
         <div className="section-heading compact">
           <div>
@@ -10041,6 +10173,19 @@ function Admin({ user }: { user: User | null }) {
               value={description}
               onChange={(event) => setDescription(event.target.value)}
             />
+          </label>
+          {courseImageUrl && (
+            <img className="admin-course-image-preview" src={courseImageUrl} alt="Current course cover" />
+          )}
+          <label>
+            Course image
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              onChange={(event) => setCourseImageFile(event.target.files?.[0] || null)}
+            />
+            <small>JPEG, PNG, or WebP · maximum 5 MB</small>
+            {courseImageFile && <small>Selected: {courseImageFile.name}</small>}
           </label>
           <div className="inline-builder">
             <label>
