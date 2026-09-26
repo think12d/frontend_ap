@@ -995,14 +995,10 @@ strong, b { color: var(--text-primary); }
 }
 
 .hero-card {
-  display: grid;
-  grid-template-columns: 1.1fr 0.9fr;
-  gap: 32px;
-  align-items: center;
-  padding: clamp(24px, 4vw, 44px);
-  background: linear-gradient(135deg, #17353f, #214c60 45%, #5f57b3);
-  border: 0;
-  box-shadow: 0 22px 56px rgba(25, 48, 55, 0.18);
+  background-image: linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.35)), url('/assets/hero_image.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
 .hero-card h1,
