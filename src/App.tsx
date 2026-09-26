@@ -1535,7 +1535,7 @@ function LearnerShell({
         <Link className="brand" to="/">
           <span className="brand-mark">
             <img
-              src="assets/logo.jpeg"
+              src="assets/logo.png"
               alt="JRF HUNTERS"
               style={{ width: 34, height: 34, borderRadius: 10 }}
               onError={(e) => {
