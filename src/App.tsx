@@ -1545,7 +1545,7 @@ function LearnerShell({
           </span>
           <span>
             <strong>JRF HUNTERS</strong>
-            <small>learning studio</small>
+            <small>Beyond Limits</small>
           </span>
         </Link>
 
@@ -3039,7 +3039,7 @@ function Login({ onLogin }: { onLogin: (user: User) => void }) {
           </span>
           <span>
             <strong>JRF HUNTERS</strong>
-            <small>learning studio</small>
+            <small>Beyond Limits</small>
           </span>
         </Link>
       </div>
@@ -4543,7 +4543,7 @@ const testimonials = [
     status: "Cleared UGC NET JRF",
   },
   {
-    name: "Amartya Barman",
+    name: "Anushka",
     affiliation: "DU",
     text: "Covered the syllabus in great detail with extra focus on question solving and pattern. Apart from the classes, personal guidance on calls was also provided frequently. Highly recommended.",
     status: "Cleared UGC NET JRF",
@@ -7953,7 +7953,7 @@ function LegalPage({ page }: { page: LegalPageKind }) {
       <div className="legal-hero">
         <span className="eyebrow">{label}</span>
         <h1>{title}</h1>
-        <p>JRF HUNTERS Learning Studio · JRF Hunters</p>
+        <p>JRF HUNTERS Beyond Limits · JRF Hunters</p>
         <small>Last updated: 14 September 2026</small>
       </div>
       <article className="legal-card">
@@ -7961,7 +7961,7 @@ function LegalPage({ page }: { page: LegalPageKind }) {
           <>
             <h2>1. About these terms</h2>
             <p>
-              These terms govern your use of the JRF HUNTERS Learning Studio website,
+              These terms govern your use of the JRF HUNTERS Beyond Limits website,
               courses, mock tests, live classes, study tools and related digital
               resources. By creating an account, enrolling in a course, or using
               a paid feature, you agree to these terms.
@@ -8254,7 +8254,7 @@ function SiteFooter() {
             </span>
             <span>
               <strong>JRF HUNTERS</strong>
-              <small>learning studio</small>
+              <small>Beyond Limits</small>
             </span>
           </Link>
           <p>
@@ -8302,7 +8302,7 @@ function SiteFooter() {
       </div>
       <div className="site-footer-bottom">
         <span>
-          © {new Date().getFullYear()} JRF HUNTERS Learning Studio · JRF Hunters
+          © {new Date().getFullYear()} JRF HUNTERS Beyond Limits · JRF Hunters
         </span>
         <span>Google Meet live · Drive replays · course media</span>
       </div>
@@ -8311,47 +8311,251 @@ function SiteFooter() {
 }
 
 function Testimonials() {
-  return (
-    <div className="container">
-      <div className="section-heading">
-        <div>
-          <span className="eyebrow">TESTIMONIALS</span>
-          <h2>Success Stories from Our Students</h2>
-        </div>
-        <span className="muted">Real learners — concise feedback</span>
-      </div>
+  const sectionRef = useRef<HTMLDivElement | null>(null);
+  const [visible, setVisible] = useState(false);
 
-      <div className="testimonial-row">
-        {testimonials.map((t) => (
-          <div className="testimonial-card" key={t.name}>
-            <div className="testimonial-quote">“{t.text}”</div>
-            <div className="testimonial-meta">
-              {/* Use initials avatar for learners; staff photo is not used in testimonials */}
-              <div className="testimonial-initials">
-                {t.name
-                  .split(" ")
-                  .map((p) => p[0])
-                  .slice(0, 2)
-                  .join("")
-                  .toUpperCase()}
-              </div>
-              <div className="testimonial-by">
-                <strong>{t.name}</strong>
-                <small>{t.affiliation}</small>
-                {t.status && (
-                  <div className="testimonial-status">{t.status}</div>
-                )}
+  useEffect(() => {
+    const node = sectionRef.current;
+    if (!node) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setVisible(true);
+            observer.disconnect();
+          }
+        });
+      },
+      { threshold: 0.15 },
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div className="container testimonial-section" ref={sectionRef}>
+      <style>{`
+        .testimonial-section .section-heading {
+          opacity: 0;
+          transform: translateX(-40px);
+          animation: testimonialHeadingIn 0.7s ease forwards;
+          animation-play-state: paused;
+        }
+        .testimonial-section.is-visible .section-heading {
+          animation-play-state: running;
+        }
+        @keyframes testimonialHeadingIn {
+          to { opacity: 1; transform: translateX(0); }
+        }
+
+        .testimonial-row {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+          gap: 22px;
+          margin-top: 20px;
+        }
+
+        .testimonial-card {
+          position: relative;
+          overflow: hidden;
+          padding: 28px 26px 24px;
+          border-radius: 20px;
+          background: linear-gradient(155deg, rgba(255,255,255,0.92), rgba(246,248,240,0.85));
+          border: 1px solid rgba(19, 143, 156, 0.14);
+          box-shadow: 0 10px 30px rgba(15, 40, 35, 0.06);
+          opacity: 0;
+          transform: translateX(-70px);
+          transition: transform 0.35s ease, box-shadow 0.35s ease;
+          will-change: transform, opacity;
+        }
+
+        .testimonial-section.is-visible .testimonial-card {
+          animation: testimonialSlideIn 0.75s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .testimonial-section.is-visible .testimonial-card:nth-child(1) { animation-delay: 0.05s; }
+        .testimonial-section.is-visible .testimonial-card:nth-child(2) { animation-delay: 0.25s; }
+        .testimonial-section.is-visible .testimonial-card:nth-child(3) { animation-delay: 0.45s; }
+
+        @keyframes testimonialSlideIn {
+          0% {
+            opacity: 0;
+            transform: translateX(-70px);
+          }
+          60% {
+            opacity: 1;
+            transform: translateX(6px);
+          }
+          100% {
+            opacity: 1;
+            transform: translateX(0);
+          }
+        }
+
+        /* diagonal flash sweep */
+        .testimonial-card::before {
+          content: "";
+          position: absolute;
+          top: 0;
+          left: -150%;
+          width: 60%;
+          height: 100%;
+          background: linear-gradient(
+            120deg,
+            transparent 0%,
+            rgba(255, 255, 255, 0.55) 45%,
+            rgba(255, 255, 255, 0.85) 50%,
+            rgba(255, 255, 255, 0.55) 55%,
+            transparent 100%
+          );
+          transform: skewX(-20deg);
+          pointer-events: none;
+          opacity: 0;
+        }
+
+        .testimonial-section.is-visible .testimonial-card::before {
+          animation: testimonialFlash 1.1s ease forwards;
+        }
+
+        .testimonial-section.is-visible .testimonial-card:nth-child(1)::before { animation-delay: 0.35s; }
+        .testimonial-section.is-visible .testimonial-card:nth-child(2)::before { animation-delay: 0.55s; }
+        .testimonial-section.is-visible .testimonial-card:nth-child(3)::before { animation-delay: 0.75s; }
+
+        @keyframes testimonialFlash {
+          0% { left: -150%; opacity: 0; }
+          10% { opacity: 1; }
+          60% { opacity: 1; }
+          100% { left: 130%; opacity: 0; }
+        }
+
+        .testimonial-card:hover {
+          transform: translateY(-6px) !important;
+          box-shadow: 0 18px 38px rgba(15, 40, 35, 0.14);
+        }
+
+        .testimonial-card::after {
+          content: "\\201C";
+          position: absolute;
+          top: -6px;
+          right: 18px;
+          font-size: 88px;
+          line-height: 1;
+          font-family: Georgia, serif;
+          color: rgba(19, 143, 156, 0.12);
+          pointer-events: none;
+        }
+
+        .testimonial-quote {
+          position: relative;
+          z-index: 1;
+          font-size: 15px;
+          line-height: 1.65;
+          color: #26332e;
+          margin-bottom: 20px;
+          font-style: italic;
+        }
+
+        .testimonial-meta {
+          position: relative;
+          z-index: 1;
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding-top: 16px;
+          border-top: 1px dashed rgba(19, 143, 156, 0.2);
+        }
+
+        .testimonial-initials {
+          width: 44px;
+          height: 44px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: 700;
+          font-size: 14px;
+          color: #fff;
+          background: linear-gradient(135deg, #138f9c, #1fb6a8);
+          box-shadow: 0 6px 14px rgba(19, 143, 156, 0.35);
+          flex-shrink: 0;
+        }
+
+        .testimonial-by {
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+        }
+        .testimonial-by strong {
+          font-size: 14.5px;
+          color: #16211d;
+        }
+        .testimonial-by small {
+          font-size: 12.5px;
+          color: #6b7a75;
+        }
+        .testimonial-status {
+          margin-top: 4px;
+          display: inline-block;
+          width: fit-content;
+          font-size: 11px;
+          font-weight: 700;
+          letter-spacing: 0.02em;
+          color: #0d7a6c;
+          background: rgba(19, 143, 156, 0.12);
+          padding: 3px 9px;
+          border-radius: 999px;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .testimonial-card,
+          .testimonial-section .section-heading,
+          .testimonial-card::before {
+            animation: none !important;
+            opacity: 1 !important;
+            transform: none !important;
+          }
+        }
+      `}</style>
+
+      <div className={`testimonial-section-inner ${visible ? "is-visible" : ""}`}>
+        <div className="section-heading">
+          <div>
+            <span className="eyebrow">TESTIMONIALS</span>
+            <h2>Success Stories from Our Students</h2>
+          </div>
+          <span className="muted">Real learners — concise feedback</span>
+        </div>
+
+        <div className="testimonial-row">
+          {testimonials.map((t) => (
+            <div className="testimonial-card" key={t.name}>
+              <div className="testimonial-quote">"{t.text}"</div>
+              <div className="testimonial-meta">
+                <div className="testimonial-initials">
+                  {t.name
+                    .split(" ")
+                    .map((p) => p[0])
+                    .slice(0, 2)
+                    .join("")
+                    .toUpperCase()}
+                </div>
+                <div className="testimonial-by">
+                  <strong>{t.name}</strong>
+                  <small>{t.affiliation}</small>
+                  {t.status && (
+                    <div className="testimonial-status">{t.status}</div>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
   );
 }
-
 function NameMarquee() {
-  const proverb = "Learn deeply, practice consistently, perform confidently.";
+  const proverb = "🎯 JRF NIKALNA HAI, SAMJHO DONE HAI! 🏆✨";
   const repeats = Array(3).fill(0);
   return (
     <div className="proverb-marquee-wrap">
