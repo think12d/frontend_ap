@@ -289,26 +289,28 @@ function MetricRow({
         }
 
         .metric-copy-premium {
-          display: flex;
-          flex-direction: column;
-          gap: 3px;
-          min-width: 0;
-        }
-        .metric-copy-premium b {
-          font-size: clamp(18px, 2.2vw, 23px);
-          line-height: 1.1;
-          color: #fff;
-          font-weight: 800;
-          letter-spacing: -0.01em;
-        }
-        .metric-copy-premium small {
-          font-size: 12.5px;
-          color: rgba(255,255,255,0.6);
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-        }
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  text-align: right;
+}
 
+.metric-copy-premium b {
+  font-size: clamp(18px, 2.2vw, 23px);
+  line-height: 1.1;
+  color: #fff;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.metric-copy-premium small {
+  font-size: 12.5px;
+  color: rgba(255,255,255,0.6);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
         @media (max-width: 480px) {
           .metric-card-premium {
             padding: 16px 18px;
@@ -2746,32 +2748,18 @@ function Home({ user }: { user: User | null }) {
 
         <div className="hero-glow-orb one" />
         <div className="hero-glow-orb two" />
-
-        <div className="hero-premium-copy">
-          <div className="hero-premium-badge">
-            <span className="dot" />
-            Master Paper 1
-          </div>
-          <h1>
-            Master Paper 1. <br />
-            <em>Achieve JRF Success.</em>
-          </h1>
-          <p>
-            India's premier platform for UGC NET & JRF History, providing
-            institutional-grade rigour and research-backed pedagogy.
-          </p>
           <div className="hero-premium-actions">
             <Link className="hero-btn hero-btn-primary" to={`/course/${defaultCourseSlug}`}>
               Explore Courses
               <ArrowRight size={17} />
             </Link>
             <Link
-              className="hero-btn hero-btn-ghost"
+              className="hero-btn hero-btn-primary"
               to={user ? `/course/${defaultCourseSlug}` : "/login"}
             >
               Start Learning
             </Link>
-            <Link className="hero-btn hero-btn-text" to="/mock-tests">
+            <Link className="hero-btn hero-btn-primary" to="/mock-tests">
               Take Free Mock Test
             </Link>
           </div>
