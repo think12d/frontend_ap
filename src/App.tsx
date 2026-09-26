@@ -2763,7 +2763,7 @@ function Home({ user }: { user: User | null }) {
               Take Free Mock Test
             </Link>
           </div>
-        </div>
+       
       </section>
 
       <MetricRow
