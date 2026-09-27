@@ -15836,3 +15836,776 @@ textarea { min-height: 108px; }
     min-height: 400px !important;
   }
 }
+/* =========================================================
+   PLANNER — RESPONSIVE PREMIUM LAYOUT
+   ========================================================= */
+
+.planner-calendar {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+}
+
+
+/* =========================================================
+   CALENDAR HEADER
+   ========================================================= */
+
+.planner-calendar > .section-heading {
+  width: 100% !important;
+  min-width: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 16px !important;
+  margin-bottom: 18px !important;
+}
+
+.planner-calendar > .section-heading > div {
+  min-width: 0 !important;
+}
+
+.planner-calendar > .section-heading h3 {
+  margin: 3px 0 0 !important;
+  color: #183128 !important;
+  font-size: clamp(17px, 2vw, 22px) !important;
+  line-height: 1.2 !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.025em !important;
+}
+
+.planner-calendar > .section-heading .eyebrow {
+  font-size: 10px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.12em !important;
+  color: #718078 !important;
+}
+
+.planner-calendar .status-pill {
+  flex: 0 0 auto !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  min-height: 28px !important;
+  padding: 5px 9px !important;
+  border: 1px solid #dce7e1 !important;
+  border-radius: 999px !important;
+  background: #f7faf8 !important;
+  color: #496057 !important;
+  font-size: 10px !important;
+  font-weight: 800 !important;
+  white-space: nowrap !important;
+}
+
+
+/* =========================================================
+   WEEKDAYS
+   ========================================================= */
+
+.planner-weekdays {
+  width: 100% !important;
+  min-width: 0 !important;
+  display: grid !important;
+  grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+  gap: 6px !important;
+  margin-bottom: 6px !important;
+}
+
+.planner-weekdays span {
+  min-width: 0 !important;
+  text-align: center !important;
+  color: #8a9891 !important;
+  font-size: 9px !important;
+  font-weight: 800 !important;
+  line-height: 1 !important;
+  letter-spacing: 0.06em !important;
+  text-transform: uppercase !important;
+}
+
+
+/* =========================================================
+   MONTH GRID
+   ========================================================= */
+
+.planner-month-grid {
+  width: 100% !important;
+  min-width: 0 !important;
+  display: grid !important;
+  grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+  gap: 6px !important;
+}
+
+.planner-calendar-blank {
+  min-width: 0 !important;
+  min-height: 58px !important;
+}
+
+.planner-day {
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 58px !important;
+  padding: 8px 6px !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  justify-content: space-between !important;
+  border: 1px solid #e1e9e5 !important;
+  border-radius: 10px !important;
+  background: #ffffff !important;
+  color: #183128 !important;
+  cursor: pointer !important;
+  text-align: left !important;
+  transition:
+    border-color 160ms ease !important,
+    background 160ms ease !important,
+    transform 160ms ease !important,
+    box-shadow 160ms ease !important;
+}
+
+.planner-day:hover {
+  border-color: #b8ccc2 !important;
+  background: #f8fbf9 !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 5px 15px rgba(16, 35, 29, 0.06) !important;
+}
+
+.planner-day b {
+  display: block !important;
+  color: #183128 !important;
+  font-size: 13px !important;
+  line-height: 1 !important;
+  font-weight: 800 !important;
+}
+
+.planner-day small {
+  display: block !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+  color: #8a9891 !important;
+  font-size: 8px !important;
+  line-height: 1.2 !important;
+  white-space: nowrap !important;
+  text-overflow: ellipsis !important;
+}
+
+.planner-day.has-items {
+  background: #fbfdfc !important;
+  border-color: #d7e4dd !important;
+}
+
+.planner-day.has-items::after {
+  content: "" !important;
+  width: 5px !important;
+  height: 5px !important;
+  position: absolute !important;
+  margin-top: 1px !important;
+  margin-left: auto !important;
+  border-radius: 50% !important;
+  background: #7caa91 !important;
+}
+
+.planner-day.selected {
+  border-color: #183128 !important;
+  background: #edf5f0 !important;
+  box-shadow: inset 0 0 0 1px #183128 !important;
+}
+
+.planner-day.selected b {
+  color: #10231d !important;
+}
+
+
+/* =========================================================
+   SELECTED DAY HEADER
+   ========================================================= */
+
+.planner-day-heading {
+  width: 100% !important;
+  min-width: 0 !important;
+  margin-top: 28px !important;
+  margin-bottom: 14px !important;
+  display: flex !important;
+  align-items: flex-end !important;
+  justify-content: space-between !important;
+  gap: 16px !important;
+}
+
+.planner-day-heading > div {
+  min-width: 0 !important;
+}
+
+.planner-day-heading h3 {
+  margin: 3px 0 0 !important;
+  color: #183128 !important;
+  font-size: clamp(16px, 1.8vw, 20px) !important;
+  line-height: 1.25 !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.02em !important;
+}
+
+.planner-day-heading .muted {
+  flex: 0 0 auto !important;
+  font-size: 10px !important;
+  white-space: nowrap !important;
+}
+
+
+/* =========================================================
+   DAY AREA
+   ========================================================= */
+
+.planner-day-layout {
+  width: 100% !important;
+  min-width: 0 !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 300px) !important;
+  align-items: start !important;
+  gap: 16px !important;
+}
+
+
+/* =========================================================
+   24-HOUR TIMELINE
+   ========================================================= */
+
+.planner-timeline {
+  width: 100% !important;
+  min-width: 0 !important;
+  display: grid !important;
+  grid-template-columns: 48px minmax(0, 1fr) !important;
+  border: 1px solid #dce7e1 !important;
+  border-radius: 14px !important;
+  background: #ffffff !important;
+  overflow: hidden !important;
+}
+
+.planner-time-labels {
+  min-width: 0 !important;
+  height: 576px !important;
+  display: grid !important;
+  grid-template-rows: repeat(24, minmax(24px, 1fr)) !important;
+  border-right: 1px solid #edf2ef !important;
+  background: #fbfcfb !important;
+}
+
+.planner-time-labels span {
+  min-width: 0 !important;
+  padding: 4px 6px !important;
+  box-sizing: border-box !important;
+  color: #87958e !important;
+  font-size: 8px !important;
+  line-height: 1 !important;
+  text-align: right !important;
+  white-space: nowrap !important;
+}
+
+.planner-time-canvas {
+  position: relative !important;
+  min-width: 0 !important;
+  height: 576px !important;
+  background:
+    linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent calc(4.166666% - 1px),
+      #edf2ef calc(4.166666% - 1px),
+      #edf2ef 4.166666%
+    ) !important;
+  background-size: 100% 4.166666% !important;
+  overflow: hidden !important;
+}
+
+.planner-hour-line {
+  position: absolute !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: 1px !important;
+  background: #edf2ef !important;
+  pointer-events: none !important;
+}
+
+.planner-time-block {
+  position: absolute !important;
+  left: 7px !important;
+  right: 7px !important;
+  min-height: 26px !important;
+  padding: 5px 8px !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  align-items: flex-start !important;
+  border: 1px solid #b8d2c3 !important;
+  border-left: 3px solid #183128 !important;
+  border-radius: 7px !important;
+  background: #edf6f0 !important;
+  color: #183128 !important;
+  overflow: hidden !important;
+  text-align: left !important;
+  cursor: pointer !important;
+}
+
+.planner-time-block b {
+  display: block !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+  font-size: 8px !important;
+  line-height: 1.15 !important;
+  font-weight: 800 !important;
+  white-space: nowrap !important;
+  text-overflow: ellipsis !important;
+}
+
+.planner-time-block span {
+  display: block !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+  margin-top: 2px !important;
+  color: #607168 !important;
+  font-size: 8px !important;
+  line-height: 1.15 !important;
+  white-space: nowrap !important;
+  text-overflow: ellipsis !important;
+}
+
+
+/* =========================================================
+   RIGHT SIDE
+   ========================================================= */
+
+.planner-day-side {
+  width: 100% !important;
+  min-width: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+}
+
+
+/* =========================================================
+   ADD BLOCK FORM
+   ========================================================= */
+
+.planner-block-form {
+  width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+  padding: 15px !important;
+  border: 1px solid #dce7e1 !important;
+  border-radius: 14px !important;
+  background: #ffffff !important;
+  box-shadow: 0 8px 24px rgba(16, 35, 29, 0.045) !important;
+}
+
+.planner-block-form > .eyebrow {
+  display: block !important;
+  margin-bottom: 12px !important;
+  color: #718078 !important;
+  font-size: 9px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.1em !important;
+}
+
+.planner-block-form label {
+  width: 100% !important;
+  min-width: 0 !important;
+  display: block !important;
+  margin-bottom: 10px !important;
+  color: #50625a !important;
+  font-size: 10px !important;
+  font-weight: 750 !important;
+}
+
+.planner-block-form input,
+.planner-block-form select,
+.planner-block-form textarea {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  margin-top: 5px !important;
+  padding: 9px 10px !important;
+  box-sizing: border-box !important;
+  border: 1px solid #dce7e1 !important;
+  border-radius: 8px !important;
+  outline: none !important;
+  background: #fbfcfb !important;
+  color: #183128 !important;
+  font: inherit !important;
+  font-size: 11px !important;
+}
+
+.planner-block-form textarea {
+  min-height: 72px !important;
+  resize: vertical !important;
+}
+
+.planner-block-form input:focus,
+.planner-block-form select:focus,
+.planner-block-form textarea:focus {
+  border-color: #9fbbae !important;
+  background: #ffffff !important;
+  box-shadow: 0 0 0 3px rgba(124, 170, 145, 0.1) !important;
+}
+
+.planner-time-inputs {
+  width: 100% !important;
+  min-width: 0 !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+  gap: 8px !important;
+}
+
+.planner-block-actions {
+  width: 100% !important;
+  display: flex !important;
+  justify-content: flex-end !important;
+  margin-top: 3px !important;
+}
+
+.planner-block-actions .button {
+  min-height: 34px !important;
+  padding: 7px 12px !important;
+  border-radius: 8px !important;
+  font-size: 10px !important;
+  font-weight: 800 !important;
+}
+
+
+/* =========================================================
+   DAY LIST
+   ========================================================= */
+
+.planner-day-list {
+  width: 100% !important;
+  min-width: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 7px !important;
+}
+
+.planner-day-list-item {
+  width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+  display: grid !important;
+  grid-template-columns: 16px minmax(0, 1fr) auto !important;
+  align-items: start !important;
+  gap: 8px !important;
+  padding: 10px !important;
+  border: 1px solid #e0e9e4 !important;
+  border-radius: 10px !important;
+  background: #fbfcfb !important;
+}
+
+.planner-day-list-item input[type="checkbox"] {
+  width: 14px !important;
+  height: 14px !important;
+  margin: 2px 0 0 !important;
+  accent-color: #183128 !important;
+}
+
+.planner-day-list-item > span {
+  min-width: 0 !important;
+}
+
+.planner-day-list-item b {
+  display: block !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+  color: #30463d !important;
+  font-size: 9px !important;
+  line-height: 1.3 !important;
+  font-weight: 800 !important;
+  white-space: nowrap !important;
+  text-overflow: ellipsis !important;
+}
+
+.planner-day-list-item small {
+  display: block !important;
+  margin-top: 3px !important;
+  color: #7a8982 !important;
+  font-size: 9px !important;
+  line-height: 1.4 !important;
+}
+
+.planner-day-list-item .button-link {
+  flex: 0 0 auto !important;
+  width: 26px !important;
+  height: 26px !important;
+  padding: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 7px !important;
+}
+
+
+/* =========================================================
+   LARGE TABLET
+   ========================================================= */
+
+@media (max-width: 1100px) {
+
+  .planner-day-layout {
+    grid-template-columns: minmax(0, 1fr) minmax(230px, 280px) !important;
+    gap: 12px !important;
+  }
+
+  .planner-time-labels {
+    width: 42px !important;
+  }
+
+  .planner-time-labels span {
+    padding-left: 3px !important;
+    padding-right: 5px !important;
+    font-size: 7px !important;
+  }
+
+  .planner-time-canvas {
+    min-width: 0 !important;
+  }
+
+}
+
+
+/* =========================================================
+   TABLET / IPAD
+   ========================================================= */
+
+@media (max-width: 850px) {
+
+  .planner-day-layout {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .planner-day-side {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+    align-items: start !important;
+  }
+
+  .planner-block-form {
+    min-width: 0 !important;
+  }
+
+  .planner-day-list {
+    min-width: 0 !important;
+  }
+
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 620px) {
+
+  .planner-calendar {
+    padding: 12px !important;
+    border-radius: 14px !important;
+  }
+
+  .planner-calendar > .section-heading {
+    align-items: flex-start !important;
+    flex-direction: column !important;
+    gap: 9px !important;
+    margin-bottom: 14px !important;
+  }
+
+  .planner-calendar > .section-heading .status-pill {
+    align-self: flex-start !important;
+  }
+
+  .planner-weekdays {
+    gap: 3px !important;
+  }
+
+  .planner-month-grid {
+    gap: 3px !important;
+  }
+
+  .planner-calendar-blank {
+    min-height: 44px !important;
+  }
+
+  .planner-day {
+    min-height: 44px !important;
+    padding: 6px 5px !important;
+    border-radius: 8px !important;
+  }
+
+  .planner-day b {
+    font-size: 11px !important;
+  }
+
+  .planner-day small {
+    font-size: 7px !important;
+  }
+
+  .planner-day-heading {
+    align-items: flex-start !important;
+    flex-direction: column !important;
+    gap: 5px !important;
+    margin-top: 22px !important;
+  }
+
+  .planner-day-heading .muted {
+    white-space: normal !important;
+  }
+
+  .planner-timeline {
+    grid-template-columns: 38px minmax(0, 1fr) !important;
+    border-radius: 11px !important;
+  }
+
+  .planner-time-labels {
+    height: 480px !important;
+  }
+
+  .planner-time-canvas {
+    height: 480px !important;
+  }
+
+  .planner-time-labels span {
+    padding: 4px 4px !important;
+    font-size: 6px !important;
+  }
+
+  .planner-time-block {
+    left: 4px !important;
+    right: 4px !important;
+    padding: 4px 6px !important;
+  }
+
+  .planner-time-block b {
+    font-size: 7px !important;
+  }
+
+  .planner-time-block span {
+    font-size: 7px !important;
+  }
+
+  .planner-day-side {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .planner-block-form {
+    padding: 12px !important;
+  }
+
+}
+
+
+/* =========================================================
+   SMALL PHONE
+   ========================================================= */
+
+@media (max-width: 420px) {
+
+  .planner-calendar {
+    padding: 9px !important;
+  }
+
+  .planner-month-grid {
+    gap: 2px !important;
+  }
+
+  .planner-day {
+    min-height: 40px !important;
+    padding: 5px 4px !important;
+    border-radius: 7px !important;
+  }
+
+  .planner-day b {
+    font-size: 10px !important;
+  }
+
+  .planner-day small {
+    display: none !important;
+  }
+
+  .planner-weekdays span {
+    font-size: 7px !important;
+  }
+
+  .planner-time-labels {
+    width: 34px !important;
+  }
+
+  .planner-timeline {
+    grid-template-columns: 34px minmax(0, 1fr) !important;
+  }
+
+  .planner-time-labels span {
+    padding-right: 3px !important;
+    font-size: 6px !important;
+  }
+
+  .planner-time-block {
+    left: 3px !important;
+    right: 3px !important;
+    border-left-width: 2px !important;
+  }
+
+  .planner-time-block b {
+    font-size: 6px !important;
+  }
+
+  .planner-time-block span {
+    display: none !important;
+  }
+
+  .planner-time-inputs {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 0 !important;
+  }
+
+  .planner-day-list-item {
+    grid-template-columns: 15px minmax(0, 1fr) auto !important;
+    padding: 8px !important;
+  }
+
+  .planner-day-list-item small {
+    font-size: 8px !important;
+  }
+
+}
+
+
+/* =========================================================
+   VERY SMALL DEVICES
+   ========================================================= */
+
+@media (max-width: 340px) {
+
+  .planner-weekdays span {
+    font-size: 6px !important;
+    letter-spacing: 0 !important;
+  }
+
+  .planner-day {
+    min-height: 36px !important;
+  }
+
+  .planner-day b {
+    font-size: 9px !important;
+  }
+
+  .planner-timeline {
+    grid-template-columns: 30px minmax(0, 1fr) !important;
+  }
+
+  .planner-time-labels {
+    width: 30px !important;
+  }
+
+  .planner-time-labels span {
+    padding-right: 2px !important;
+    font-size: 5px !important;
+  }
+
+}
