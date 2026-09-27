@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Calendar, Clock, ExternalLink, Film, Play, RefreshCw, Video } from "lucide-react";
+import { Calendar, Clock, ExternalLink, Film, Play, RefreshCw } from "lucide-react";
 import { api, apiBlob, ApiError, API_URL } from "../api";
 import { useNotifications } from "../notifications";
 
@@ -20,6 +20,11 @@ type RecordingSegment = {
   status: string;
 };
 
+type ClassRecordingResponse = {
+  recording_id: number;
+  recordings?: RecordingSegment[];
+};
+
 function formatDuration(seconds?: number | null): string {
   if (!seconds) return "Full Session";
   const hours = Math.floor(seconds / 3600);
@@ -27,7 +32,15 @@ function formatDuration(seconds?: number | null): string {
   return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
 }
 
-export default function RecordingCard({ data }: { data: RecordingCardData }) {
+function chooseSegment(recording: ClassRecordingResponse, preferredId?: number | null) {
+  const segments = recording.recordings?.length
+    ? recording.recordings
+    : [{ recording_id: recording.recording_id, status: "COMPLETED" }];
+  const selected = segments.find((segment) => segment.recording_id === preferredId) ?? segments[0];
+  return { segments, selected };
+}
+
+export default function RecordedClassCard({ data }: { data: RecordingCardData }) {
   const notifications = useNotifications();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -37,45 +50,24 @@ export default function RecordingCard({ data }: { data: RecordingCardData }) {
   const [selectedSegmentId, setSelectedSegmentId] = useState<number | null>(data.recordingId ?? null);
 
   useEffect(() => () => {
-    if (mediaUrl && mediaUrl.startsWith("blob:")) {
-      URL.revokeObjectURL(mediaUrl);
-    }
+    if (mediaUrl?.startsWith("blob:")) URL.revokeObjectURL(mediaUrl);
   }, [mediaUrl]);
 
   const handleWatch = async () => {
     setLoading(true);
     setError(null);
     try {
-      const recording = await api<{
-        recording_id: number;
-        recordings?: RecordingSegment[];
-      }>(`/live-classes/${data.liveClassId}/recording`);
-      const availableSegments = recording.recordings?.length
-        ? recording.recordings
-        : [{ recording_id: recording.recording_id, status: "COMPLETED" }];
+      const recording = await api<ClassRecordingResponse>(`/live-classes/${data.liveClassId}/recording`);
+      const { segments: availableSegments, selected } = chooseSegment(
+        recording,
+        selectedSegmentId ?? data.recordingId,
+      );
       setSegments(availableSegments);
-      const recordingId = selectedSegmentId ?? data.recordingId ?? availableSegments[0].recording_id;
-      setSelectedSegmentId(recordingId);
-      // First attempt stream endpoint for fast native playback
-      try {
-        const streamInfo = await api<{ playback_url: string }>(`/recordings/${recordingId}/stream`);
-        if (streamInfo.playback_url) {
-          setMediaUrl(streamInfo.playback_url);
-          notifications.showToast({
-            kind: "success",
-            title: "Replay ready",
-            message: "Your recorded class has started loading for playback.",
-          });
-          setLoading(false);
-          return;
-        }
-      } catch {
-        // Fallback to blob download
-      }
+      setSelectedSegmentId(selected.recording_id);
 
-      const blob = await apiBlob(`/recordings/${recordingId}/media`);
+      const blob = await apiBlob(`/recordings/${selected.recording_id}/media`);
       setMediaUrl((current) => {
-        if (current && current.startsWith("blob:")) URL.revokeObjectURL(current);
+        if (current?.startsWith("blob:")) URL.revokeObjectURL(current);
         return URL.createObjectURL(blob);
       });
       notifications.showToast({
@@ -97,27 +89,52 @@ export default function RecordingCard({ data }: { data: RecordingCardData }) {
   };
 
   const openInDrive = async () => {
+    const driveWindow = window.open("about:blank", "_blank");
+    if (driveWindow) driveWindow.opener = null;
     setDriveBusy(true);
+    setError(null);
     try {
-      const recording = await api<{
-        recording_id: number;
-        recordings?: RecordingSegment[];
-      }>(`/live-classes/${data.liveClassId}/recording`);
-      const availableSegments = recording.recordings?.length
-        ? recording.recordings
-        : [{ recording_id: recording.recording_id, status: "COMPLETED" }];
+      const recording = await api<ClassRecordingResponse>(`/live-classes/${data.liveClassId}/recording`);
+      const { segments: availableSegments, selected } = chooseSegment(
+        recording,
+        selectedSegmentId ?? data.recordingId,
+      );
       setSegments(availableSegments);
-      const recordingId = selectedSegmentId ?? data.recordingId ?? availableSegments[0].recording_id;
-      setSelectedSegmentId(recordingId);
-      const result = await api<{ url: string }>(`/recordings/${recordingId}/drive-view`, { method: "POST" });
-      window.open(result.url, "_blank", "noopener,noreferrer");
+      setSelectedSegmentId(selected.recording_id);
+      if (!selected.file_name) {
+        throw new Error("This recording cannot be matched to its private Drive file.");
+      }
+
+      const library = await api<{
+        items: { id: string; name: string; live_class_id?: number | null }[];
+      }>("/library/recorded-videos");
+      const matches = library.items.filter(
+        (item) => item.live_class_id === data.liveClassId && item.name === selected.file_name,
+      );
+      if (matches.length !== 1) {
+        throw new Error("Could not uniquely match this recording to its private Drive file.");
+      }
+
+      const grant = await api<{ url: string; expires_at?: string }>(
+        `/library/recorded-videos/${encodeURIComponent(matches[0].id)}/drive-view`,
+        { method: "POST" },
+      );
+      const driveUrl = new URL(grant.url);
+      if (driveUrl.protocol !== "https:" || driveUrl.hostname !== "drive.google.com") {
+        throw new Error("Google Drive returned an unexpected recording link.");
+      }
+      if (driveWindow) driveWindow.location.replace(driveUrl.href);
       notifications.showToast({
         kind: "info",
         title: "Opening Drive copy",
-        message: "The recording has been opened in a protected Google Drive window.",
+        message: grant.expires_at
+          ? `Drive access is granted to your verified Google account until ${new Date(grant.expires_at).toLocaleDateString()}.`
+          : "Drive access is granted to your verified Google account.",
       });
     } catch (cause) {
-      setError((cause as Error).message || "Google Drive access could not be granted.");
+      driveWindow?.close();
+      const message = (cause as Error).message || "Google Drive access could not be granted.";
+      setError(message);
     } finally {
       setDriveBusy(false);
     }
@@ -144,7 +161,7 @@ export default function RecordingCard({ data }: { data: RecordingCardData }) {
       {error && (
         <div className="notice notice-error small-notice">
           <span>{error}</span>
-          {error === "Sign in with Google to unlock this recording" && (
+          {(error === "Sign in with Google to unlock this recording" || error.toLowerCase().includes("verify your google account")) && (
             <button className="button button-cyan button-small" type="button" onClick={() => window.location.assign(`${API_URL}/auth/google/login`)}>
               Continue with Google
             </button>
@@ -155,17 +172,11 @@ export default function RecordingCard({ data }: { data: RecordingCardData }) {
         </div>
       )}
 
-      {mediaUrl ? (
+      {mediaUrl && (
         <div className="video-player-container">
-          <video
-            className="recording-player"
-            controls
-            autoPlay
-            preload="metadata"
-            src={mediaUrl}
-          />
+          <video className="recording-player" controls autoPlay preload="metadata" src={mediaUrl} />
         </div>
-      ) : null}
+      )}
 
       {segments.length > 1 && (
         <label className="recording-segment-picker">
@@ -189,7 +200,8 @@ export default function RecordingCard({ data }: { data: RecordingCardData }) {
       <div className="recording-card-actions">
         <button
           className={`button full ${mediaUrl ? "button-outline" : "button-cyan"}`}
-          onClick={handleWatch}
+          type="button"
+          onClick={() => void handleWatch()}
           disabled={loading}
         >
           {loading ? (
@@ -213,4 +225,3 @@ export default function RecordingCard({ data }: { data: RecordingCardData }) {
     </article>
   );
 }
-
