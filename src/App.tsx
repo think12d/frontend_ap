@@ -7908,10 +7908,69 @@ function RecordedVideoLibraryPage({ user }: { user: User | null }) {
   const [access, setAccess] = useState<PremiumAccess | null>(null);
   const [library, setLibrary] = useState<RecordedLibrary | null>(null);
   const [playingId, setPlayingId] = useState<string | null>(null);
+  const [playingUrl, setPlayingUrl] = useState<string | null>(null);
+  const [loadingRecordingId, setLoadingRecordingId] = useState<string | null>(null);
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
+  const [driveBusyId, setDriveBusyId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<"newest" | "oldest" | "alpha">("newest");
+
+  useEffect(() => {
+    return () => {
+      if (playingUrl?.startsWith("blob:")) URL.revokeObjectURL(playingUrl);
+    };
+  }, [playingUrl]);
+
+  const authenticatedMediaPath = (value: string) => {
+    const mediaUrl = new URL(value, API_URL);
+    const apiBase = new URL(API_URL);
+    if (mediaUrl.origin !== apiBase.origin) {
+      throw new Error("The recording URL is not on the configured API host.");
+    }
+    const basePath = apiBase.pathname.replace(/\/$/, "");
+    const path = mediaUrl.pathname.startsWith(`${basePath}/`)
+      ? mediaUrl.pathname.slice(basePath.length)
+      : mediaUrl.pathname;
+    mediaUrl.searchParams.delete("token");
+    return `${path}${mediaUrl.search}`;
+  };
+
+  const playRecordedVideo = async (item: RecordedLibrary["items"][number]) => {
+    setError("");
+    setPlayingId(null);
+    setLoadingRecordingId(item.id);
+    try {
+      const media = await apiBlob(authenticatedMediaPath(item.play_url), { cache: "no-store" });
+      setPlayingUrl(URL.createObjectURL(media));
+      setPlayingId(item.id);
+    } catch (cause) {
+      setError((cause as Error).message || "Could not load this recording.");
+    } finally {
+      setLoadingRecordingId(null);
+    }
+  };
+
+  const downloadRecordedVideo = async (item: RecordedLibrary["items"][number]) => {
+    setError("");
+    setDownloadingId(item.id);
+    try {
+      const media = await apiBlob(authenticatedMediaPath(item.download_url), { cache: "no-store" });
+      const url = URL.createObjectURL(media);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = item.name || item.display_name || "recording";
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      window.setTimeout(() => URL.revokeObjectURL(url), 0);
+    } catch (cause) {
+      setError((cause as Error).message || "Could not download this recording.");
+    } finally {
+      setDownloadingId(null);
+    }
+  };
 
   const stats = useMemo(() => {
     const items = library?.items ?? [];
@@ -7986,6 +8045,28 @@ function RecordedVideoLibraryPage({ user }: { user: User | null }) {
     if (user) load();
     else setLoading(false);
   }, [user]);
+  const openRecordedVideoInDrive = async (item: RecordedLibrary["items"][number]) => {
+    const driveWindow = window.open("about:blank", "_blank");
+    if (driveWindow) driveWindow.opener = null;
+    setError("");
+    setDriveBusyId(item.id);
+    try {
+      const grant = await api<{ url: string }>(
+        `/library/recorded-videos/${encodeURIComponent(item.id)}/drive-view`,
+        { method: "POST" },
+      );
+      const driveUrl = new URL(grant.url);
+      if (driveUrl.protocol !== "https:" || driveUrl.hostname !== "drive.google.com") {
+        throw new Error("Google Drive returned an unexpected recording link.");
+      }
+      if (driveWindow) driveWindow.location.replace(driveUrl.href);
+    } catch (cause) {
+      driveWindow?.close();
+      setError((cause as Error).message || "Google Drive access could not be granted.");
+    } finally {
+      setDriveBusyId(null);
+    }
+  };
   if (!user)
     return (
       <div className="container">
@@ -8109,10 +8190,11 @@ function RecordedVideoLibraryPage({ user }: { user: User | null }) {
                   className={`recorded-library-card ${playingId === item.id ? "playing" : ""}`}
                   key={item.id}
                 >
-                  {playingId === item.id ? (
+                {playingId === item.id && playingUrl ? (
+
                     <video
                       className="recorded-library-player"
-                      src={item.play_url}
+                      src={playingUrl}
                       controls
                       autoPlay
                       playsInline
@@ -8122,11 +8204,13 @@ function RecordedVideoLibraryPage({ user }: { user: User | null }) {
                     <button
                       className="recorded-library-cover"
                       type="button"
-                      onClick={() => setPlayingId(item.id)}
+                      onClick={() => void playRecordedVideo(item)}
+                      disabled={loadingRecordingId === item.id}
+                    
                       aria-label={`Play recording: ${meetingName}`}
                     >
                       <span className="recorded-play">
-                        <Play size={19} />
+                       {loadingRecordingId === item.id ? <RefreshCw size={19} className="spin" /> : <Play size={19} />}
                       </span>
                       <span className="recorded-cover-copy">{meetingName}</span>
                     </button>
@@ -8159,13 +8243,28 @@ function RecordedVideoLibraryPage({ user }: { user: User | null }) {
                       <button
                         className="button button-small button-dark"
                         type="button"
-                        onClick={() => setPlayingId(item.id)}
+                        onClick={() => void playRecordedVideo(item)}
+                        disabled={loadingRecordingId === item.id}
                       >
-                        <Play size={13} /> Watch recording
+                        {loadingRecordingId === item.id ? <RefreshCw size={13} className="spin" /> : <Play size={13} />}
+                        {loadingRecordingId === item.id ? "Loading recording…" : "Watch recording"}
                       </button>
-                      <a className="button button-small" href={item.download_url}>
-                        Download <Download size={13} />
-                      </a>
+                      <button
+                        className="button button-small"
+                        type="button"
+                        onClick={() => void downloadRecordedVideo(item)}
+                        disabled={downloadingId === item.id}
+                      >
+                        {downloadingId === item.id ? "Preparing…" : "Download"} <Download size={13} />
+                      </button>
+                      <button
+                        className="button button-small"
+                        type="button"
+                        onClick={() => void openRecordedVideoInDrive(item)}
+                        disabled={driveBusyId === item.id}
+                      >
+                        <ExternalLink size={13} /> {driveBusyId === item.id ? "Granting…" : "Open in Drive"}
+                      </button>
                     </div>
 
                     <small className="recording-original-name" title={originalName}>
