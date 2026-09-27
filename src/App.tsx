@@ -5010,14 +5010,7 @@ function FlagshipCard({ user, course }: { user: User | null; course: Course | nu
           </Link>
         </div>
       </div>
-      <div className="course-stamp">
-        <img
-          src="assets/logo.png"
-          alt="logo"
-          style={{ width: 74 }}
-          onError={(e) => (e.currentTarget.style.display = "none")}
-        />
-      </div>
+      
     </section>
   );
 }
