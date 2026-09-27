@@ -4270,11 +4270,7 @@ function CoursePage({ user }: { user: User | null }) {
           )}
           {message && <span className="inline-message">{message}</span>}
         </div>
-        <div className="course-stamp">
-          <Library size={24} />
-          <b>{course.modules.length || 1}</b>
-          <span>modules</span>
-        </div>
+        
       </div>
       <CourseLiveClasses
         key={liveRefresh}
