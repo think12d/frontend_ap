@@ -14529,7 +14529,6 @@ textarea { min-height: 108px; }
   overflow-x: auto !important;
   border: 1px solid #dce7e1 !important;
   border-radius: 20px !important;
-  overflow-x:scrollable hidden
   background: #ffffff !important;
   box-shadow: 0 12px 35px rgba(16, 35, 29, 0.055) !important;
 }
