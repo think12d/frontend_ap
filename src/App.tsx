@@ -1714,7 +1714,7 @@ function LearnerShell({
         <Link className="brand" to="/">
           <span className="brand-mark">
             <img
-              src="assets/logo.png"
+              src="/assets/logo.png"
               alt="JRF HUNTERS"
               style={{ width: 34, height: 34, borderRadius: 10 }}
               onError={(e) => {
@@ -3420,7 +3420,7 @@ function Login({ onLogin }: { onLogin: (user: User) => void }) {
         <Link className="brand" to="/">
           <span className="brand-mark">
             <img
-              src="assets/logo.png"
+              src="/assets/logo.png"
               alt="JRF HUNTERS"
               style={{ width: 34, height: 34, borderRadius: 10 }}
               onError={(event) => {
