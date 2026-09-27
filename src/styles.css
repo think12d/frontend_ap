@@ -11529,3 +11529,385 @@ textarea { min-height: 108px; }
     padding-right: 12px !important;
   }
 }
+
+
+/* =========================================================
+   HERO — RESPONSIVE / ALL DEVICES
+   Buttons pushed toward bottom
+   Mobile layout preserved
+   ========================================================= */
+
+.hero-premium {
+  position: relative !important;
+
+  width: 100% !important;
+  min-height: 460px !important;
+
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  justify-content: flex-end !important;
+
+  box-sizing: border-box !important;
+
+  padding: 56px !important;
+
+  border-radius: 28px !important;
+  overflow: hidden !important;
+
+  color: #ffffff !important;
+
+  isolation: isolate !important;
+}
+
+
+/* =========================================================
+   BACKGROUND
+   ========================================================= */
+
+.hero-premium::before {
+  content: "" !important;
+
+  position: absolute !important;
+  inset: 0 !important;
+
+  z-index: -2 !important;
+
+  background-image: url("/assets/hero_image.png") !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+
+  transform: scale(1.06) !important;
+}
+
+
+/* =========================================================
+   DARK OVERLAY
+   ========================================================= */
+
+.hero-premium::after {
+  content: "" !important;
+
+  display: block !important;
+
+  position: absolute !important;
+  inset: 0 !important;
+
+  z-index: -1 !important;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(4, 16, 15, 0.88) 0%,
+      rgba(4, 16, 15, 0.66) 43%,
+      rgba(4, 16, 15, 0.30) 75%,
+      rgba(4, 16, 15, 0.18) 100%
+    ) !important;
+}
+
+
+/* =========================================================
+   HIDE ORBS
+   ========================================================= */
+
+.hero-premium .hero-glow-orb {
+  display: none !important;
+}
+
+
+/* =========================================================
+   BUTTON CONTAINER
+   Pushes buttons toward bottom
+   ========================================================= */
+
+.hero-premium .hero-premium-actions {
+  position: relative !important;
+  z-index: 5 !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+
+  flex-wrap: wrap !important;
+
+  gap: 12px !important;
+
+  width: 100% !important;
+
+  margin-top: auto !important;
+}
+
+
+/* =========================================================
+   BUTTON BASE
+   ========================================================= */
+
+.hero-premium .hero-btn {
+  display: inline-flex !important;
+
+  align-items: center !important;
+  justify-content: center !important;
+
+  gap: 8px !important;
+
+  min-height: 48px !important;
+
+  padding: 0 20px !important;
+
+  box-sizing: border-box !important;
+
+  border-radius: 12px !important;
+
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+
+  text-decoration: none !important;
+
+  white-space: nowrap !important;
+
+  border: 1px solid transparent !important;
+
+  transition:
+    transform 0.2s ease !important,
+    box-shadow 0.2s ease !important,
+    background 0.2s ease !important,
+    border-color 0.2s ease !important;
+}
+
+
+/* =========================================================
+   ICON
+   ========================================================= */
+
+.hero-premium .hero-btn svg {
+  width: 16px !important;
+  height: 16px !important;
+
+  flex: 0 0 auto !important;
+}
+
+
+/* =========================================================
+   PRIMARY
+   ========================================================= */
+
+.hero-premium .hero-btn-primary {
+  background: #ffffff !important;
+
+  color: #10231d !important;
+
+  border-color: #ffffff !important;
+
+  box-shadow:
+    0 8px 22px rgba(0, 0, 0, 0.16) !important;
+}
+
+.hero-premium .hero-btn-primary:hover {
+  background: #f1f8f4 !important;
+
+  color: #10231d !important;
+
+  transform: translateY(-2px) !important;
+
+  box-shadow:
+    0 12px 28px rgba(0, 0, 0, 0.22) !important;
+}
+
+
+/* =========================================================
+   SECONDARY
+   ========================================================= */
+
+.hero-premium .hero-btn-secondary {
+  background: rgba(255, 255, 255, 0.10) !important;
+
+  color: #ffffff !important;
+
+  border-color: rgba(255, 255, 255, 0.40) !important;
+
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+}
+
+.hero-premium .hero-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.18) !important;
+
+  border-color: rgba(255, 255, 255, 0.65) !important;
+
+  transform: translateY(-2px) !important;
+}
+
+
+/* =========================================================
+   ACCENT
+   ========================================================= */
+
+.hero-premium .hero-btn-accent {
+  background: #f5c542 !important;
+
+  color: #332700 !important;
+
+  border-color: #f5c542 !important;
+
+  box-shadow:
+    0 8px 22px rgba(0, 0, 0, 0.14) !important;
+}
+
+.hero-premium .hero-btn-accent:hover {
+  background: #ffd65e !important;
+
+  color: #332700 !important;
+
+  transform: translateY(-2px) !important;
+
+  box-shadow:
+    0 12px 28px rgba(0, 0, 0, 0.20) !important;
+}
+
+
+/* =========================================================
+   ACTIVE
+   ========================================================= */
+
+.hero-premium .hero-btn:active {
+  transform: translateY(0) scale(0.98) !important;
+}
+
+
+/* =========================================================
+   LAPTOP
+   ========================================================= */
+
+@media (max-width: 1200px) {
+
+  .hero-premium {
+    min-height: 430px !important;
+
+    padding:
+      44px
+      clamp(28px, 5vw, 44px) !important;
+  }
+
+  .hero-premium .hero-premium-actions {
+    gap: 10px !important;
+  }
+
+  .hero-premium .hero-btn {
+    min-height: 46px !important;
+
+    padding: 0 17px !important;
+
+    font-size: 13.5px !important;
+  }
+}
+
+
+/* =========================================================
+   TABLET / iPAD
+   ========================================================= */
+
+@media (max-width: 900px) {
+
+  .hero-premium {
+    min-height: 400px !important;
+
+    padding:
+      36px
+      clamp(22px, 4vw, 32px) !important;
+  }
+
+  .hero-premium .hero-premium-actions {
+    gap: 9px !important;
+  }
+
+  .hero-premium .hero-btn {
+    min-height: 45px !important;
+
+    padding: 0 15px !important;
+
+    font-size: 13px !important;
+  }
+}
+
+
+/* =========================================================
+   MOBILE
+   Keep mobile buttons same
+   ========================================================= */
+
+@media (max-width: 640px) {
+
+  .hero-premium {
+    min-height: 380px !important;
+
+    padding:
+      32px
+      22px !important;
+
+    border-radius: 20px !important;
+
+    align-items: stretch !important;
+
+    justify-content: flex-end !important;
+  }
+
+
+  .hero-premium::after {
+    background:
+      linear-gradient(
+        180deg,
+        rgba(4, 16, 15, 0.16) 0%,
+        rgba(4, 16, 15, 0.58) 48%,
+        rgba(4, 16, 15, 0.94) 100%
+      ) !important;
+  }
+
+
+  .hero-premium .hero-premium-actions {
+    display: flex !important;
+
+    flex-direction: column !important;
+
+    align-items: stretch !important;
+    justify-content: flex-end !important;
+
+    width: 100% !important;
+
+    gap: 9px !important;
+
+    margin-top: auto !important;
+  }
+
+
+  .hero-premium .hero-btn {
+    width: 100% !important;
+
+    min-height: 46px !important;
+
+    justify-content: center !important;
+  }
+}
+
+
+/* =========================================================
+   SMALL MOBILE
+   ========================================================= */
+
+@media (max-width: 380px) {
+
+  .hero-premium {
+    min-height: 340px !important;
+
+    padding:
+      24px
+      16px !important;
+  }
+
+  .hero-premium .hero-btn {
+    min-height: 44px !important;
+
+    font-size: 13px !important;
+  }
+}
