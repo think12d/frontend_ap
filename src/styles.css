@@ -8,6 +8,398 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
 }
+
+/* ==========================================
+   PREMIUM RESPONSIVE AI LAB CARD
+   ========================================== */
+
+.panel.panel-olive {
+  position: relative !important;
+  isolation: isolate !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  height: 100% !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  padding: clamp(20px, 2.2vw, 30px) !important;
+  border-radius: 22px !important;
+  background: linear-gradient(
+    145deg,
+    #ffffff 0%,
+    #f8fcf6 50%,
+    #eff7e9 100%
+  ) !important;
+  border: 1px solid rgba(77, 130, 62, 0.16) !important;
+  box-shadow:
+    0 4px 10px rgba(34, 75, 42, 0.025),
+    0 16px 42px rgba(34, 75, 42, 0.065),
+    inset 0 1px 0 #ffffff !important;
+  transition:
+    transform 0.45s cubic-bezier(.2,.8,.2,1),
+    box-shadow 0.45s ease,
+    border-color 0.45s ease !important;
+  animation: aiCardEnter .75s ease both !important;
+}
+
+/* SOFT DECORATIVE GLOW */
+
+.panel.panel-olive::before {
+  content: "" !important;
+  position: absolute !important;
+  z-index: -1 !important;
+  width: 260px !important;
+  height: 260px !important;
+  top: -130px !important;
+  right: -105px !important;
+  border-radius: 50% !important;
+  background: radial-gradient(
+    circle,
+    rgba(131, 205, 111, .24),
+    rgba(174, 224, 151, .09) 45%,
+    transparent 72%
+  ) !important;
+  pointer-events: none !important;
+  transition: transform .7s ease !important;
+}
+
+.panel.panel-olive::after {
+  content: "" !important;
+  position: absolute !important;
+  z-index: -1 !important;
+  width: 190px !important;
+  height: 190px !important;
+  bottom: -110px !important;
+  left: -85px !important;
+  border-radius: 50% !important;
+  background: radial-gradient(
+    circle,
+    rgba(90, 173, 112, .12),
+    transparent 72%
+  ) !important;
+  pointer-events: none !important;
+}
+
+.panel.panel-olive:hover {
+  transform: translateY(-5px) !important;
+  border-color: rgba(57, 151, 81, .3) !important;
+  box-shadow:
+    0 12px 25px rgba(32, 86, 46, .065),
+    0 26px 55px rgba(32, 86, 46, .105) !important;
+}
+
+.panel.panel-olive:hover::before {
+  transform: scale(1.4) translate(-10px, 12px) !important;
+}
+
+/* ==========================================
+   FLOATING AI ICON
+   ========================================== */
+
+.panel.panel-olive .panel-icon {
+  position: relative !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+  width: 52px !important;
+  height: 52px !important;
+  margin-bottom: 23px !important;
+  border-radius: 16px !important;
+  color: #21824a !important;
+  background: linear-gradient(
+    145deg,
+    #e7f8e9,
+    #d7f0db
+  ) !important;
+  border: 1px solid #c6e9ce !important;
+  box-shadow:
+    0 5px 13px rgba(39, 145, 75, .11),
+    inset 0 1px 0 rgba(255,255,255,.9) !important;
+  animation: aiIconFloat 4s ease-in-out infinite !important;
+  transition:
+    background .35s ease,
+    box-shadow .35s ease !important;
+}
+
+.panel.panel-olive .panel-icon::after {
+  content: "" !important;
+  position: absolute !important;
+  inset: -6px !important;
+  border: 1px solid rgba(54, 167, 91, .18) !important;
+  border-radius: 21px !important;
+  animation: aiIconPulse 3s ease-in-out infinite !important;
+  pointer-events: none !important;
+}
+
+.panel.panel-olive .panel-icon svg {
+  width: 24px !important;
+  height: 24px !important;
+  stroke-width: 1.9 !important;
+  transition: transform .4s ease !important;
+}
+
+.panel.panel-olive:hover .panel-icon svg {
+  transform: rotate(-8deg) scale(1.12) !important;
+}
+
+/* ==========================================
+   EYEBROW LABEL
+   ========================================== */
+
+.panel.panel-olive .eyebrow {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+  width: fit-content !important;
+  margin-bottom: 14px !important;
+  padding: 7px 12px !important;
+  border-radius: 8px !important;
+  background: #eaf6e7 !important;
+  color: #438449 !important;
+  border: 1px solid #d5ebd1 !important;
+  font-size: 10px !important;
+  font-weight: 800 !important;
+  line-height: 1.3 !important;
+  letter-spacing: 1.5px !important;
+  text-transform: uppercase !important;
+}
+
+/* ==========================================
+   TITLE AND DESCRIPTION
+   ========================================== */
+
+.panel.panel-olive h3 {
+  margin: 0 0 14px !important;
+  max-width: 18ch !important;
+  color: #183e2b !important;
+  font-size: clamp(23px, 2.1vw, 30px) !important;
+  font-weight: 800 !important;
+  line-height: 1.2 !important;
+  letter-spacing: -.9px !important;
+  overflow-wrap: break-word !important;
+  text-wrap: balance !important;
+}
+
+.panel.panel-olive p {
+  margin: 0 0 27px !important;
+  max-width: 48ch !important;
+  color: #708475 !important;
+  font-size: clamp(12px, 1vw, 14px) !important;
+  font-weight: 450 !important;
+  line-height: 1.8 !important;
+  overflow-wrap: anywhere !important;
+}
+
+/* ==========================================
+   PREMIUM ACTION BUTTON
+   ========================================== */
+
+.panel.panel-olive .button.button-dark {
+  position: relative !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 13px !important;
+  width: fit-content !important;
+  max-width: 100% !important;
+  min-height: 46px !important;
+  margin-top: auto !important;
+  padding: 13px 20px !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(255,255,255,.13) !important;
+  border-radius: 12px !important;
+  background: linear-gradient(
+    135deg,
+    #153d2a,
+    #246b43
+  ) !important;
+  color: #ffffff !important;
+  font-size: 12px !important;
+  font-weight: 750 !important;
+  line-height: 1.3 !important;
+  text-decoration: none !important;
+  white-space: nowrap !important;
+  box-shadow: 0 5px 14px rgba(25, 91, 52, .17) !important;
+  transition:
+    transform .3s cubic-bezier(.2,.8,.2,1),
+    background .3s ease,
+    box-shadow .3s ease !important;
+}
+
+.panel.panel-olive .button.button-dark::before {
+  content: "" !important;
+  position: absolute !important;
+  inset: 0 !important;
+  background: linear-gradient(
+    110deg,
+    transparent 25%,
+    rgba(255,255,255,.17) 50%,
+    transparent 75%
+  ) !important;
+  transform: translateX(-150%) !important;
+  transition: transform .7s ease !important;
+  pointer-events: none !important;
+}
+
+.panel.panel-olive .button.button-dark:hover {
+  transform: translateY(-3px) !important;
+  background: linear-gradient(
+    135deg,
+    #1c5936,
+    #328b55
+  ) !important;
+  box-shadow: 0 9px 22px rgba(25, 91, 52, .25) !important;
+}
+
+.panel.panel-olive .button.button-dark:hover::before {
+  transform: translateX(150%) !important;
+}
+
+.panel.panel-olive .button.button-dark:active {
+  transform: scale(.97) !important;
+}
+
+.panel.panel-olive .button.button-dark:focus-visible {
+  outline: 3px solid #6dcf8d !important;
+  outline-offset: 4px !important;
+}
+
+.panel.panel-olive .button.button-dark svg {
+  width: 16px !important;
+  height: 16px !important;
+  flex-shrink: 0 !important;
+  transition: transform .3s ease !important;
+}
+
+.panel.panel-olive .button.button-dark:hover svg {
+  transform: translateX(5px) !important;
+}
+
+/* ==========================================
+   ENTRANCE AND FLOATING ANIMATIONS
+   ========================================== */
+
+@keyframes aiCardEnter {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes aiIconFloat {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes aiIconPulse {
+  0%, 100% {
+    opacity: .5;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.055);
+  }
+}
+
+/* ==========================================
+   TABLET AND SMALL LAPTOP
+   ========================================== */
+
+@media (max-width: 1024px) {
+  .panel.panel-olive {
+    padding: 24px !important;
+  }
+
+  .panel.panel-olive h3 {
+    font-size: clamp(22px, 2.5vw, 27px) !important;
+  }
+
+  .panel.panel-olive p {
+    font-size: 13px !important;
+  }
+}
+
+/* ==========================================
+   MOBILE
+   ========================================== */
+
+@media (max-width: 600px) {
+  .panel.panel-olive {
+    padding: 22px !important;
+    border-radius: 18px !important;
+  }
+
+  .panel.panel-olive .panel-icon {
+    width: 46px !important;
+    height: 46px !important;
+    margin-bottom: 20px !important;
+    border-radius: 14px !important;
+  }
+
+  .panel.panel-olive h3 {
+    font-size: clamp(22px, 5.5vw, 27px) !important;
+  }
+
+  .panel.panel-olive p {
+    font-size: 13px !important;
+    line-height: 1.7 !important;
+    margin-bottom: 24px !important;
+  }
+
+  .panel.panel-olive .button.button-dark {
+    min-height: 46px !important;
+  }
+}
+
+/* EXTRA SMALL SCREENS AND NARROW COLUMNS */
+
+@media (max-width: 360px) {
+  .panel.panel-olive {
+    padding: 18px !important;
+  }
+
+  .panel.panel-olive h3 {
+    font-size: 22px !important;
+  }
+
+  .panel.panel-olive .button.button-dark {
+    width: 100% !important;
+  }
+}
+
+/* ==========================================
+   REDUCED MOTION
+   ========================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .panel.panel-olive,
+  .panel.panel-olive *,
+  .panel.panel-olive::before,
+  .panel.panel-olive::after,
+  .panel.panel-olive *::before,
+  .panel.panel-olive *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .panel.panel-olive:hover,
+  .panel.panel-olive:hover .button.button-dark {
+    transform: none !important;
+  }
+}
 /* PREMIUM LIGHT STUDY PLAN CARD */
 
 .panel.panel-paper {
