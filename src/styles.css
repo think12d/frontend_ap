@@ -8,7 +8,411 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
 }
+/* PREMIUM LIGHT STUDY PLAN CARD */
 
+.panel.panel-paper {
+  position: relative !important;
+  overflow: hidden !important;
+  padding: 28px !important;
+  border-radius: 22px !important;
+  background: linear-gradient(
+    145deg,
+    #ffffff 0%,
+    #f8fcf9 55%,
+    #eff8f2 100%
+  ) !important;
+  border: 1px solid rgba(38, 125, 78, 0.13) !important;
+  box-shadow:
+    0 4px 8px rgba(21, 76, 45, 0.025),
+    0 16px 42px rgba(21, 76, 45, 0.065),
+    inset 0 1px 0 #ffffff !important;
+  transition:
+    transform 0.45s cubic-bezier(.2,.8,.2,1),
+    box-shadow 0.45s ease,
+    border-color 0.45s ease !important;
+  animation: studyCardEnter 0.75s ease both !important;
+}
+
+.panel.panel-paper::before {
+  content: "" !important;
+  position: absolute !important;
+  width: 220px !important;
+  height: 220px !important;
+  top: -115px !important;
+  right: -85px !important;
+  border-radius: 50% !important;
+  background: radial-gradient(
+    circle,
+    rgba(94, 202, 132, 0.16),
+    transparent 70%
+  ) !important;
+  pointer-events: none !important;
+  transition: transform 0.7s ease !important;
+}
+
+.panel.panel-paper:hover {
+  transform: translateY(-5px) !important;
+  border-color: rgba(39, 148, 87, 0.28) !important;
+  box-shadow:
+    0 12px 24px rgba(21, 76, 45, 0.06),
+    0 25px 55px rgba(21, 76, 45, 0.1) !important;
+}
+
+.panel.panel-paper:hover::before {
+  transform: scale(1.5) translate(-15px, 15px) !important;
+}
+
+/* HEADER */
+
+.panel.panel-paper .panel-top {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+  margin-bottom: 20px !important;
+}
+
+.panel.panel-paper .eyebrow {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+  padding: 7px 11px !important;
+  border-radius: 8px !important;
+  background: #edf7ef !important;
+  color: #327c4c !important;
+  font-size: 10px !important;
+  font-weight: 800 !important;
+  letter-spacing: 1.5px !important;
+  border: 1px solid #dceee0 !important;
+}
+
+/* ANIMATED STATUS */
+
+.panel.panel-paper .status-pill {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 8px 12px !important;
+  border-radius: 100px !important;
+  background: #e8f8ee !important;
+  color: #21834a !important;
+  border: 1px solid #d0edda !important;
+  font-size: 11px !important;
+  font-weight: 750 !important;
+  white-space: nowrap !important;
+  transition: all 0.3s ease !important;
+}
+
+.panel.panel-paper .status-pill:hover {
+  background: #d9f4e3 !important;
+  transform: translateY(-2px) !important;
+}
+
+.panel.panel-paper .status-pill > span {
+  position: relative !important;
+  width: 7px !important;
+  height: 7px !important;
+  flex-shrink: 0 !important;
+  border-radius: 50% !important;
+  background: #29b966 !important;
+  box-shadow: 0 0 0 3px rgba(41,185,102,.12) !important;
+}
+
+.panel.panel-paper .status-pill > span::after {
+  content: "" !important;
+  position: absolute !important;
+  inset: -4px !important;
+  border: 1px solid #29b966 !important;
+  border-radius: 50% !important;
+  animation: statusPulse 2.4s ease-out infinite !important;
+}
+
+/* TITLE */
+
+.panel.panel-paper h3 {
+  margin: 0 0 24px !important;
+  color: #153c2b !important;
+  font-size: clamp(23px, 2vw, 29px) !important;
+  font-weight: 800 !important;
+  line-height: 1.2 !important;
+  letter-spacing: -1px !important;
+}
+
+/* PROGRESS BAR */
+
+.panel.panel-paper .progress-bar {
+  position: relative !important;
+  width: 100% !important;
+  height: 11px !important;
+  overflow: hidden !important;
+  border-radius: 100px !important;
+  background: #e4eee7 !important;
+  box-shadow: inset 0 2px 4px rgba(24,80,47,.06) !important;
+}
+
+.panel.panel-paper .progress-bar > span {
+  position: relative !important;
+  display: block !important;
+  height: 100% !important;
+  border-radius: inherit !important;
+  background: linear-gradient(
+    90deg,
+    #249854 0%,
+    #38bb70 55%,
+    #75d99c 100%
+  ) !important;
+  box-shadow: 0 2px 8px rgba(42,169,90,.25) !important;
+  animation: progressReveal 1.5s cubic-bezier(.2,.8,.2,1) both !important;
+}
+
+.panel.panel-paper .progress-bar > span::after {
+  content: "" !important;
+  position: absolute !important;
+  inset: 0 !important;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255,255,255,.5),
+    transparent
+  ) !important;
+  transform: translateX(-100%) !important;
+  animation: progressShimmer 3s ease-in-out 1.5s infinite !important;
+}
+
+/* PROGRESS INFORMATION */
+
+.panel.panel-paper .plan-line {
+  display: flex !important;
+  align-items: center !important;
+  flex-wrap: wrap !important;
+  gap: 9px !important;
+  margin-top: 15px !important;
+  margin-bottom: 25px !important;
+}
+
+.panel.panel-paper .plan-line b {
+  color: #17683d !important;
+  font-size: 26px !important;
+  font-weight: 850 !important;
+  letter-spacing: -1px !important;
+  line-height: 1 !important;
+}
+
+.panel.panel-paper .plan-line > span {
+  color: #7a8e80 !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+}
+
+.panel.panel-paper .plan-line strong {
+  margin-left: auto !important;
+  padding: 6px 9px !important;
+  border-radius: 8px !important;
+  background: #e0f5e7 !important;
+  color: #20934e !important;
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  border: 1px solid #ccebd5 !important;
+  transition: transform .3s ease !important;
+}
+
+.panel.panel-paper .plan-line strong:hover {
+  transform: scale(1.08) !important;
+}
+
+/* STUDY TASK LIST */
+
+.panel.panel-paper .mini-list {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 9px !important;
+  padding-top: 17px !important;
+  border-top: 1px solid #e5eee7 !important;
+}
+
+.panel.panel-paper .mini-list > span {
+  display: flex !important;
+  align-items: center !important;
+  gap: 11px !important;
+  min-height: 44px !important;
+  padding: 11px 13px !important;
+  border-radius: 11px !important;
+  background: rgba(255,255,255,.85) !important;
+  border: 1px solid #e8efe9 !important;
+  color: #435b4c !important;
+  font-size: 12px !important;
+  font-weight: 650 !important;
+  box-shadow: 0 2px 5px rgba(25,75,45,.025) !important;
+  transition:
+    transform .3s cubic-bezier(.2,.8,.2,1),
+    background .3s ease,
+    box-shadow .3s ease,
+    border-color .3s ease !important;
+  animation: taskSlideIn .55s ease both !important;
+}
+
+.panel.panel-paper .mini-list > span:nth-child(1) {
+  animation-delay: .2s !important;
+}
+
+.panel.panel-paper .mini-list > span:nth-child(2) {
+  animation-delay: .35s !important;
+}
+
+.panel.panel-paper .mini-list > span:nth-child(3) {
+  animation-delay: .5s !important;
+}
+
+.panel.panel-paper .mini-list > span:hover {
+  transform: translateX(5px) !important;
+  background: #f5fcf7 !important;
+  border-color: #c9e8d3 !important;
+  box-shadow: 0 5px 15px rgba(32,110,60,.07) !important;
+}
+
+/* COMPLETED TASK ICON */
+
+.panel.panel-paper .mini-list svg {
+  box-sizing: content-box !important;
+  width: 13px !important;
+  height: 13px !important;
+  flex-shrink: 0 !important;
+  padding: 5px !important;
+  border-radius: 8px !important;
+  color: #ffffff !important;
+  background: linear-gradient(135deg,#38bd70,#229752) !important;
+  stroke-width: 3 !important;
+  box-shadow: 0 3px 8px rgba(40,160,86,.16) !important;
+  transition: transform .35s ease !important;
+}
+
+.panel.panel-paper .mini-list > span:hover svg {
+  transform: rotate(-8deg) scale(1.12) !important;
+}
+
+/* PENDING TASK */
+
+.panel.panel-paper .mini-list > span.pending {
+  background: #fffdf8 !important;
+  border: 1px dashed #eadfbd !important;
+  color: #9b8250 !important;
+}
+
+.panel.panel-paper .mini-list > span.pending:hover {
+  background: #fff9eb !important;
+  border-color: #d8bb78 !important;
+}
+
+.panel.panel-paper .mini-list > span.pending > span {
+  position: relative !important;
+  display: inline-block !important;
+  width: 9px !important;
+  height: 9px !important;
+  margin: 7px !important;
+  flex-shrink: 0 !important;
+  border-radius: 50% !important;
+  background: #edb84e !important;
+  box-shadow: 0 0 0 4px #fff0cd !important;
+  animation: pendingGlow 2.5s ease-in-out infinite !important;
+}
+
+/* KEYFRAME ANIMATIONS */
+
+@keyframes studyCardEnter {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes statusPulse {
+  0% {
+    transform: scale(.6);
+    opacity: .85;
+  }
+  75%,100% {
+    transform: scale(1.8);
+    opacity: 0;
+  }
+}
+
+@keyframes progressReveal {
+  from {
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+  to {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+}
+
+@keyframes progressShimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  60%,100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes taskSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pendingGlow {
+  0%,100% {
+    box-shadow: 0 0 0 4px #fff0cd;
+  }
+  50% {
+    box-shadow: 0 0 0 7px rgba(237,184,78,.12);
+  }
+}
+
+/* MOBILE RESPONSIVENESS */
+
+@media (max-width: 480px) {
+  .panel.panel-paper {
+    padding: 20px !important;
+    border-radius: 18px !important;
+  }
+
+  .panel.panel-paper h3 {
+    font-size: 24px !important;
+    margin-bottom: 21px !important;
+  }
+
+  .panel.panel-paper .plan-line b {
+    font-size: 23px !important;
+  }
+
+  .panel.panel-paper .mini-list > span {
+    font-size: 11px !important;
+  }
+}
+
+/* ACCESSIBILITY */
+
+@media (prefers-reduced-motion: reduce) {
+  .panel.panel-paper,
+  .panel.panel-paper *,
+  .panel.panel-paper::before,
+  .panel.panel-paper *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
 .course-art.has-image {
   height: 120px;
   min-height: 120px;
