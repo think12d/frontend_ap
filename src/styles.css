@@ -15634,3 +15634,206 @@ textarea { min-height: 108px; }
     font-size: 9px !important;
   }
 }
+/* =========================================================
+   AI LAB — SCROLLABLE ANSWER PANEL
+   ========================================================= */
+
+.ai-workspace {
+  display: grid !important;
+  grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.18fr) !important;
+  gap: 20px !important;
+  align-items: stretch !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  height: calc(100vh - 190px) !important;
+  min-height: 620px !important;
+}
+
+/* LEFT PROMPT PANEL */
+.ai-workspace .prompt-card {
+  min-width: 0 !important;
+  height: 100% !important;
+  overflow: hidden !important;
+}
+
+/* RIGHT ANSWER PANEL */
+.ai-workspace .answer-card {
+  min-width: 0 !important;
+  min-height: 0 !important;
+  height: 100% !important;
+
+  /* THIS MAKES THE AI RESPONSE SCROLLABLE */
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+
+  overscroll-behavior: contain !important;
+  scrollbar-gutter: stable !important;
+
+  padding: 22px !important;
+}
+
+/* Keep the top/source header visible while scrolling */
+.ai-workspace .answer-top {
+  position: sticky !important;
+  top: -22px !important;
+  z-index: 10 !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+
+  margin: -22px -22px 18px -22px !important;
+  padding: 18px 22px 14px 22px !important;
+
+  background: rgba(255, 255, 255, 0.96) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+
+  border-bottom: 1px solid #e4ebe7 !important;
+}
+
+/* AI response content */
+.ai-workspace .answer-body {
+  min-width: 0 !important;
+  width: 100% !important;
+  overflow: visible !important;
+
+  line-height: 1.7 !important;
+  color: #26372f !important;
+}
+
+/* Prevent long AI text from causing horizontal scrolling */
+.ai-workspace .answer-body p,
+.ai-workspace .answer-body h1,
+.ai-workspace .answer-body h2,
+.ai-workspace .answer-body h3,
+.ai-workspace .answer-body h4,
+.ai-workspace .answer-body li {
+  max-width: 100% !important;
+  overflow-wrap: anywhere !important;
+  word-break: normal !important;
+}
+
+/* Markdown-style tables inside AI answer */
+.ai-workspace .answer-body table {
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow-x: auto !important;
+
+  border-collapse: collapse !important;
+  margin: 18px 0 !important;
+}
+
+/* Source trail stays inside the same scroll area */
+.ai-workspace .source-list {
+  width: 100% !important;
+  min-width: 0 !important;
+  margin-top: 24px !important;
+}
+
+/* Source text should wrap instead of expanding the card */
+.ai-workspace .source-item {
+  min-width: 0 !important;
+  width: 100% !important;
+}
+
+.ai-workspace .source-item span {
+  min-width: 0 !important;
+  overflow-wrap: anywhere !important;
+}
+
+.ai-workspace .source-item small {
+  display: block !important;
+  max-width: 100% !important;
+  overflow-wrap: anywhere !important;
+}
+
+/* =========================================================
+   PREMIUM SCROLLBAR
+   ========================================================= */
+
+.ai-workspace .answer-card::-webkit-scrollbar {
+  width: 7px !important;
+}
+
+.ai-workspace .answer-card::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+.ai-workspace .answer-card::-webkit-scrollbar-thumb {
+  background: #c5d2cb !important;
+  border-radius: 999px !important;
+}
+
+.ai-workspace .answer-card::-webkit-scrollbar-thumb:hover {
+  background: #8fa89b !important;
+}
+
+/* Firefox */
+.ai-workspace .answer-card {
+  scrollbar-width: thin !important;
+  scrollbar-color: #c5d2cb transparent !important;
+}
+
+
+/* =========================================================
+   MOBILE / TABLET
+   ========================================================= */
+
+@media (max-width: 1000px) {
+  .ai-workspace {
+    grid-template-columns: 1fr !important;
+    height: auto !important;
+    min-height: 0 !important;
+  }
+
+  .ai-workspace .prompt-card {
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  .ai-workspace .answer-card {
+    height: 70vh !important;
+    min-height: 500px !important;
+    max-height: 760px !important;
+
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+  }
+}
+
+
+@media (max-width: 600px) {
+  .ai-workspace {
+    gap: 14px !important;
+  }
+
+  .ai-workspace .answer-card {
+    height: 65vh !important;
+    min-height: 440px !important;
+    max-height: 680px !important;
+
+    padding: 16px !important;
+  }
+
+  .ai-workspace .answer-top {
+    top: -16px !important;
+
+    margin: -16px -16px 16px -16px !important;
+    padding: 14px 16px 12px 16px !important;
+  }
+
+  .ai-workspace .answer-body {
+    font-size: 14px !important;
+    line-height: 1.65 !important;
+  }
+}
+
+
+@media (max-width: 420px) {
+  .ai-workspace .answer-card {
+    height: 62vh !important;
+    min-height: 400px !important;
+  }
+}
