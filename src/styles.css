@@ -10,6 +10,229 @@
 }
 
 /* ==========================================
+   PREMIUM BATCH CATALOGUE HEADING
+   ========================================== */
+
+.section-heading {
+  position: relative !important;
+  display: flex !important;
+  align-items: flex-end !important;
+  justify-content: space-between !important;
+  flex-wrap: wrap !important;
+  gap: 18px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+  margin: 0 0 28px !important;
+  padding: 12px 0 22px !important;
+  border-bottom: 1px solid #e4eee7 !important;
+  background: transparent !important;
+  animation: catalogueEnter .7s ease both !important;
+}
+
+/* ACCENT LINE */
+
+.section-heading::after {
+  content: "" !important;
+  position: absolute !important;
+  bottom: -1px !important;
+  left: 0 !important;
+  width: 68px !important;
+  height: 3px !important;
+  border-radius: 10px !important;
+  background: linear-gradient(
+    90deg,
+    #249854,
+    #70d79a
+  ) !important;
+  box-shadow: 0 1px 7px rgba(45, 168, 88, .18) !important;
+  transition: width .45s cubic-bezier(.2,.8,.2,1) !important;
+}
+
+.section-heading:hover::after {
+  width: 115px !important;
+}
+
+/* HEADING CONTENT */
+
+.section-heading > div {
+  position: relative !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  gap: 12px !important;
+  flex: 1 1 300px !important;
+  min-width: 0 !important;
+}
+
+/* EYEBROW BADGE */
+
+.section-heading .eyebrow {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  width: fit-content !important;
+  max-width: 100% !important;
+  padding: 8px 12px !important;
+  border-radius: 8px !important;
+  border: 1px solid #d8edda !important;
+  background: linear-gradient(
+    135deg,
+    #eff9ef,
+    #e5f5e8
+  ) !important;
+  color: #327b4c !important;
+  font-size: 10px !important;
+  font-weight: 800 !important;
+  line-height: 1.4 !important;
+  letter-spacing: 1.4px !important;
+  text-transform: uppercase !important;
+  transition:
+    transform .3s ease,
+    background .3s ease,
+    box-shadow .3s ease !important;
+}
+
+.section-heading .eyebrow::before {
+  content: "" !important;
+  width: 7px !important;
+  height: 7px !important;
+  flex-shrink: 0 !important;
+  border-radius: 50% !important;
+  background: #37b86c !important;
+  box-shadow: 0 0 0 3px rgba(55, 184, 108, .12) !important;
+}
+
+.section-heading:hover .eyebrow {
+  transform: translateY(-2px) !important;
+  background: #e2f5e7 !important;
+  box-shadow: 0 4px 12px rgba(42, 144, 74, .07) !important;
+}
+
+/* MAIN TITLE */
+
+.section-heading h2 {
+  margin: 0 !important;
+  max-width: 100% !important;
+  color: #173d2b !important;
+  font-size: clamp(24px, 2.5vw, 36px) !important;
+  font-weight: 800 !important;
+  line-height: 1.2 !important;
+  letter-spacing: -1.2px !important;
+  text-wrap: balance !important;
+  overflow-wrap: break-word !important;
+  transition: color .3s ease !important;
+}
+
+.section-heading:hover h2 {
+  color: #246c43 !important;
+}
+
+/* SUPPORTING DESCRIPTION */
+
+.section-heading > .muted {
+  display: inline-flex !important;
+  align-items: center !important;
+  flex: 0 1 auto !important;
+  max-width: 100% !important;
+  margin-bottom: 4px !important;
+  padding: 9px 13px !important;
+  border-radius: 10px !important;
+  border: 1px solid #e6eee6 !important;
+  background: #f7faf6 !important;
+  color: #7a8e7d !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  line-height: 1.5 !important;
+  transition:
+    color .3s ease,
+    background .3s ease,
+    border-color .3s ease !important;
+}
+
+.section-heading > .muted:hover {
+  background: #edf7ef !important;
+  color: #37734d !important;
+  border-color: #d5e9d8 !important;
+}
+
+/* ==========================================
+   ANIMATION
+   ========================================== */
+
+@keyframes catalogueEnter {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ==========================================
+   LAPTOP AND TABLET
+   ========================================== */
+
+@media (max-width: 1024px) {
+  .section-heading {
+    gap: 15px !important;
+    margin-bottom: 24px !important;
+  }
+
+  .section-heading h2 {
+    font-size: clamp(25px, 3vw, 32px) !important;
+  }
+}
+
+/* ==========================================
+   MOBILE
+   ========================================== */
+
+@media (max-width: 600px) {
+  .section-heading {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 15px !important;
+    padding-bottom: 20px !important;
+    margin-bottom: 22px !important;
+  }
+
+  .section-heading > div {
+    flex: 0 1 auto !important;
+    width: 100% !important;
+    gap: 11px !important;
+  }
+
+  .section-heading h2 {
+    font-size: clamp(23px, 6vw, 29px) !important;
+    letter-spacing: -.8px !important;
+  }
+
+  .section-heading > .muted {
+    font-size: 11px !important;
+    padding: 8px 11px !important;
+  }
+
+  .section-heading::after {
+    width: 55px !important;
+  }
+}
+
+/* ==========================================
+   ACCESSIBILITY
+   ========================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .section-heading,
+  .section-heading *,
+  .section-heading::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+/* ==========================================
    PREMIUM RESPONSIVE AI LAB CARD
    ========================================== */
 
