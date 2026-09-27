@@ -115,7 +115,7 @@ export default function RecordedClassCard({ data }: { data: RecordingCardData })
         throw new Error("Could not uniquely match this recording to its private Drive file.");
       }
 
-      const grant = await api<{ url: string; expires_at?: string }>(
+      const grant = await api<{ url: string; expires_at?: string | null; expiration_supported?: boolean }>(
         `/library/recorded-videos/${encodeURIComponent(matches[0].id)}/drive-view`,
         { method: "POST" },
       );
@@ -127,7 +127,9 @@ export default function RecordedClassCard({ data }: { data: RecordingCardData })
       notifications.showToast({
         kind: "info",
         title: "Opening Drive copy",
-        message: grant.expires_at
+        message: grant.expiration_supported === false
+          ? "This Drive file does not support automatic access expiry. Its permission must be revoked manually."
+          : grant.expires_at
           ? `Drive access is granted to your verified Google account until ${new Date(grant.expires_at).toLocaleDateString()}.`
           : "Drive access is granted to your verified Google account.",
       });
