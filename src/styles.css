@@ -13205,6 +13205,683 @@ textarea { min-height: 108px; }
 /* =========================================================
    SUBMIT ROW
    ========================================================= */
+/* =========================================================
+   JRF HUNTERS — COMPLETE QUIZ PAGE
+   CSS ONLY
+   Responsive: Desktop / Laptop / iPad / Tablet / Mobile
+   ========================================================= */
+
+
+/* =========================================================
+   1. GLOBAL QUIZ PAGE SAFETY
+   ========================================================= */
+
+.quiz-page,
+.quiz-page *,
+.quiz-page *::before,
+.quiz-page *::after {
+  box-sizing: border-box !important;
+  min-width: 0 !important;
+}
+
+.quiz-page {
+  width: 100% !important;
+  max-width: 1440px !important;
+  margin-inline: auto !important;
+
+  overflow-x: clip !important;
+}
+
+@supports not (overflow: clip) {
+  .quiz-page {
+    overflow-x: hidden !important;
+  }
+}
+
+.quiz-page img,
+.quiz-page svg {
+  max-width: 100% !important;
+}
+
+.quiz-page h1,
+.quiz-page h2,
+.quiz-page h3,
+.quiz-page h4,
+.quiz-page p,
+.quiz-page span,
+.quiz-page small,
+.quiz-page label,
+.quiz-page button {
+  overflow-wrap: anywhere !important;
+}
+
+
+/* =========================================================
+   2. PAGE HEADER
+   ========================================================= */
+
+.quiz-page-heading {
+  width: 100% !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+
+  gap: 24px !important;
+}
+
+.quiz-page-heading > div:first-child {
+  min-width: 0 !important;
+  flex: 1 1 auto !important;
+}
+
+.quiz-page-heading h2 {
+  margin: 5px 0 0 !important;
+
+  font-size: clamp(22px, 2.5vw, 32px) !important;
+  line-height: 1.15 !important;
+  letter-spacing: -0.035em !important;
+}
+
+.quiz-page-heading-meta {
+  flex: 0 0 auto !important;
+
+  display: flex !important;
+  align-items: center !important;
+  gap: 9px !important;
+
+  white-space: nowrap !important;
+}
+
+.quiz-heading-mark {
+  width: 31px !important;
+  height: 31px !important;
+
+  flex: 0 0 31px !important;
+
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  border-radius: 9px !important;
+
+  background: rgba(16, 35, 29, 0.08) !important;
+}
+
+
+/* =========================================================
+   3. NOTICE
+   ========================================================= */
+
+.quiz-page > .notice {
+  width: 100% !important;
+  max-width: 100% !important;
+
+  margin-top: 14px !important;
+
+  padding: 11px 14px !important;
+
+  border-radius: 10px !important;
+
+  font-size: 12px !important;
+  line-height: 1.5 !important;
+
+  overflow-wrap: anywhere !important;
+}
+
+
+/* =========================================================
+   4. ACTIVE TESTS
+   ========================================================= */
+
+.active-tests-section {
+  width: 100% !important;
+
+  margin-top: 22px !important;
+
+  padding: 20px !important;
+
+  border: 1px solid rgba(16, 35, 29, 0.10) !important;
+  border-radius: 15px !important;
+
+  background: rgba(255, 255, 255, 0.72) !important;
+}
+
+.active-tests-section .section-heading {
+  width: 100% !important;
+
+  display: flex !important;
+  align-items: flex-end !important;
+  justify-content: space-between !important;
+
+  gap: 20px !important;
+}
+
+.active-tests-section h3 {
+  margin: 4px 0 0 !important;
+
+  font-size: clamp(17px, 1.8vw, 21px) !important;
+  line-height: 1.2 !important;
+}
+
+.active-tests-section .muted {
+  flex: 0 1 auto !important;
+
+  font-size: 11px !important;
+  line-height: 1.45 !important;
+}
+
+.no-active-test {
+  width: 100% !important;
+
+  margin-top: 14px !important;
+  padding: 12px 14px !important;
+
+  display: flex !important;
+  align-items: center !important;
+  gap: 9px !important;
+
+  border-radius: 10px !important;
+
+  background: rgba(16, 35, 29, 0.045) !important;
+
+  font-size: 12px !important;
+  line-height: 1.45 !important;
+}
+
+.no-active-test svg {
+  flex: 0 0 auto !important;
+}
+
+
+/* =========================================================
+   5. MAIN BUILDER CARD
+   ========================================================= */
+
+.quiz-builder.quiz-builder-card {
+  width: 100% !important;
+  max-width: 100% !important;
+
+  margin-top: 22px !important;
+
+  padding: clamp(18px, 2.5vw, 30px) !important;
+
+  display: flex !important;
+  flex-direction: column !important;
+
+  gap: 22px !important;
+
+  overflow: visible !important;
+}
+
+
+/* =========================================================
+   6. BUILDER HEADER
+   ========================================================= */
+
+.quiz-builder-head {
+  width: 100% !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+
+  gap: 18px !important;
+}
+
+.quiz-builder-head > div {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+}
+
+.quiz-builder-head h3 {
+  margin: 5px 0 0 !important;
+
+  font-size: clamp(20px, 2vw, 26px) !important;
+  line-height: 1.18 !important;
+  letter-spacing: -0.025em !important;
+}
+
+.quiz-builder-head > svg {
+  flex: 0 0 auto !important;
+  width: 23px !important;
+  height: 23px !important;
+}
+
+
+/* =========================================================
+   7. FORM LABELS
+   ========================================================= */
+
+.quiz-builder label {
+  width: 100% !important;
+  min-width: 0 !important;
+
+  display: flex !important;
+  flex-direction: column !important;
+
+  gap: 7px !important;
+
+  font-size: 11px !important;
+  line-height: 1.4 !important;
+  font-weight: 800 !important;
+}
+
+
+/* =========================================================
+   8. PRIMARY SETUP
+   ========================================================= */
+
+.quiz-builder-primary {
+  width: 100% !important;
+
+  display: grid !important;
+
+  grid-template-columns:
+    minmax(0, 1.8fr)
+    minmax(0, 1.35fr)
+    minmax(145px, 0.75fr)
+    minmax(145px, 0.75fr) !important;
+
+  gap: 13px !important;
+}
+
+
+/* =========================================================
+   9. INPUTS / SELECTS
+   ========================================================= */
+
+.quiz-builder input,
+.quiz-builder select {
+  width: 100% !important;
+  max-width: 100% !important;
+
+  height: 45px !important;
+  min-height: 45px !important;
+
+  padding: 0 12px !important;
+
+  border-radius: 10px !important;
+  border: 1px solid rgba(16, 35, 29, 0.15) !important;
+
+  background: #ffffff !important;
+  color: #10231d !important;
+
+  font-size: 12px !important;
+  line-height: 1.2 !important;
+
+  outline: none !important;
+}
+
+.quiz-builder select {
+  min-width: 0 !important;
+
+  text-overflow: ellipsis !important;
+  overflow: hidden !important;
+  white-space: nowrap !important;
+
+  cursor: pointer !important;
+}
+
+.quiz-builder input:focus,
+.quiz-builder select:focus {
+  border-color: rgba(16, 35, 29, 0.38) !important;
+
+  box-shadow:
+    0 0 0 3px rgba(16, 35, 29, 0.06) !important;
+}
+
+
+/* =========================================================
+   10. FILTER BLOCKS
+   ========================================================= */
+
+.quiz-filter-section {
+  width: 100% !important;
+  min-width: 0 !important;
+
+  padding: clamp(15px, 2vw, 21px) !important;
+
+  display: flex !important;
+  flex-direction: column !important;
+
+  gap: 11px !important;
+
+  border: 1px solid rgba(16, 35, 29, 0.10) !important;
+  border-radius: 14px !important;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(249, 251, 249, 0.96),
+      rgba(246, 248, 246, 0.82)
+    ) !important;
+}
+
+
+/* =========================================================
+   11. SMALL SUPPORT TEXT
+   ========================================================= */
+
+.quiz-builder .muted,
+.quiz-builder small {
+  max-width: 100% !important;
+
+  font-size: 10.5px !important;
+  line-height: 1.55 !important;
+
+  overflow-wrap: anywhere !important;
+}
+
+
+/* =========================================================
+   12. CHIPS
+   ========================================================= */
+
+.quiz-builder .chip-row {
+  width: 100% !important;
+
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+
+  gap: 7px !important;
+}
+
+.quiz-builder .filter-chip {
+  flex: 0 1 auto !important;
+
+  min-height: 31px !important;
+
+  max-width: 100% !important;
+
+  padding: 5px 10px !important;
+
+  border-radius: 999px !important;
+
+  font-size: 10.5px !important;
+  line-height: 1.3 !important;
+  font-weight: 750 !important;
+
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+
+  cursor: pointer !important;
+}
+
+
+/* =========================================================
+   13. QUESTION BANK HEADER
+   ========================================================= */
+
+.quiz-filter-section > .section-heading.compact {
+  width: 100% !important;
+
+  display: grid !important;
+
+  grid-template-columns:
+    minmax(0, 1fr)
+    minmax(180px, 230px) !important;
+
+  gap: 18px !important;
+
+  align-items: end !important;
+
+  margin: 0 !important;
+}
+
+.quiz-filter-section > .section-heading.compact > div {
+  min-width: 0 !important;
+}
+
+.quiz-filter-section > .section-heading.compact > label {
+  min-width: 0 !important;
+}
+
+
+/* =========================================================
+   14. TOPIC FILTER
+   ========================================================= */
+
+/*
+   IMPORTANT:
+   This is the frontend representation of:
+
+   topic_ids: [...]
+   question_bank_topics: [...]
+   papers: [...]
+   count: ...
+   source_mode: ...
+
+   The visual control should clearly look like a
+   multi-select topic filter, not a normal single select.
+*/
+
+.quiz-builder .topic-picker {
+  width: 100% !important;
+  min-width: 0 !important;
+
+  position: relative !important;
+}
+
+.quiz-builder .topic-picker-trigger {
+  width: 100% !important;
+  min-width: 0 !important;
+
+  min-height: 45px !important;
+
+  padding: 9px 12px !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+
+  gap: 12px !important;
+
+  border: 1px solid rgba(16, 35, 29, 0.15) !important;
+  border-radius: 10px !important;
+
+  background: #ffffff !important;
+  color: #10231d !important;
+
+  font-size: 12px !important;
+  font-weight: 750 !important;
+
+  cursor: pointer !important;
+
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    background 0.18s ease !important;
+}
+
+.quiz-builder .topic-picker-trigger:hover {
+  border-color: rgba(16, 35, 29, 0.30) !important;
+}
+
+.quiz-builder .topic-picker-trigger > span {
+  min-width: 0 !important;
+  flex: 1 1 auto !important;
+
+  display: flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.quiz-builder .topic-picker-trigger > svg {
+  flex: 0 0 auto !important;
+}
+
+
+/* =========================================================
+   15. SESSION / PAPER CHIPS
+   ========================================================= */
+
+.quiz-filter-section > .eyebrow {
+  margin-top: 3px !important;
+}
+
+.quiz-filter-section > .eyebrow:not(:first-child) {
+  padding-top: 3px !important;
+}
+
+
+/* =========================================================
+   16. SUBJECT AREA HEADER
+   ========================================================= */
+
+.subject-area-heading {
+  width: 100% !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+
+  gap: 18px !important;
+}
+
+.subject-area-heading > div {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+}
+
+.subject-area-heading .muted {
+  display: block !important;
+  margin-top: 3px !important;
+}
+
+.subject-area-count {
+  flex: 0 0 auto !important;
+
+  padding: 5px 9px !important;
+
+  border-radius: 999px !important;
+
+  background: rgba(16, 35, 29, 0.07) !important;
+
+  font-size: 10px !important;
+  font-weight: 800 !important;
+
+  white-space: nowrap !important;
+}
+
+
+/* =========================================================
+   17. SUBJECT GRID
+   ========================================================= */
+
+.subject-toggle-grid {
+  width: 100% !important;
+
+  display: grid !important;
+
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr)) !important;
+
+  grid-auto-rows: minmax(54px, auto) !important;
+
+  gap: 8px !important;
+
+  align-items: stretch !important;
+}
+
+
+/* =========================================================
+   18. SUBJECT BUTTON
+   ========================================================= */
+
+.quiz-builder .subject-toggle {
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 54px !important;
+
+  padding: 8px 10px !important;
+
+  display: flex !important;
+  align-items: center !important;
+
+  gap: 9px !important;
+
+  border: 1px solid rgba(16, 35, 29, 0.11) !important;
+  border-radius: 10px !important;
+
+  background: #ffffff !important;
+  color: #10231d !important;
+
+  text-align: left !important;
+
+  cursor: pointer !important;
+
+  transition:
+    border-color 0.16s ease,
+    background 0.16s ease,
+    transform 0.16s ease,
+    box-shadow 0.16s ease !important;
+}
+
+.quiz-builder .subject-toggle:hover {
+  transform: translateY(-1px) !important;
+
+  border-color: rgba(16, 35, 29, 0.27) !important;
+
+  box-shadow:
+    0 5px 14px rgba(16, 35, 29, 0.06) !important;
+}
+
+.quiz-builder .subject-toggle.active {
+  background: #10231d !important;
+  border-color: #10231d !important;
+  color: #ffffff !important;
+
+  box-shadow:
+    0 6px 16px rgba(16, 35, 29, 0.13) !important;
+}
+
+
+/* icon */
+
+.subject-toggle-mark {
+  width: 28px !important;
+  height: 28px !important;
+  min-width: 28px !important;
+
+  flex: 0 0 28px !important;
+
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  border-radius: 8px !important;
+
+  background: rgba(16, 35, 29, 0.065) !important;
+}
+
+.subject-toggle.active .subject-toggle-mark {
+  background: rgba(255, 255, 255, 0.14) !important;
+}
+
+
+/* text */
+
+.subject-toggle > span:last-child {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+
+  font-size: 10.5px !important;
+  line-height: 1.35 !important;
+  font-weight: 750 !important;
+
+  overflow-wrap: anywhere !important;
+}
+
+
+/* =========================================================
+   19. GENERATE ROW
+   ========================================================= */
 
 .quiz-builder-submit-row {
   width: 100% !important;
@@ -13212,57 +13889,259 @@ textarea { min-height: 108px; }
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
-  gap: 20px !important;
 
-  padding-top: 3px !important;
+  gap: 18px !important;
 }
 
 .quiz-builder-note {
   flex: 1 1 auto !important;
   min-width: 0 !important;
+
+  font-size: 10.5px !important;
+  line-height: 1.5 !important;
 }
 
 .quiz-builder-submit-row .button {
   flex: 0 0 auto !important;
 
-  min-height: 46px !important;
-
-  white-space: nowrap !important;
-}
-
-
-/* =========================================================
-   BUTTON SAFETY
-   ========================================================= */
-
-.quiz-builder .button {
-  max-width: 100% !important;
+  min-height: 44px !important;
 
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
   gap: 8px !important;
 
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-}
-
-.quiz-builder .button svg {
-  flex: 0 0 auto !important;
+  white-space: nowrap !important;
 }
 
 
 /* =========================================================
-   LARGE LAPTOP
-   1200px
+   20. QUIZ HISTORY CARD
+   ========================================================= */
+
+.quiz-history-card {
+  width: 100% !important;
+  max-width: 100% !important;
+
+  margin-top: 22px !important;
+
+  padding: clamp(18px, 2.5vw, 30px) !important;
+
+  overflow: hidden !important;
+}
+
+.quiz-history-card > .section-heading {
+  width: 100% !important;
+
+  display: flex !important;
+  align-items: flex-end !important;
+  justify-content: space-between !important;
+
+  gap: 18px !important;
+}
+
+.quiz-history-card h3 {
+  margin: 5px 0 0 !important;
+
+  font-size: clamp(18px, 1.8vw, 23px) !important;
+  line-height: 1.2 !important;
+}
+
+.quiz-history-card > .section-heading > .muted {
+  font-size: 10.5px !important;
+}
+
+
+/* =========================================================
+   21. HISTORY CONTROLS
+   ========================================================= */
+
+.history-controls {
+  width: 100% !important;
+
+  margin-top: 16px !important;
+
+  display: grid !important;
+
+  grid-template-columns:
+    minmax(0, 1fr)
+    minmax(170px, 220px) !important;
+
+  gap: 10px !important;
+}
+
+.history-search {
+  position: relative !important;
+
+  width: 100% !important;
+}
+
+.history-search svg {
+  position: absolute !important;
+
+  left: 12px !important;
+  top: 50% !important;
+
+  transform: translateY(-50%) !important;
+
+  pointer-events: none !important;
+
+  opacity: 0.55 !important;
+}
+
+.history-search input {
+  width: 100% !important;
+
+  padding-left: 36px !important;
+}
+
+.history-controls > select {
+  width: 100% !important;
+}
+
+
+/* =========================================================
+   22. HISTORY ROW
+   ========================================================= */
+
+.history-row {
+  width: 100% !important;
+
+  margin-top: 10px !important;
+  padding: 16px !important;
+
+  display: grid !important;
+
+  grid-template-columns:
+    minmax(0, 0.9fr)
+    minmax(0, 1.6fr) !important;
+
+  gap: 20px !important;
+
+  border: 1px solid rgba(16, 35, 29, 0.09) !important;
+  border-radius: 13px !important;
+
+  background: #ffffff !important;
+}
+
+.history-row > div:first-child {
+  min-width: 0 !important;
+}
+
+.history-title {
+  display: block !important;
+
+  font-size: 13px !important;
+  line-height: 1.35 !important;
+  font-weight: 800 !important;
+
+  overflow-wrap: anywhere !important;
+}
+
+.history-support {
+  margin-top: 8px !important;
+
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+
+  gap: 6px 10px !important;
+}
+
+.history-support b {
+  font-size: 17px !important;
+  line-height: 1 !important;
+}
+
+.history-support small,
+.history-strength,
+.history-topic-percentages {
+  font-size: 10px !important;
+  line-height: 1.45 !important;
+}
+
+.history-strength,
+.history-topic-percentages {
+  display: block !important;
+  margin-top: 6px !important;
+}
+
+
+/* =========================================================
+   23. REPORT
+   ========================================================= */
+
+.history-report {
+  min-width: 0 !important;
+
+  display: flex !important;
+  flex-direction: column !important;
+
+  gap: 10px !important;
+}
+
+.history-report details {
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+.history-report summary {
+  width: 100% !important;
+
+  padding: 9px 11px !important;
+
+  border-radius: 8px !important;
+
+  background: rgba(16, 35, 29, 0.055) !important;
+
+  font-size: 11px !important;
+  font-weight: 800 !important;
+
+  cursor: pointer !important;
+}
+
+.history-report details p {
+  margin: 10px 0 0 !important;
+
+  max-width: 100% !important;
+
+  font-size: 10.5px !important;
+  line-height: 1.65 !important;
+
+  overflow-wrap: anywhere !important;
+  word-break: normal !important;
+}
+
+.history-report details small {
+  display: block !important;
+
+  margin-top: 9px !important;
+
+  font-size: 9.5px !important;
+  line-height: 1.45 !important;
+}
+
+.history-report .button {
+  align-self: flex-start !important;
+
+  max-width: 100% !important;
+
+  min-height: 36px !important;
+
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 7px !important;
+
+  font-size: 10px !important;
+}
+
+
+/* =========================================================
+   24. 1200px
    ========================================================= */
 
 @media (max-width: 1200px) {
-
-  .quiz-builder-card {
-    max-width: 100% !important;
-    padding: 24px !important;
-  }
 
   .quiz-builder-primary {
     grid-template-columns:
@@ -13276,19 +14155,23 @@ textarea { min-height: 108px; }
     grid-template-columns:
       repeat(3, minmax(0, 1fr)) !important;
   }
+
+  .history-row {
+    grid-template-columns:
+      minmax(0, 0.85fr)
+      minmax(0, 1.5fr) !important;
+  }
 }
 
 
 /* =========================================================
-   LAPTOP / SMALL DESKTOP
-   1024px
+   1024px — LAPTOP / SMALL TABLET
    ========================================================= */
 
 @media (max-width: 1024px) {
 
-  .quiz-builder-card {
-    padding: 21px !important;
-    gap: 22px !important;
+  .quiz-page-heading {
+    align-items: flex-start !important;
   }
 
   .quiz-builder-primary {
@@ -13306,148 +14189,91 @@ textarea { min-height: 108px; }
     grid-template-columns:
       repeat(2, minmax(0, 1fr)) !important;
   }
+
+  .history-row {
+    grid-template-columns:
+      minmax(0, 1fr) !important;
+  }
 }
 
 
 /* =========================================================
-   TABLET / iPAD
-   768px
+   768px — iPAD / TABLET
    ========================================================= */
 
 @media (max-width: 768px) {
 
-  .quiz-builder-card {
-    padding: 18px !important;
-    gap: 18px !important;
-  }
-
-  .quiz-builder-head {
+  .quiz-page-heading {
+    flex-direction: column !important;
+    align-items: stretch !important;
     gap: 12px !important;
   }
 
-  .quiz-builder-head > svg {
-    width: 21px !important;
-    height: 21px !important;
+  .quiz-page-heading-meta {
+    align-self: flex-start !important;
+  }
+
+  .active-tests-section {
+    padding: 16px !important;
+  }
+
+  .active-tests-section .section-heading {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 7px !important;
+  }
+
+  .quiz-builder.quiz-builder-card,
+  .quiz-history-card {
+    padding: 18px !important;
   }
 
   .quiz-builder-primary {
     grid-template-columns:
       minmax(0, 1fr) !important;
-
-    gap: 12px !important;
   }
 
   .quiz-filter-section > .section-heading.compact {
     grid-template-columns:
       minmax(0, 1fr) !important;
 
-    gap: 13px !important;
-    align-items: stretch !important;
-  }
-
-  .quiz-filter-section > .section-heading.compact > label {
-    width: 100% !important;
+    gap: 12px !important;
   }
 
   .subject-toggle-grid {
     grid-template-columns:
       repeat(2, minmax(0, 1fr)) !important;
-
-    gap: 8px !important;
   }
 
   .quiz-builder-submit-row {
     flex-direction: column !important;
     align-items: stretch !important;
-    gap: 12px !important;
   }
 
   .quiz-builder-submit-row .button {
     width: 100% !important;
   }
 
-  .quiz-builder-note {
-    width: 100% !important;
+  .history-controls {
+    grid-template-columns:
+      minmax(0, 1fr) !important;
   }
 }
 
 
 /* =========================================================
-   MOBILE
-   600px
+   600px — MOBILE
    ========================================================= */
 
 @media (max-width: 600px) {
 
-  .quiz-builder-card {
-    width: 100% !important;
-    padding: 15px !important;
-
-    border-radius: 15px !important;
-
-    gap: 16px !important;
+  .quiz-page-heading h2 {
+    font-size: 22px !important;
   }
 
-  .quiz-builder-head h3 {
-    font-size: 20px !important;
-  }
-
-  .quiz-builder .eyebrow {
-    font-size: 9px !important;
-  }
-
-  .quiz-filter-section {
+  .quiz-builder.quiz-builder-card,
+  .quiz-history-card {
     padding: 14px !important;
-    border-radius: 13px !important;
-  }
-
-  .quiz-builder input,
-  .quiz-builder select {
-    height: 44px !important;
-    min-height: 44px !important;
-
-    font-size: 13px !important;
-  }
-
-  .subject-toggle-grid {
-    grid-template-columns:
-      minmax(0, 1fr) !important;
-
-    gap: 7px !important;
-  }
-
-  .quiz-builder .subject-toggle {
-    min-height: 48px !important;
-  }
-
-  .subject-toggle > span:last-child {
-    font-size: 12px !important;
-  }
-
-  .subject-area-heading {
-    align-items: flex-start !important;
-  }
-
-  .subject-area-count {
-    margin-top: 1px !important;
-  }
-}
-
-
-/* =========================================================
-   SMALL MOBILE
-   420px
-   ========================================================= */
-
-@media (max-width: 420px) {
-
-  .quiz-builder-card {
-    padding: 12px !important;
-    gap: 14px !important;
-  }
-
-  .quiz-filter-section {
-    padding: 12px !important;
   }
 
   .quiz-builder-head {
@@ -13455,8 +14281,63 @@ textarea { min-height: 108px; }
   }
 
   .quiz-builder-head > svg {
-    width: 19px !important;
-    height: 19px !important;
+    width: 20px !important;
+    height: 20px !important;
+  }
+
+  .quiz-filter-section {
+    padding: 13px !important;
+    border-radius: 12px !important;
+  }
+
+  .subject-toggle-grid {
+    grid-template-columns:
+      minmax(0, 1fr) !important;
+  }
+
+  .subject-toggle {
+    min-height: 48px !important;
+  }
+
+  .subject-toggle > span:last-child {
+    font-size: 11px !important;
+  }
+
+  .subject-area-heading {
+    align-items: flex-start !important;
+  }
+
+  .history-row {
+    padding: 13px !important;
+  }
+
+  .history-report .button {
+    width: 100% !important;
+  }
+}
+
+
+/* =========================================================
+   420px — SMALL PHONE
+   ========================================================= */
+
+@media (max-width: 420px) {
+
+  .quiz-page {
+    width: 100% !important;
+  }
+
+  .quiz-builder.quiz-builder-card,
+  .quiz-history-card {
+    padding: 11px !important;
+  }
+
+  .active-tests-section {
+    padding: 13px !important;
+  }
+
+  .quiz-builder-head h3 {
+    font-size: 19px !important;
   }
 
   .quiz-builder input,
@@ -13464,62 +14345,11 @@ textarea { min-height: 108px; }
     height: 43px !important;
     min-height: 43px !important;
 
-    padding-left: 11px !important;
-    padding-right: 11px !important;
-
-    font-size: 12px !important;
+    font-size: 11.5px !important;
   }
 
   .quiz-builder .filter-chip {
-    min-height: 30px !important;
-    padding: 5px 9px !important;
     font-size: 10px !important;
-  }
-
-  .quiz-builder .subject-toggle {
-    padding: 8px !important;
-  }
-
-  .subject-toggle-mark {
-    width: 27px !important;
-    height: 27px !important;
-    min-width: 27px !important;
-    flex-basis: 27px !important;
-  }
-
-  .subject-toggle > span:last-child {
-    font-size: 11px !important;
-  }
-
-  .quiz-builder-submit-row .button {
-    min-height: 44px !important;
-    width: 100% !important;
-  }
-}
-
-
-/* =========================================================
-   VERY SMALL PHONES
-   360px
-   ========================================================= */
-
-@media (max-width: 360px) {
-
-  .quiz-builder-card {
-    padding: 10px !important;
-  }
-
-  .quiz-filter-section {
-    padding: 10px !important;
-  }
-
-  .quiz-builder-head h3 {
-    font-size: 18px !important;
-  }
-
-  .quiz-builder input,
-  .quiz-builder select {
-    font-size: 11px !important;
   }
 
   .subject-area-heading {
@@ -13531,46 +14361,42 @@ textarea { min-height: 108px; }
   .subject-area-count {
     align-self: flex-start !important;
   }
+
+  .history-support {
+    gap: 5px 8px !important;
+  }
 }
 
 
 /* =========================================================
-   EXTRA OVERFLOW PROTECTION
+   360px — VERY SMALL PHONE
    ========================================================= */
 
-.quiz-builder h1,
-.quiz-builder h2,
-.quiz-builder h3,
-.quiz-builder h4,
-.quiz-builder p,
-.quiz-builder small,
-.quiz-builder span,
-.quiz-builder label,
-.quiz-builder button {
-  max-width: 100% !important;
-  overflow-wrap: anywhere !important;
-}
+@media (max-width: 360px) {
 
-.quiz-builder button,
-.quiz-builder input,
-.quiz-builder select {
-  max-inline-size: 100% !important;
-}
+  .quiz-builder.quiz-builder-card,
+  .quiz-history-card {
+    padding: 9px !important;
+  }
 
-.quiz-builder svg {
-  max-width: 100% !important;
-  flex-shrink: 0 !important;
-}
+  .quiz-filter-section {
+    padding: 10px !important;
+  }
 
+  .quiz-builder-head h3 {
+    font-size: 18px !important;
+  }
 
-/* Prevent accidental horizontal page scrolling from this component */
+  .quiz-page-heading h2 {
+    font-size: 20px !important;
+  }
 
-.quiz-builder {
-  overflow-x: clip !important;
-}
+  .quiz-builder input,
+  .quiz-builder select {
+    font-size: 11px !important;
+  }
 
-@supports not (overflow: clip) {
-  .quiz-builder {
-    overflow-x: hidden !important;
+  .topic-picker-trigger {
+    font-size: 11px !important;
   }
 }
