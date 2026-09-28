@@ -580,7 +580,7 @@ function PremiumPaywall({
             ? "Opening payment…"
             : access.mock_mode
               ? "Complete mock payment"
-                : `Unlock ${feature === "mock" ? "mock tests" : "Question Archive"} · ${access.currency} ${((feature === "mock" ? access.mock_test_price_paise : pricePaise ?? access.premium_price_paise) / 100).toLocaleString("en-IN")}`}
+                : `Unlock ${feature === "mock" ? "mock tests" : "Question Archive"} · ${access.currency} ${((feature === "mock" ? access.mock_test_price_paise : pricePaise ?? 39900) / 100).toLocaleString("en-IN")}`}
         </button>
       )}
       {error && <small>{error}</small>}
