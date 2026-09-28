@@ -7494,6 +7494,7 @@ function QuestionBankPage({ user }: { user: User | null }) {
   const [yearFilter, setYearFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
+  const [showArchivePaywall, setShowArchivePaywall] = useState(false);
   const [expandedYears, setExpandedYears] = useState<Record<string, boolean>>({});
   const load = () => {
     setLoading(true);
@@ -7704,6 +7705,9 @@ function QuestionBankPage({ user }: { user: User | null }) {
         </div>
       ) : (
         <>
+          {showArchivePaywall && (
+            <PremiumPaywall access={access} feature="library" onPaid={async () => { setShowArchivePaywall(false); load(); }} />
+          )}
           <div className="archive-toolbar">
             <label className="archive-search">
               <span className="archive-search-icon">
@@ -7807,6 +7811,7 @@ function QuestionBankPage({ user }: { user: User | null }) {
                         {group.filteredFiles.map((file) => {
                           const fileType = getLibraryFileType(file.name);
                           const category = getLibraryCategory(file);
+                          const locked = file.free_access === false;
                           return (
                             <article className="archive-file" key={file.id}>
                               <span className={`archive-file-icon ${file.is_answer_key ? "answer-key" : ""}`}>
@@ -7828,7 +7833,11 @@ function QuestionBankPage({ user }: { user: User | null }) {
                                 </div>
                               </div>
                               <div className="archive-file-actions">
-                                {file.is_question_file && (
+                                {locked ? (
+                                  <button className="button button-small" type="button" onClick={() => setShowArchivePaywall(true)}>
+                                    Unlock for ₹399
+                                  </button>
+                                ) : file.is_question_file && (
                                   <button
                                     className="button button-small"
                                     type="button"
@@ -7842,20 +7851,20 @@ function QuestionBankPage({ user }: { user: User | null }) {
                                         : "Preview"}
                                   </button>
                                 )}
-                                <button
+                                {!locked && <button
                                   className="button button-small button-lime"
                                   type="button"
                                   onClick={() => void downloadQuestionFile(file)}
                                 >
                                   Download <Download size={12} />
-                                </button>
-                                <button
+                                </button>}
+                                {!locked && <button
                                   className="button button-small button-outline"
                                   type="button"
                                   onClick={() => void openQuestionInDrive(file)}
                                 >
                                   Open in Drive <ExternalLink size={12} />
-                                </button>
+                                </button>}
                               </div>
                               {preview?.file.id === file.id && (
                                 <div className="question-preview">
