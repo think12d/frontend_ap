@@ -527,10 +527,14 @@ function PremiumPaywall({
   access,
   feature,
   onPaid,
+  orderBody,
+  pricePaise,
 }: {
   access: PremiumAccess | null;
   feature: "mock" | "live" | "recorded" | "library";
   onPaid: () => Promise<void> | void;
+  orderBody?: Record<string, unknown>;
+  pricePaise?: number;
 }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -548,7 +552,7 @@ function PremiumPaywall({
         setBusy(false);
         setError(message);
       },
-      feature === "mock" ? { product: "mock_test_unlimited_access" } : {},
+      orderBody || (feature === "mock" ? { product: "mock_test_unlimited_access" } : {}),
     );
   };
   return (
@@ -558,7 +562,7 @@ function PremiumPaywall({
         {freeAvailable
           ? "Use your remaining free mock tests before choosing unlimited access."
           : feature === "library"
-            ? "The question archive and recorded classes unlock after a successful paid course enrollment or premium payment."
+            ? `The question archive unlocks after payment${pricePaise ? ` of ₹${(pricePaise / 100).toLocaleString("en-IN")}` : ""}.`
             : feature === "recorded"
               ? "Recorded classes are available after a successful paid course enrollment or premium payment."
               : "Your free mock-test attempts are used. One successful payment unlocks unlimited mock-test access."}
@@ -7706,7 +7710,7 @@ function QuestionBankPage({ user }: { user: User | null }) {
       ) : (
         <>
           {showArchivePaywall && (
-            <PremiumPaywall access={access} feature="library" onPaid={async () => { setShowArchivePaywall(false); load(); }} />
+            <PremiumPaywall access={access} feature="library" pricePaise={library?.price_paise} orderBody={{ question_archive_access: true }} onPaid={async () => { setShowArchivePaywall(false); load(); }} />
           )}
           <div className="archive-toolbar">
             <label className="archive-search">
