@@ -17,6 +17,7 @@ import {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
+  ChevronUp,
   Clock3,
   Download,
   Eye,
@@ -81,7 +82,6 @@ import type {
   PaginatedCourseListResponse,
   PaymentReceipt,
   PremiumAccess,
-  QuestionArchivePaper,
   QuestionLibrary,
   QuestionLibraryFile,
   Quiz,
@@ -97,7 +97,7 @@ import type {
 import AdminLiveDashboard from "./components/AdminLiveDashboard";
 import LiveClassCard from "./components/LiveClassCard";
 import LiveClassRoomPanel from "./components/LiveClassRoomPanel";
-import RecordingCard from "./components/RecordingCard";
+import RecordingCard, { AdminRecordedVideosPage as RecordedVideosAdminPage } from "./components/RecordingCard";
 import ResourceMedia from "./components/ResourceMedia";
 import { NotificationProvider, useNotifications } from "./notifications";
 
@@ -165,186 +165,7 @@ function readQuizDraft(user: User | null): QuizDraftState | null {
     return null;
   }
 }
-function MetricRow({
-  items,
-}: {
-  items: { icon: ReactNode; value: string; label: string }[];
-}) {
-  const sectionRef = useRef<HTMLDivElement | null>(null);
-  const [visible, setVisible] = useState(false);
 
-  useEffect(() => {
-    const node = sectionRef.current;
-    if (!node) return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setVisible(true);
-            observer.disconnect();
-          }
-        });
-      },
-      { threshold: 0.2 },
-    );
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, []);
-
-  return (
-    <div
-      className={`metric-row-premium ${visible ? "is-visible" : ""}`}
-      ref={sectionRef}
-    >
-      <style>{`
-        .metric-row-premium {
-          display: grid;
-          grid-template-columns: repeat(4, 1fr);
-          gap: 18px;
-          margin: 28px 0;
-        }
-        @media (max-width: 900px) {
-          .metric-row-premium {
-            grid-template-columns: repeat(2, 1fr);
-            gap: 14px;
-          }
-        }
-        @media (max-width: 480px) {
-          .metric-row-premium {
-            grid-template-columns: 1fr;
-            gap: 12px;
-          }
-        }
-.metric-card-premium {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;   /* icon stays left, text pushes right */
-  gap: 16px;
-  padding: 22px 24px;
-  border-radius: 18px;
-  overflow: hidden;
-  isolation: isolate;
-  background: linear-gradient(155deg, #0c2a27 0%, #103a35 55%, #0c2a27 100%);
-  border: 1px solid rgba(41,230,201,0.18);
-  box-shadow: 0 10px 28px rgba(4,16,15,0.25);
-  opacity: 0;
-  transform: translateY(20px);
-  transition: transform 0.35s cubic-bezier(0.16,1,0.3,1), box-shadow 0.35s ease, border-color 0.35s ease;
-}
-
-.metric-copy-premium {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;   /* right-align the value + label */
-  gap: 3px;
-  min-width: 0;
-  text-align: right;
-}
-        .metric-card-premium::before {
-          content: "";
-          position: absolute;
-          inset: 0;
-          z-index: -1;
-          background: radial-gradient(circle at 85% 15%, rgba(31,182,168,0.35), transparent 55%);
-          opacity: 0.8;
-        }
-
-        .metric-row-premium.is-visible .metric-card-premium {
-          animation: metricPremiumIn 0.65s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-        .metric-row-premium.is-visible .metric-card-premium:nth-child(1) { animation-delay: 0.05s; }
-        .metric-row-premium.is-visible .metric-card-premium:nth-child(2) { animation-delay: 0.15s; }
-        .metric-row-premium.is-visible .metric-card-premium:nth-child(3) { animation-delay: 0.25s; }
-        .metric-row-premium.is-visible .metric-card-premium:nth-child(4) { animation-delay: 0.35s; }
-
-        @keyframes metricPremiumIn {
-          0% { opacity: 0; transform: translateY(20px); }
-          100% { opacity: 1; transform: translateY(0); }
-        }
-
-        .metric-card-premium:hover {
-          transform: translateY(-6px);
-          box-shadow: 0 20px 40px rgba(4,16,15,0.4), 0 0 0 1px rgba(41,230,201,0.3);
-          border-color: rgba(41,230,201,0.4);
-        }
-
-        .metric-icon-premium {
-          flex-shrink: 0;
-          position: relative;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          width: 50px;
-          height: 50px;
-          border-radius: 14px;
-          background: linear-gradient(135deg, #1fb6a8, #29e6c9);
-          color: #06231f;
-          box-shadow: 0 8px 20px rgba(31,182,168,0.45);
-        }
-
-        .metric-icon-premium::after {
-          content: "";
-          position: absolute;
-          inset: -6px;
-          border-radius: 18px;
-          border: 1px solid rgba(41,230,201,0.3);
-          opacity: 0;
-          transition: opacity 0.3s ease, inset 0.3s ease;
-        }
-        .metric-card-premium:hover .metric-icon-premium::after {
-          opacity: 1;
-          inset: -9px;
-        }
-
-        
-
-.metric-copy-premium b {
-  font-size: clamp(18px, 2.2vw, 23px);
-  line-height: 1.1;
-  color: #fff;
-  font-weight: 800;
-  letter-spacing: -0.01em;
-}
-
-.metric-copy-premium small {
-  font-size: 12.5px;
-  color: rgba(255,255,255,0.6);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-        @media (max-width: 480px) {
-          .metric-card-premium {
-            padding: 16px 18px;
-          }
-          .metric-icon-premium {
-            width: 44px;
-            height: 44px;
-          }
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-          .metric-card-premium {
-            animation: none !important;
-            opacity: 1 !important;
-            transform: none !important;
-          }
-        }
-      `}</style>
-
-      {items.map((item, index) => (
-        <div className="metric-card-premium" key={index}>
-          <span className="metric-icon-premium">{item.icon}</span>
-          <div className="metric-copy-premium">
-            <b>{item.value}</b>
-            <small>{item.label}</small>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
 function persistQuizDraft(user: User | null, draft: QuizDraftState | null): void {
   if (typeof window === "undefined") return;
   const key = quizDraftKey(user);
@@ -527,14 +348,10 @@ function PremiumPaywall({
   access,
   feature,
   onPaid,
-  orderBody,
-  pricePaise,
 }: {
   access: PremiumAccess | null;
   feature: "mock" | "live" | "recorded" | "library";
   onPaid: () => Promise<void> | void;
-  orderBody?: Record<string, unknown>;
-  pricePaise?: number;
 }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -552,7 +369,7 @@ function PremiumPaywall({
         setBusy(false);
         setError(message);
       },
-      orderBody || (feature === "mock" ? { product: "mock_test_unlimited_access" } : {}),
+      feature === "mock" ? { product: "mock_test_unlimited_access" } : {},
     );
   };
   return (
@@ -562,7 +379,7 @@ function PremiumPaywall({
         {freeAvailable
           ? "Use your remaining free mock tests before choosing unlimited access."
           : feature === "library"
-            ? `The question archive unlocks after payment${pricePaise ? ` of ₹${(pricePaise / 100).toLocaleString("en-IN")}` : ""}.`
+            ? "The question archive and recorded classes unlock after a successful paid course enrollment or premium payment."
             : feature === "recorded"
               ? "Recorded classes are available after a successful paid course enrollment or premium payment."
               : "Your free mock-test attempts are used. One successful payment unlocks unlimited mock-test access."}
@@ -580,7 +397,7 @@ function PremiumPaywall({
             ? "Opening payment…"
             : access.mock_mode
               ? "Complete mock payment"
-                : `Unlock ${feature === "mock" ? "mock tests" : "Question Archive"} · ${access.currency} ${((feature === "mock" ? access.mock_test_price_paise : pricePaise ?? 39900) / 100).toLocaleString("en-IN")}`}
+                : `Unlock ${feature === "mock" ? "mock tests" : "premium"} · ${access.currency} ${((feature === "mock" ? access.mock_test_price_paise : access.premium_price_paise) / 100).toLocaleString("en-IN")}`}
         </button>
       )}
       {error && <small>{error}</small>}
@@ -722,7 +539,7 @@ function AppContent() {
         <Route path="/admin/user-access" element={<AdminUserAccessPage user={user} />} />
         <Route path="/admin/user-access/:userId" element={<AdminUserAccessDetailPage user={user} />} />
         <Route path="/admin/live" element={<UnifiedAdminLivePage user={user} />} />
-        <Route path="/admin/recorded-videos" element={<AdminRecordedVideosPage user={user} />} />
+               <Route path="/admin/recorded-videos" element={<RecordedVideosAdminPage user={user} />} />
       </Route>
       <Route path="*" element={<Navigate to="/admin/login" replace />} />
     </Routes>
@@ -753,7 +570,6 @@ function AppContent() {
           <Route path="/jrf-strategy" element={<JRFStrategyBuilder user={user} />} />
           <Route path="/mock-tests" element={<MockTests user={user} />} />
           <Route path="/question-bank" element={<QuestionBankPage user={user} />} />
-          <Route path="/question-archive" element={<QuestionBankPage user={user} />} />
           <Route path="/recorded-classes" element={<RecordedVideoLibraryPage user={user} />} />
           <Route path="/live" element={<UnifiedLivePage user={user} />} />
           <Route path="/live/:liveClassId" element={<FullLiveClassPage user={user} />} />
@@ -1720,7 +1536,7 @@ function LearnerShell({
         <Link className="brand" to="/">
           <span className="brand-mark">
             <img
-              src="/assets/logo.png"
+              src="assets/logo.png"
               alt="JRF HUNTERS"
               style={{ width: 34, height: 34, borderRadius: 10 }}
               onError={(e) => {
@@ -1730,7 +1546,7 @@ function LearnerShell({
           </span>
           <span>
             <strong>JRF HUNTERS</strong>
-            <small>Beyond Limits</small>
+            <small>learning studio</small>
           </span>
         </Link>
 
@@ -1764,7 +1580,7 @@ function LearnerShell({
                 onClick={() => setProfileOpen((value) => !value)}
                 title="Account menu"
               >
-                <span className="avatar">{user.full_name.slice(0, 1).toUpperCase()}</span>
+                <span className="avatar"></span>
                 <span>{user.full_name.split(" ")[0]}</span>
                 <ChevronDown size={14} />
               </button>
@@ -1824,8 +1640,8 @@ function AdminShell({
       <aside className={`admin-sidebar ${sidebarOpen ? "is-open" : ""}`}>
         <Link className="admin-brand" to="/admin">
           <span className="admin-brand-mark">
-            <ShieldCheck size={18} />
-          </span>
+  <img src="/assets/logo.png" alt="JRF Hunters" />
+</span>
           <span>
             <strong>JRF HUNTERS</strong>
             <small>admin console</small>
@@ -1857,7 +1673,7 @@ function AdminShell({
         <div className="admin-sidebar-bottom">
           <div className="admin-user">
             <span className="avatar">
-              {user.full_name.slice(0, 1).toUpperCase()}
+              
             </span>
             <span>
               <b>{user.full_name}</b>
@@ -1908,121 +1724,597 @@ function AdminUserAccessPage({ user }: { user: User | null }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  // Filters
+  const [courseFilter, setCourseFilter] = useState("all");
+  const [accessFilter, setAccessFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
+
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const rowsPerPage = 10;
+
   useEffect(() => {
     if (!user) return;
+
     let active = true;
+
     const load = async () => {
       setLoading(true);
       setError("");
+
       try {
-        const response = await api<{ items: any[]; total: number }>('/admin/user-access');
-        if (active) setRows(response.items || []);
+        const response = await api<{
+          items: any[];
+          total: number;
+        }>("/admin/user-access");
+
+        if (active) {
+          setRows(response.items || []);
+        }
       } catch (cause) {
         if (!active) return;
-        setError((cause as Error).message || 'Unable to load user access records.');
+
+        setError(
+          (cause as Error).message ||
+            "Unable to load user access records."
+        );
       } finally {
-        if (active) setLoading(false);
+        if (active) {
+          setLoading(false);
+        }
       }
     };
+
     void load();
-    return () => { active = false; };
+
+    return () => {
+      active = false;
+    };
   }, [user?.id]);
 
-  if (!user || user.role !== 'admin') return <Navigate to="/admin/login" replace />;
+  /*
+   * Reset pagination whenever search/filter changes.
+   */
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [query, courseFilter, accessFilter, statusFilter]);
 
+  if (!user || user.role !== "admin") {
+    return <Navigate to="/admin/login" replace />;
+  }
+
+  /*
+   * Safely get course access records.
+   */
+  const getCourseAccess = (row: any) => {
+    return Array.isArray(row.course_access)
+      ? row.course_access
+      : [];
+  };
+
+  /*
+   * Build course filter options from loaded users.
+   */
+  const courseOptions = Array.from(
+    new Map(
+      rows
+        .flatMap((row) => getCourseAccess(row))
+        .filter(
+          (course: any) =>
+            course &&
+            course.course_id !== undefined &&
+            course.course_id !== null
+        )
+        .map((course: any) => [
+          String(course.course_id),
+          course.course_title ||
+            `Course #${course.course_id}`,
+        ])
+    ).entries()
+  );
+
+  /*
+   * Search + filters.
+   */
   const filtered = rows.filter((row) => {
-    if (!query.trim()) return true;
-    const term = query.toLowerCase();
-    return row.full_name.toLowerCase().includes(term) || row.email.toLowerCase().includes(term);
+    const courseAccess = getCourseAccess(row);
+
+    /*
+     * SEARCH
+     */
+    const term = query.trim().toLowerCase();
+
+    const matchesSearch =
+      !term ||
+      String(row.full_name || "")
+        .toLowerCase()
+        .includes(term) ||
+      String(row.email || "")
+        .toLowerCase()
+        .includes(term);
+
+    if (!matchesSearch) {
+      return false;
+    }
+
+    /*
+     * COURSE FILTER
+     */
+    const matchesCourse =
+      courseFilter === "all" ||
+      courseAccess.some(
+        (course: any) =>
+          String(course.course_id) ===
+          String(courseFilter)
+      );
+
+    if (!matchesCourse) {
+      return false;
+    }
+
+    /*
+     * ACCESS FILTER
+     */
+    let matchesAccess = true;
+
+    if (accessFilter === "paid") {
+      matchesAccess = courseAccess.some(
+        (course: any) =>
+          course.access_type === "paid"
+      );
+    }
+
+    if (accessFilter === "manual") {
+      matchesAccess = courseAccess.some(
+        (course: any) =>
+          course.access_type === "manual"
+      );
+    }
+
+    if (accessFilter === "none") {
+      matchesAccess = courseAccess.length === 0;
+    }
+
+    if (!matchesAccess) {
+      return false;
+    }
+
+    /*
+     * STATUS FILTER
+     */
+    const hasActiveAccess = courseAccess.some(
+      (course: any) => course.is_active === true
+    );
+
+    let matchesStatus = true;
+
+    if (statusFilter === "active") {
+      matchesStatus = hasActiveAccess;
+    }
+
+    if (statusFilter === "inactive") {
+      matchesStatus = !hasActiveAccess;
+    }
+
+    if (!matchesStatus) {
+      return false;
+    }
+
+    return true;
   });
+
+  /*
+   * PAGINATION
+   */
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filtered.length / rowsPerPage)
+  );
+
+  const safeCurrentPage = Math.min(
+    currentPage,
+    totalPages
+  );
+
+  const startIndex =
+    (safeCurrentPage - 1) * rowsPerPage;
+
+  const endIndex = Math.min(
+    startIndex + rowsPerPage,
+    filtered.length
+  );
+
+  const paginatedRows = filtered.slice(
+    startIndex,
+    endIndex
+  );
+
+  /*
+   * Page numbers.
+   */
+  const pageNumbers = Array.from(
+    { length: totalPages },
+    (_, index) => index + 1
+  );
+
+  /*
+   * If a filter/search reduces the number of pages,
+   * keep the current page valid.
+   */
+  useEffect(() => {
+    if (
+      currentPage !== safeCurrentPage
+    ) {
+      setCurrentPage(safeCurrentPage);
+    }
+  }, [currentPage, safeCurrentPage]);
 
   return (
     <div className="admin-access-shell page-shell">
       <div className="admin-access-header">
         <div>
-          <span className="eyebrow">ADMIN ACCESS</span>
+          <span className="eyebrow">
+            ADMIN ACCESS
+          </span>
+
           <h1>User Access</h1>
-          <p className="muted">Manage users, course permissions and manual access.</p>
+
+          <p className="muted">
+            Manage users, course permissions and manual access.
+          </p>
         </div>
       </div>
 
       <div className="admin-access-toolbar panel">
         <div className="admin-toolbar-search">
           <Search size={16} />
-          <input aria-label="Search users" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search name or email" />
+
+          <input
+            aria-label="Search users"
+            value={query}
+            onChange={(event) =>
+              setQuery(event.target.value)
+            }
+            placeholder="Search name or email"
+          />
         </div>
-        <select aria-label="Course filter" defaultValue="all">
-          <option value="all">Course</option>
+
+        {/* COURSE FILTER */}
+        <select
+          aria-label="Course filter"
+          value={courseFilter}
+          onChange={(event) =>
+            setCourseFilter(event.target.value)
+          }
+        >
+          <option value="all">
+            Course
+          </option>
+
+          {courseOptions.map(
+            ([courseId, courseTitle]) => (
+              <option
+                key={courseId}
+                value={courseId}
+              >
+                {courseTitle}
+              </option>
+            )
+          )}
         </select>
-        <select aria-label="Access status filter" defaultValue="all">
-          <option value="all">Access</option>
+
+        {/* ACCESS FILTER */}
+        <select
+          aria-label="Access status filter"
+          value={accessFilter}
+          onChange={(event) =>
+            setAccessFilter(event.target.value)
+          }
+        >
+          <option value="all">
+            Access
+          </option>
+
+          <option value="paid">
+            Paid
+          </option>
+
+          <option value="manual">
+            Manual
+          </option>
+
+          <option value="none">
+            No access
+          </option>
         </select>
-        <select aria-label="Status filter" defaultValue="all">
-          <option value="all">Status</option>
+
+        {/* STATUS FILTER */}
+        <select
+          aria-label="Status filter"
+          value={statusFilter}
+          onChange={(event) =>
+            setStatusFilter(event.target.value)
+          }
+        >
+          <option value="all">
+            Status
+          </option>
+
+          <option value="active">
+            Active
+          </option>
+
+          <option value="inactive">
+            Inactive
+          </option>
         </select>
       </div>
 
-      {error && <div className="notice error-banner"><strong>Unable to load user access</strong><span>{error}</span></div>}
+      {error && (
+        <div className="notice error-banner">
+          <strong>
+            Unable to load user access
+          </strong>
+
+          <span>{error}</span>
+        </div>
+      )}
 
       {loading ? (
-        <div className="empty-state">Loading course access records…</div>
+        <div className="empty-state">
+          Loading course access records…
+        </div>
       ) : filtered.length === 0 ? (
-        <div className="empty-state"><p>No matching user access records found.</p></div>
+        <div className="empty-state">
+          <p>
+            No matching user access records found.
+          </p>
+        </div>
       ) : (
-        <div className="admin-access-table panel">
-          <div className="admin-access-table-head">
-            <span>User</span>
-            <span>Courses</span>
-            <span>Access</span>
-            <span>Last active</span>
-            <span className="admin-access-head-action">Action</span>
+        <>
+          <div className="admin-access-table panel">
+            <div className="admin-access-table-head">
+              <span>User</span>
+              <span>Courses</span>
+              <span>Access</span>
+              <span>Last active</span>
+              <span className="admin-access-head-action">
+                Action
+              </span>
+            </div>
+
+            {paginatedRows.map((row) => {
+              const courseAccess =
+                getCourseAccess(row);
+
+              /*
+               * Prefer an active course for display.
+               * Otherwise use the first available course.
+               */
+              const firstCourse =
+                courseAccess.find(
+                  (course: any) =>
+                    course.is_active === true
+                ) || courseAccess[0];
+
+              /*
+               * Find the latest granted course.
+               */
+              const latestCourse =
+                [...courseAccess].sort(
+                  (a: any, b: any) => {
+                    const aTime = a?.granted_at
+                      ? new Date(
+                          a.granted_at
+                        ).getTime()
+                      : 0;
+
+                    const bTime = b?.granted_at
+                      ? new Date(
+                          b.granted_at
+                        ).getTime()
+                      : 0;
+
+                    return bTime - aTime;
+                  }
+                )[0];
+
+              const lastActive =
+                latestCourse?.granted_at
+                  ? new Date(
+                      latestCourse.granted_at
+                    ).toLocaleString("en-IN", {
+                      day: "numeric",
+                      month: "short",
+                      hour: "numeric",
+                      minute: "2-digit",
+                    })
+                  : "No recent activity";
+
+              const accessLabel = firstCourse
+                ? firstCourse.access_type ===
+                  "manual"
+                  ? "Manual"
+                  : "Paid"
+                : "No access";
+
+              const hasActiveAccess =
+                courseAccess.some(
+                  (course: any) =>
+                    course.is_active === true
+                );
+
+              const statusLabel =
+                hasActiveAccess
+                  ? "Active"
+                  : "Inactive";
+
+              return (
+                <article
+                  key={row.id}
+                  className="admin-access-row"
+                >
+                  <div className="admin-access-user">
+                    <div className="admin-user-avatar tiny">
+                      {String(
+                        row.full_name || "U"
+                      )
+                        .slice(0, 1)
+                        .toUpperCase()}
+                    </div>
+
+                    <div>
+                      <strong>
+                        {row.full_name}
+                      </strong>
+
+                      <small>
+                        {row.email}
+                      </small>
+                    </div>
+                  </div>
+
+                  <div className="admin-access-cell admin-access-course">
+                    <span className="admin-cell-label">
+                      Courses
+                    </span>
+
+                    <strong>
+                      {courseAccess.length}
+                    </strong>
+
+                    <small>
+                      {firstCourse
+                        ? firstCourse.course_title ||
+                          `Course #${firstCourse.course_id}`
+                        : "No course granted"}
+                    </small>
+                  </div>
+
+                  <div className="admin-access-cell admin-access-status">
+                    <span className="admin-cell-label">
+                      Access
+                    </span>
+
+                    <span
+                      className={`status-chip ${
+                        statusLabel === "Active"
+                          ? "status-live"
+                          : "status-archived"
+                      }`}
+                    >
+                      {statusLabel}
+                    </span>
+
+                    <small>
+                      {accessLabel}
+                    </small>
+                  </div>
+
+                  <div className="admin-access-cell admin-access-activity">
+                    <span className="admin-cell-label">
+                      Last active
+                    </span>
+
+                    <strong>
+                      {lastActive}
+                    </strong>
+                  </div>
+
+                  <div className="admin-access-actions">
+                    <Link
+                      className="button button-dark button-small"
+                      to={`/admin/user-access/${row.id}`}
+                    >
+                      Manage access
+                    </Link>
+                  </div>
+                </article>
+              );
+            })}
           </div>
 
-          {filtered.map((row) => {
-            const firstCourse = row.course_access[0];
-            const lastActive = firstCourse?.granted_at ? new Date(firstCourse.granted_at).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' }) : 'No recent activity';
-            const accessLabel = firstCourse ? (firstCourse.access_type === 'manual' ? 'Manual' : 'Paid') : 'No access';
-            const statusLabel = firstCourse && firstCourse.is_active ? 'Active' : 'Inactive';
+          {/* PAGINATION */}
+          <div className="admin-access-pagination">
+            <div className="admin-pagination-info">
+              Showing{" "}
+              <strong>
+                {startIndex + 1}
+              </strong>
+              {"–"}
+              <strong>
+                {endIndex}
+              </strong>{" "}
+              of{" "}
+              <strong>
+                {filtered.length}
+              </strong>{" "}
+              users
+            </div>
 
-            return (
-              <article key={row.id} className="admin-access-row">
-                <div className="admin-access-user">
-                  <div className="admin-user-avatar tiny">{row.full_name.slice(0, 1).toUpperCase()}</div>
-                  <div>
-                    <strong>{row.full_name}</strong>
-                    <small>{row.email}</small>
-                  </div>
-                </div>
+            <div className="admin-pagination-controls">
+              <button
+                type="button"
+                className="button button-ghost button-small"
+                disabled={safeCurrentPage === 1}
+                onClick={() =>
+                  setCurrentPage(
+                    (page) =>
+                      Math.max(1, page - 1)
+                  )
+                }
+              >
+                Previous
+              </button>
 
-                <div className="admin-access-cell admin-access-course">
-                  <span className="admin-cell-label">Courses</span>
-                  <strong>{row.manual_access_count || 0}</strong>
-                  <small>{firstCourse ? (firstCourse.course_title || `Course #${firstCourse.course_id}`) : 'No course granted'}</small>
-                </div>
+              {pageNumbers.map((page) => (
+                <button
+                  key={page}
+                  type="button"
+                  className={`button button-small ${
+                    safeCurrentPage === page
+                      ? "button-dark"
+                      : "button-ghost"
+                  }`}
+                  onClick={() =>
+                    setCurrentPage(page)
+                  }
+                  aria-current={
+                    safeCurrentPage === page
+                      ? "page"
+                      : undefined
+                  }
+                >
+                  {page}
+                </button>
+              ))}
 
-                <div className="admin-access-cell admin-access-status">
-                  <span className="admin-cell-label">Access</span>
-                  <span className={`status-chip ${statusLabel === 'Active' ? 'status-live' : 'status-archived'}`}>{statusLabel}</span>
-                  <small>{accessLabel}</small>
-                </div>
-
-                <div className="admin-access-cell admin-access-activity">
-                  <span className="admin-cell-label">Last active</span>
-                  <strong>{lastActive}</strong>
-                </div>
-
-                <div className="admin-access-actions">
-                  <Link className="button button-dark button-small" to={`/admin/user-access/${row.id}`}>Manage access</Link>
-                </div>
-              </article>
-            );
-          })}
-        </div>
+              <button
+                type="button"
+                className="button button-ghost button-small"
+                disabled={
+                  safeCurrentPage === totalPages
+                }
+                onClick={() =>
+                  setCurrentPage(
+                    (page) =>
+                      Math.min(
+                        totalPages,
+                        page + 1
+                      )
+                  )
+                }
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        </>
       )}
     </div>
   );
 }
-
 function AdminUserAccessDetailPage({ user }: { user: User | null }) {
   const { userId } = useParams();
   const [detail, setDetail] = useState<any>(null);
@@ -2541,264 +2833,64 @@ function Home({ user }: { user: User | null }) {
 
   return (
     <div className="container home-page">
-      <section className="hero-premium">
-        <style>{`
-          .hero-premium {
-            position: relative;
-            border-radius: 28px;
-            overflow: hidden;
-            min-height: 460px;
-            display: flex;
-            align-items: center;
-            padding: 56px 56px;
-            box-sizing: border-box;
-            color: #fff;
-            isolation: isolate;
-          }
-
-          .hero-premium::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -2;
-  background-image: url('/assets/hero_image.png');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  transform: scale(1.06);
-}
-
-          .hero-premium::after {
-            content: "";
-            display: none;
-            position: absolute;
-            inset: 0;
-            z-index: -1;
-            background:
-              radial-gradient(circle at 15% 20%, rgba(31,182,168,0.35), transparent 45%),
-              radial-gradient(circle at 90% 85%, rgba(19,143,156,0.4), transparent 50%),
-              linear-gradient(120deg, rgba(4,16,15,0.88) 0%, rgba(8,28,26,0.72) 45%, rgba(4,16,15,0.9) 100%);
-          }
-
-          .hero-glow-orb {
-          display: none;
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(60px);
-            opacity: 0.5;
-            pointer-events: none;
-            z-index: -1;
-          }
-          .hero-glow-orb.one {
-            width: 260px;
-            height: 260px;
-            top: -60px;
-            right: 8%;
-            background: radial-gradient(circle, #1fb6a8, transparent 70%);
-            animation: heroFloat 8s ease-in-out infinite;
-          }
-          .hero-glow-orb.two {
-            width: 200px;
-            height: 200px;
-            bottom: -40px;
-            left: 6%;
-            background: radial-gradient(circle, #f5b400, transparent 70%);
-            opacity: 0.25;
-            animation: heroFloat 10s ease-in-out infinite reverse;
-          }
-          @keyframes heroFloat {
-            0%, 100% { transform: translateY(0px) translateX(0px); }
-            50% { transform: translateY(-22px) translateX(14px); }
-          }
-
-          .hero-premium-copy {
-            position: relative;
-            z-index: 1;
-            max-width: 640px;
-            width: 100%;
-          }
-
-          .hero-premium-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 16px;
-            border-radius: 999px;
-            background: rgba(255,255,255,0.1);
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(255,255,255,0.22);
-            font-size: 12px;
-            font-weight: 700;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            margin-bottom: 20px;
-          }
-          .hero-premium-badge .dot {
-            width: 7px;
-            height: 7px;
-            border-radius: 50%;
-            background: #29e6c9;
-            box-shadow: 0 0 0 4px rgba(41,230,201,0.25);
-            animation: heroPulseDot 1.8s ease-in-out infinite;
-          }
-          @keyframes heroPulseDot {
-            0%, 100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.4); opacity: 0.6; }
-          }
-
-          .hero-premium h1 {
-            font-size: clamp(30px, 5vw, 52px);
-            line-height: 1.12;
-            margin: 0 0 18px;
-            font-weight: 800;
-            letter-spacing: -0.02em;
-          }
-          .hero-premium h1 em {
-            font-style: normal;
-            background: linear-gradient(120deg, #29e6c9, #7fe8d4 50%, #f5b400);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-          }
-
-          .hero-premium p {
-            font-size: clamp(14px, 1.6vw, 17px);
-            line-height: 1.65;
-            max-width: 520px;
-            color: rgba(255,255,255,0.85);
-            margin: 0 0 28px;
-          }
-
-          .hero-premium-actions {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 14px;
-            justify-content: flex-end;
-          }
-
-          .hero-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 14px 26px;
-  border-radius: 14px;
-  font-weight: 700;
-  font-size: 14.5px;
-  text-decoration: none;
-  border: 1px solid transparent;
-  transition: transform 0.25s cubic-bezier(0.16,1,0.3,1), box-shadow 0.25s ease, background 0.25s ease;
-  white-space: nowrap;
-}
-.hero-btn:active { transform: translateY(-1px) scale(0.98); }
-
-.hero-btn-primary {
-  background: linear-gradient(135deg, #1fb6a8, #29e6c9);
-  color: #06231f;
-  box-shadow: 0 10px 28px rgba(31,182,168,0.45), inset 0 1px 0 rgba(255,255,255,0.4);
-}
-.hero-btn-primary:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 18px 40px rgba(31,182,168,0.6), inset 0 1px 0 rgba(255,255,255,0.5);
-}
-
-.hero-btn-secondary {
-  background: rgba(255,255,255,0.06);
-  backdrop-filter: blur(8px);
-  color: #fff;
-  border-color: rgba(255,255,255,0.35);
-}
-.hero-btn-secondary:hover {
-  background: rgba(255,255,255,0.16);
-  border-color: rgba(255,255,255,0.6);
-  transform: translateY(-3px);
-}
-
-.hero-btn-accent {
-  background: linear-gradient(135deg, #f5b400, #ffd25c);
-  color: #3a2600;
-  box-shadow: 0 10px 26px rgba(245,180,0,0.4), inset 0 1px 0 rgba(255,255,255,0.5);
-}
-.hero-btn-accent:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 16px 36px rgba(245,180,0,0.55), inset 0 1px 0 rgba(255,255,255,0.6);
-}
-
-.hero-premium-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 14px;
-  justify-content: flex-end;
-}
-
-@media (max-width: 900px) {
-  .hero-premium {
-    padding: 40px 32px;
-    min-height: 420px;
-  }
-}
-
-@media (max-width: 640px) {
-  .hero-premium {
-    padding: 32px 22px;
-    min-height: 380px;
-    border-radius: 20px;
-    align-items: flex-end;
-  }
-  .hero-premium-copy {
-    max-width: 100%;
-  }
-  .hero-premium-actions {
-    flex-direction: column;
-    width: 100%;
-    justify-content: flex-start;
-  }
-  .hero-btn {
-    width: 100%;
-    justify-content: center;
-  }
-  .hero-glow-orb {
-    display: none;
-  }
-}
-
-@media (max-width: 380px) {
-  .hero-premium {
-    padding: 24px 16px;
-    min-height: 340px;
-  }
-}
-        `}</style>
-
-        <div className="hero-glow-orb one" />
-        <div className="hero-glow-orb two" />
-          <div className="hero-premium-actions">
-  <Link className="hero-btn hero-btn-primary" to={`/course/${defaultCourseSlug}`}>
-    Explore Courses
-    <ArrowRight size={17} />
-  </Link>
-  <Link
-    className="hero-btn hero-btn-secondary"
-    to={user ? `/course/${defaultCourseSlug}` : "/login"}
-  >
-    <Play size={15} />
-    Start Learning
-  </Link>
-  <Link className="hero-btn hero-btn-accent" to="/mock-tests">
-    <Sparkles size={15} />
-    Take Free Mock Test
-  </Link>
-</div>       
+      <section className="hero-card">
+        <div className="hero-copy">
+          <div className="eyebrow">
+            <span className="live-pulse" />
+            Master Paper 1
+          </div>
+          <h1>
+            Master Paper 1. <br />
+            <em>Achieve JRF Success.</em>
+          </h1>
+          <p>
+            India's premier platform for UGC NET & JRF History, providing
+            institutional-grade rigour and research-backed pedagogy.
+          </p>
+          <div className="hero-actions">
+            <Link
+              className="button button-lime"
+              to={`/course/${defaultCourseSlug}`}
+            >
+              Explore Courses
+              <ArrowRight size={17} />
+            </Link>
+            <Link
+              className="button button-dark"
+              to={user ? `/course/${defaultCourseSlug}` : "/login"}
+            >
+              Start Learning
+            </Link>
+            <Link className="button" to="/mock-tests">
+              Take Free Mock Test
+            </Link>
+          </div>
+        </div>
+        <div className="hero-orbit">
+          <div className="orbit-ring ring-one" />
+          <div className="orbit-ring ring-two" />
+          <div className="orbit-core">
+            <Sparkles size={25} />
+            <span>
+              JRF HUNTERS
+              <br />
+              <small>NET 2025</small>
+            </span>
+          </div>
+          <div className="orbit-tag tag-top">01 · WATCH</div>
+          <div className="orbit-tag tag-bottom">04 · MASTER</div>
+        </div>
       </section>
-
-      <MetricRow
-        items={[
-          { icon: <BookOpen size={22} />, value: `${total}`, label: "Structured courses" },
-          { icon: <Radio size={22} />, value: "LIVE", label: "Meet classes" },
-          { icon: <Bot size={22} />, value: "RAG", label: "Syllabus-grounded AI" },
-          { icon: <Users size={22} />, value: "24/7", label: "Peer learning" },
-        ]}
-      />
-
+      <section className="metric-row">
+        <Metric
+          icon={<BookOpen />}
+          value={`${total}`}
+          label="structured course"
+        />
+        <Metric icon={<Radio />} value="LIVE" label="Meet classes" />
+        <Metric icon={<Bot />} value="RAG" label="syllabus-grounded AI" />
+        <Metric icon={<Users />} value="24/7" label="peer learning" />
+      </section>
       <FlagshipCard user={user} course={featuredCourse} />
       <DemoVideo />
       <LibraryLaunch />
@@ -2957,6 +3049,7 @@ function Home({ user }: { user: User | null }) {
     </div>
   );
 }
+
 function LibraryLaunch() {
   return (
     <section className="library-launch-grid">
@@ -3426,7 +3519,7 @@ function Login({ onLogin }: { onLogin: (user: User) => void }) {
         <Link className="brand" to="/">
           <span className="brand-mark">
             <img
-              src="/assets/logo.png"
+              src="assets/logo.png"
               alt="JRF HUNTERS"
               style={{ width: 34, height: 34, borderRadius: 10 }}
               onError={(event) => {
@@ -3436,7 +3529,7 @@ function Login({ onLogin }: { onLogin: (user: User) => void }) {
           </span>
           <span>
             <strong>JRF HUNTERS</strong>
-            <small>Beyond Limits</small>
+            <small>learning studio</small>
           </span>
         </Link>
       </div>
@@ -3928,8 +4021,8 @@ function AdminLogin({ onLogin }: { onLogin: (user: User) => void }) {
         <div className="admin-auth-copy">
           <Link className="admin-brand admin-auth-brand" to="/admin/login">
             <span className="admin-brand-mark">
-              <ShieldCheck size={18} />
-            </span>
+  <img src="/assets/logo.png" alt="JRF Hunters" />
+</span>
             <span>
               <strong>JRF HUNTERS</strong>
               <small>admin console</small>
@@ -4276,7 +4369,11 @@ function CoursePage({ user }: { user: User | null }) {
           )}
           {message && <span className="inline-message">{message}</span>}
         </div>
-        
+        <div className="course-stamp">
+          <Library size={24} />
+          <b>{course.modules.length || 1}</b>
+          <span>modules</span>
+        </div>
       </div>
       <CourseLiveClasses
         key={liveRefresh}
@@ -4936,7 +5033,7 @@ const testimonials = [
     status: "Cleared UGC NET JRF",
   },
   {
-    name: "Anushka",
+    name: "Amartya Barman",
     affiliation: "DU",
     text: "Covered the syllabus in great detail with extra focus on question solving and pattern. Apart from the classes, personal guidance on calls was also provided frequently. Highly recommended.",
     status: "Cleared UGC NET JRF",
@@ -5016,7 +5113,14 @@ function FlagshipCard({ user, course }: { user: User | null; course: Course | nu
           </Link>
         </div>
       </div>
-      
+      <div className="course-stamp">
+        <img
+          src="assets/logo.png"
+          alt="logo"
+          style={{ width: 74 }}
+          onError={(e) => (e.currentTarget.style.display = "none")}
+        />
+      </div>
     </section>
   );
 }
@@ -5026,9 +5130,6 @@ function MockTests({ user }: { user: User | null }) {
 }
 
 function QuizStudio({ user }: { user: User | null }) {
-  // Reuse the same key only while a generation is in flight. The backend
-  // resolves a retry to the already-created quiz instead of creating another.
-  const generationKeyRef = useRef<string | null>(null);
   const [courses, setCourses] = useState<Course[]>([]);
   const [selectedCourse, setSelectedCourse] = useState("");
   const [selectedSubjectArea, setSelectedSubjectArea] = useState("");
@@ -5340,11 +5441,8 @@ function QuizStudio({ user }: { user: User | null }) {
     );
     setResult(null);
     try {
-      const generationKey = generationKeyRef.current || crypto.randomUUID();
-      generationKeyRef.current = generationKey;
       const generated = await api<Quiz>("/quizzes/generate", {
         method: "POST",
-        headers: { "Idempotency-Key": generationKey },
         body: JSON.stringify({
           topic_ids: topicSelection,
           exam: "UGC NET",
@@ -5377,7 +5475,6 @@ function QuizStudio({ user }: { user: User | null }) {
       persistQuizDraft(user, null);
       setResumeDraft(null);
       setPaymentRequired(false);
-      generationKeyRef.current = null;
       setMessage(
         `${generated.questions.length} questions loaded. ${generated.availability_notice || "You can move between questions and return to skipped ones."}`,
       );
@@ -7449,40 +7546,6 @@ function getLibraryCategory(file: QuestionLibraryFile) {
   return "Other";
 }
 
-function QuestionArchivePage({ user }: { user: User | null }) {
-  const [papers, setPapers] = useState<QuestionArchivePaper[]>([]);
-  const [selected, setSelected] = useState<QuestionArchivePaper | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [busyId, setBusyId] = useState<number | null>(null);
-  const [error, setError] = useState("");
-  const load = async () => {
-    setLoading(true);
-    try {
-      setPapers(await api<QuestionArchivePaper[]>("/question-archive?page=1&limit=100"));
-      setError("");
-    } catch (cause) { setError((cause as Error).message || "Could not load the question archive."); }
-    finally { setLoading(false); }
-  };
-  useEffect(() => { if (user) void load(); else setLoading(false); }, [user]);
-  const openPaper = async (id: number) => {
-    setBusyId(id);
-    try { setSelected(await api<QuestionArchivePaper>(`/question-archive/${id}`)); }
-    catch (cause) { setError((cause as Error).message || "Could not open this paper."); }
-    finally { setBusyId(null); }
-  };
-  const buyPaper = async (paper: QuestionArchivePaper) => {
-    setBusyId(paper.id);
-    await startPremiumCheckout(
-      async () => { await load(); await openPaper(paper.id); },
-      (message) => setError(message),
-      { question_archive_paper_id: paper.id },
-    );
-    setBusyId(null);
-  };
-  if (!user) return <div className="container"><div className="empty-state"><Lock size={24} /><h2>Sign in to browse the Question Archive.</h2></div></div>;
-  return <main className="container page-section"><div className="section-heading"><div><span className="eyebrow">QUESTION ARCHIVE</span><h1>Previous-year papers</h1><p>Free papers open immediately. Paid papers are released only after verified payment.</p></div></div>{error && <div className="notice notice-error">{error}</div>}{loading ? <div className="empty-state">Loading papers…</div> : !papers.length ? <div className="empty-state"><Library size={24} /><h2>No papers are published yet.</h2></div> : <div className="course-grid">{papers.map((paper) => <article className="course-card" key={paper.id}><div className="course-card-content"><span className={`status-chip ${paper.owned || paper.is_free ? "status-live" : "status-archived"}`}>{paper.owned || paper.is_free ? "Available" : "Locked"}</span><h2>{paper.title}</h2><p>{paper.description || `${paper.subject}${paper.year ? ` · ${paper.year}` : ""}`}</p><p><b>{paper.is_free ? "Free" : `${paper.currency} ${(paper.price_paise / 100).toLocaleString("en-IN")}`}</b></p><button className="button button-dark" disabled={busyId === paper.id} onClick={() => void (paper.owned || paper.is_free ? openPaper(paper.id) : buyPaper(paper))}>{busyId === paper.id ? "Please wait…" : paper.owned || paper.is_free ? "Open paper" : "Unlock paper"}</button></div></article>)}</div>}{selected && <section className="panel" style={{ marginTop: 24, padding: 20 }}><div className="section-heading compact"><h2>{selected.title}</h2><button className="button button-outline button-small" onClick={() => setSelected(null)}>Close</button></div>{selected.owned || selected.is_free ? <pre style={{ whiteSpace: "pre-wrap", overflowWrap: "anywhere" }}>{JSON.stringify(selected.content, null, 2)}</pre> : <p>This paper is locked. Purchase it to view its questions.</p>}</section>}</main>;
-}
-
 function QuestionBankPage({ user }: { user: User | null }) {
   const [access, setAccess] = useState<PremiumAccess | null>(null);
   const [library, setLibrary] = useState<QuestionLibrary | null>(null);
@@ -7492,13 +7555,13 @@ function QuestionBankPage({ user }: { user: User | null }) {
     count: number;
   } | null>(null);
   const [loading, setLoading] = useState(true);
+  const [checkoutBusy, setCheckoutBusy] = useState(false);
   const [previewLoading, setPreviewLoading] = useState(false);
   const [error, setError] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [yearFilter, setYearFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
-  const [showArchivePaywall, setShowArchivePaywall] = useState(false);
   const [expandedYears, setExpandedYears] = useState<Record<string, boolean>>({});
   const load = () => {
     setLoading(true);
@@ -7525,6 +7588,21 @@ function QuestionBankPage({ user }: { user: User | null }) {
           );
       })
       .finally(() => setLoading(false));
+  };
+  const startArchiveCheckout = () => {
+    setCheckoutBusy(true);
+    setError("");
+    void startPremiumCheckout(
+      () => {
+        load();
+        setCheckoutBusy(false);
+      },
+      (message) => {
+        setCheckoutBusy(false);
+        setError(message);
+      },
+      { product: "question_archive_unlimited_access" },
+    );
   };
   const fileTypeOptions = useMemo(
     () =>
@@ -7696,8 +7774,6 @@ function QuestionBankPage({ user }: { user: User | null }) {
       )}
       {loading ? (
         <div className="empty-state">Loading the question archive…</div>
-      ) : library?.premium_required ? (
-        <PremiumPaywall access={access} feature="library" onPaid={load} />
       ) : !library?.files.length ? (
         <div className="empty-state">
           <FileText size={25} />
@@ -7709,15 +7785,36 @@ function QuestionBankPage({ user }: { user: User | null }) {
         </div>
       ) : (
         <>
-          {!library?.library_access && (library?.free_papers_remaining ?? 0) > 0 && (
-            <div className="notice premium-paywall" role="status">
-              <b>{library.free_papers_remaining} free paper{library.free_papers_remaining === 1 ? "" : "s"} remaining</b>
-              <span>Preview, download, or open any paper in Drive. After three different papers, archive access requires payment.</span>
-            </div>
-          )}
-          {!library?.library_access && (showArchivePaywall || (library?.free_papers_remaining ?? 0) === 0) && (
-            <PremiumPaywall access={access} feature="library" pricePaise={library?.price_paise} orderBody={{ question_archive_access: true }} onPaid={async () => { setShowArchivePaywall(false); load(); }} />
-          )}
+          <div className="notice premium-paywall" role="status">
+            <b>
+              {library.question_archive_access || library.library_access
+                ? "Unlimited archive access is active"
+                : `${library.free_papers_remaining ?? 0} free papers remaining`}
+            </b>
+            <span>
+              {library.question_archive_access || library.library_access
+                ? "All question papers, downloads, and Drive views are unlocked."
+                : library.free_papers_remaining
+                  ? "Choose any papers to preview, download, or open in Drive. Each distinct paper uses one free opening."
+                  : "Your 3 free papers are used. Unlock unlimited archive access for ₹399."}
+            </span>
+            {!library.question_archive_access &&
+              !library.library_access &&
+              !library.free_papers_remaining && (
+                <button
+                  className="button button-lime button-small"
+                  type="button"
+                  disabled={checkoutBusy || !access?.razorpay_configured && !access?.mock_mode}
+                  onClick={startArchiveCheckout}
+                >
+                  {checkoutBusy
+                    ? "Opening payment…"
+                    : access?.mock_mode
+                      ? "Complete archive payment"
+                      : `Unlock archive · ${access?.currency || "INR"} ${((library.price_paise || 39900) / 100).toLocaleString("en-IN")}`}
+                </button>
+              )}
+          </div>
           <div className="archive-toolbar">
             <label className="archive-search">
               <span className="archive-search-icon">
@@ -7821,7 +7918,6 @@ function QuestionBankPage({ user }: { user: User | null }) {
                         {group.filteredFiles.map((file) => {
                           const fileType = getLibraryFileType(file.name);
                           const category = getLibraryCategory(file);
-                          const locked = file.free_access === false;
                           return (
                             <article className="archive-file" key={file.id}>
                               <span className={`archive-file-icon ${file.is_answer_key ? "answer-key" : ""}`}>
@@ -7843,15 +7939,24 @@ function QuestionBankPage({ user }: { user: User | null }) {
                                 </div>
                               </div>
                               <div className="archive-file-actions">
-                                {locked ? (
-                                  <button className="button button-small" type="button" onClick={() => setShowArchivePaywall(true)}>
-                                    Unlock for ₹399
+                                {file.locked && (
+                                  <button
+                                    className="button button-small button-outline"
+                                    type="button"
+                                    disabled={checkoutBusy || Boolean(library.free_papers_remaining)}
+                                    onClick={startArchiveCheckout}
+                                  >
+                                    <LockKeyhole size={12} />
+                                    {library.free_papers_remaining
+                                      ? "Use a free paper first"
+                                      : "Unlock · ₹399"}
                                   </button>
-                                ) : file.is_question_file && (
+                                )}
+                                {file.is_question_file && (
                                   <button
                                     className="button button-small"
                                     type="button"
-                                    disabled={previewLoading}
+                                    disabled={previewLoading || file.locked}
                                     onClick={() => void openPreview(file)}
                                   >
                                     {preview?.file.id === file.id
@@ -7861,20 +7966,22 @@ function QuestionBankPage({ user }: { user: User | null }) {
                                         : "Preview"}
                                   </button>
                                 )}
-                                {!locked && <button
+                                <button
                                   className="button button-small button-lime"
                                   type="button"
+                                  disabled={file.locked}
                                   onClick={() => void downloadQuestionFile(file)}
                                 >
                                   Download <Download size={12} />
-                                </button>}
-                                {!locked && <button
+                                </button>
+                                <button
                                   className="button button-small button-outline"
                                   type="button"
+                                  disabled={file.locked}
                                   onClick={() => void openQuestionInDrive(file)}
                                 >
                                   Open in Drive <ExternalLink size={12} />
-                                </button>}
+                                </button>
                               </div>
                               {preview?.file.id === file.id && (
                                 <div className="question-preview">
@@ -7959,69 +8066,10 @@ function RecordedVideoLibraryPage({ user }: { user: User | null }) {
   const [access, setAccess] = useState<PremiumAccess | null>(null);
   const [library, setLibrary] = useState<RecordedLibrary | null>(null);
   const [playingId, setPlayingId] = useState<string | null>(null);
-  const [playingUrl, setPlayingUrl] = useState<string | null>(null);
-  const [loadingRecordingId, setLoadingRecordingId] = useState<string | null>(null);
-  const [downloadingId, setDownloadingId] = useState<string | null>(null);
-  const [driveBusyId, setDriveBusyId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-  const [sortBy, setSortBy] = useState<"newest" | "oldest" | "alpha">("newest");
-
-  useEffect(() => {
-    return () => {
-      if (playingUrl?.startsWith("blob:")) URL.revokeObjectURL(playingUrl);
-    };
-  }, [playingUrl]);
-
-  const authenticatedMediaPath = (value: string) => {
-    const mediaUrl = new URL(value, API_URL);
-    const apiBase = new URL(API_URL);
-    if (mediaUrl.origin !== apiBase.origin) {
-      throw new Error("The recording URL is not on the configured API host.");
-    }
-    const basePath = apiBase.pathname.replace(/\/$/, "");
-    const path = mediaUrl.pathname.startsWith(`${basePath}/`)
-      ? mediaUrl.pathname.slice(basePath.length)
-      : mediaUrl.pathname;
-    mediaUrl.searchParams.delete("token");
-    return `${path}${mediaUrl.search}`;
-  };
-
-  const playRecordedVideo = async (item: RecordedLibrary["items"][number]) => {
-    setError("");
-    setPlayingId(null);
-    setLoadingRecordingId(item.id);
-    try {
-      const media = await apiBlob(authenticatedMediaPath(item.play_url), { cache: "no-store" });
-      setPlayingUrl(URL.createObjectURL(media));
-      setPlayingId(item.id);
-    } catch (cause) {
-      setError((cause as Error).message || "Could not load this recording.");
-    } finally {
-      setLoadingRecordingId(null);
-    }
-  };
-
-  const downloadRecordedVideo = async (item: RecordedLibrary["items"][number]) => {
-    setError("");
-    setDownloadingId(item.id);
-    try {
-      const media = await apiBlob(authenticatedMediaPath(item.download_url), { cache: "no-store" });
-      const url = URL.createObjectURL(media);
-      const anchor = document.createElement("a");
-      anchor.href = url;
-      anchor.download = item.name || item.display_name || "recording";
-      document.body.appendChild(anchor);
-      anchor.click();
-      anchor.remove();
-      window.setTimeout(() => URL.revokeObjectURL(url), 0);
-    } catch (cause) {
-      setError((cause as Error).message || "Could not download this recording.");
-    } finally {
-      setDownloadingId(null);
-    }
-  };
+  const [sortBy, setSortBy] = useState<"manual" | "newest" | "oldest" | "alpha">("manual");
 
   const stats = useMemo(() => {
     const items = library?.items ?? [];
@@ -8057,6 +8105,7 @@ function RecordedVideoLibraryPage({ user }: { user: User | null }) {
         })
       : items;
 
+    if (sortBy === "manual") return filtered;
     return [...filtered].sort((a, b) => {
       if (sortBy === "alpha") {
         return (a.display_name || a.name).localeCompare(b.display_name || b.name);
@@ -8096,28 +8145,6 @@ function RecordedVideoLibraryPage({ user }: { user: User | null }) {
     if (user) load();
     else setLoading(false);
   }, [user]);
-  const openRecordedVideoInDrive = async (item: RecordedLibrary["items"][number]) => {
-    const driveWindow = window.open("about:blank", "_blank");
-    if (driveWindow) driveWindow.opener = null;
-    setError("");
-    setDriveBusyId(item.id);
-    try {
-      const grant = await api<{ url: string }>(
-        `/library/recorded-videos/${encodeURIComponent(item.id)}/drive-view`,
-        { method: "POST" },
-      );
-      const driveUrl = new URL(grant.url);
-      if (driveUrl.protocol !== "https:" || driveUrl.hostname !== "drive.google.com") {
-        throw new Error("Google Drive returned an unexpected recording link.");
-      }
-      if (driveWindow) driveWindow.location.replace(driveUrl.href);
-    } catch (cause) {
-      driveWindow?.close();
-      setError((cause as Error).message || "Google Drive access could not be granted.");
-    } finally {
-      setDriveBusyId(null);
-    }
-  };
   if (!user)
     return (
       <div className="container">
@@ -8213,6 +8240,7 @@ function RecordedVideoLibraryPage({ user }: { user: User | null }) {
             <label className="recordings-sort">
               <span>Sort</span>
               <select value={sortBy} onChange={(event) => setSortBy(event.target.value as typeof sortBy)}>
+                <option value="manual">Course order</option>
                 <option value="newest">Newest first</option>
                 <option value="oldest">Oldest first</option>
                 <option value="alpha">A–Z</option>
@@ -8241,11 +8269,10 @@ function RecordedVideoLibraryPage({ user }: { user: User | null }) {
                   className={`recorded-library-card ${playingId === item.id ? "playing" : ""}`}
                   key={item.id}
                 >
-                {playingId === item.id && playingUrl ? (
-
+                  {playingId === item.id ? (
                     <video
                       className="recorded-library-player"
-                      src={playingUrl}
+                      src={item.play_url}
                       controls
                       autoPlay
                       playsInline
@@ -8255,13 +8282,11 @@ function RecordedVideoLibraryPage({ user }: { user: User | null }) {
                     <button
                       className="recorded-library-cover"
                       type="button"
-                      onClick={() => void playRecordedVideo(item)}
-                      disabled={loadingRecordingId === item.id}
-                    
+                      onClick={() => setPlayingId(item.id)}
                       aria-label={`Play recording: ${meetingName}`}
                     >
                       <span className="recorded-play">
-                       {loadingRecordingId === item.id ? <RefreshCw size={19} className="spin" /> : <Play size={19} />}
+                        <Play size={19} />
                       </span>
                       <span className="recorded-cover-copy">{meetingName}</span>
                     </button>
@@ -8294,28 +8319,13 @@ function RecordedVideoLibraryPage({ user }: { user: User | null }) {
                       <button
                         className="button button-small button-dark"
                         type="button"
-                        onClick={() => void playRecordedVideo(item)}
-                        disabled={loadingRecordingId === item.id}
+                        onClick={() => setPlayingId(item.id)}
                       >
-                        {loadingRecordingId === item.id ? <RefreshCw size={13} className="spin" /> : <Play size={13} />}
-                        {loadingRecordingId === item.id ? "Loading recording…" : "Watch recording"}
+                        <Play size={13} /> Watch recording
                       </button>
-                      <button
-                        className="button button-small"
-                        type="button"
-                        onClick={() => void downloadRecordedVideo(item)}
-                        disabled={downloadingId === item.id}
-                      >
-                        {downloadingId === item.id ? "Preparing…" : "Download"} <Download size={13} />
-                      </button>
-                      <button
-                        className="button button-small"
-                        type="button"
-                        onClick={() => void openRecordedVideoInDrive(item)}
-                        disabled={driveBusyId === item.id}
-                      >
-                        <ExternalLink size={13} /> {driveBusyId === item.id ? "Granting…" : "Open in Drive"}
-                      </button>
+                      <a className="button button-small" href={item.download_url}>
+                        Download <Download size={13} />
+                      </a>
                     </div>
 
                     <small className="recording-original-name" title={originalName}>
@@ -8494,7 +8504,7 @@ function LegalPage({ page }: { page: LegalPageKind }) {
       <div className="legal-hero">
         <span className="eyebrow">{label}</span>
         <h1>{title}</h1>
-        <p>JRF HUNTERS Beyond Limits · JRF Hunters</p>
+        <p>JRF HUNTERS Learning Studio · JRF Hunters</p>
         <small>Last updated: 14 September 2026</small>
       </div>
       <article className="legal-card">
@@ -8502,7 +8512,7 @@ function LegalPage({ page }: { page: LegalPageKind }) {
           <>
             <h2>1. About these terms</h2>
             <p>
-              These terms govern your use of the JRF HUNTERS Beyond Limits website,
+              These terms govern your use of the JRF HUNTERS Learning Studio website,
               courses, mock tests, live classes, study tools and related digital
               resources. By creating an account, enrolling in a course, or using
               a paid feature, you agree to these terms.
@@ -8795,7 +8805,7 @@ function SiteFooter() {
             </span>
             <span>
               <strong>JRF HUNTERS</strong>
-              <small>Beyond Limits</small>
+              <small>learning studio</small>
             </span>
           </Link>
           <p>
@@ -8843,358 +8853,45 @@ function SiteFooter() {
       </div>
       <div className="site-footer-bottom">
         <span>
-          © {new Date().getFullYear()} JRF HUNTERS Beyond Limits · JRF Hunters
+          © {new Date().getFullYear()} JRF HUNTERS Learning Studio · JRF Hunters
         </span>
         <span>Google Meet live · Drive replays · course media</span>
       </div>
     </footer>
   );
 }
+
 function Testimonials() {
-  const sectionRef = useRef<HTMLDivElement | null>(null);
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    const node = sectionRef.current;
-    if (!node) return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setVisible(true);
-            observer.disconnect();
-          }
-        });
-      },
-      { threshold: 0.1 },
-    );
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, []);
-
-  // Duplicate the list so the marquee loops seamlessly
-  const loopItems = [...testimonials, ...testimonials];
-
   return (
-    <div
-      className={`testimonial-showcase ${visible ? "is-visible" : ""}`}
-      ref={sectionRef}
-    >
-      <style>{`
-        .testimonial-showcase {
-          position: relative;
-          padding: 56px 0 40px;
-          margin: 20px 0;
-          overflow: hidden;
-        }
-
-        .testimonial-showcase::before,
-        .testimonial-showcase::after {
-          content: "";
-          position: absolute;
-          top: 0;
-          bottom: 0;
-          width: 90px;
-          z-index: 3;
-          pointer-events: none;
-        }
-        .testimonial-showcase::before {
-          left: 0;
-          background: linear-gradient(90deg, var(--tsg-bg, #fbfdfc) 10%, transparent);
-        }
-        .testimonial-showcase::after {
-          right: 0;
-          background: linear-gradient(270deg, var(--tsg-bg, #fbfdfc) 10%, transparent);
-        }
-
-        .testimonial-showcase-head {
-          text-align: center;
-          max-width: 640px;
-          margin: 0 auto 40px;
-          padding: 0 20px;
-          opacity: 0;
-          transform: translateY(-24px);
-        }
-        .testimonial-showcase.is-visible .testimonial-showcase-head {
-          animation: tsHeadIn 0.8s cubic-bezier(0.16,1,0.3,1) forwards;
-        }
-        @keyframes tsHeadIn {
-          to { opacity: 1; transform: translateY(0); }
-        }
-
-        .testimonial-showcase-badge {
-          display: inline-flex;
-          align-items: center;
-          gap: 6px;
-          padding: 6px 16px;
-          border-radius: 999px;
-          background: linear-gradient(135deg, rgba(19,143,156,0.12), rgba(31,182,168,0.12));
-          border: 1px solid rgba(19, 143, 156, 0.25);
-          color: #0d7a6c;
-          font-size: 11.5px;
-          font-weight: 800;
-          letter-spacing: 0.08em;
-          margin-bottom: 14px;
-        }
-        .testimonial-showcase-badge .dot {
-          width: 6px;
-          height: 6px;
-          border-radius: 50%;
-          background: #17b8a4;
-          box-shadow: 0 0 0 3px rgba(23,184,164,0.25);
-          animation: tsPulseDot 1.8s ease-in-out infinite;
-        }
-        @keyframes tsPulseDot {
-          0%, 100% { transform: scale(1); opacity: 1; }
-          50% { transform: scale(1.35); opacity: 0.6; }
-        }
-
-        .testimonial-showcase-head h2 {
-          font-size: clamp(24px, 3.4vw, 36px);
-          margin: 0 0 10px;
-          background: linear-gradient(135deg, #0f2b26, #138f9c 65%, #17b8a4);
-          -webkit-background-clip: text;
-          background-clip: text;
-          -webkit-text-fill-color: transparent;
-          font-weight: 800;
-          letter-spacing: -0.02em;
-        }
-        .testimonial-showcase-head p {
-          color: #5c6b66;
-          font-size: 14.5px;
-          line-height: 1.6;
-          margin: 0;
-        }
-
-        .testimonial-marquee-track {
-          display: flex;
-          gap: 22px;
-          width: max-content;
-          animation: tsScroll 42s linear infinite;
-        }
-        .testimonial-showcase:hover .testimonial-marquee-track {
-          animation-play-state: paused;
-        }
-        @keyframes tsScroll {
-          0% { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
-        }
-
-        .testimonial-glow-card {
-          position: relative;
-          flex: 0 0 auto;
-          width: min(360px, 84vw);
-          border-radius: 22px;
-          padding: 2px;
-          background: linear-gradient(135deg, rgba(19,143,156,0.35), rgba(255,255,255,0) 40%, rgba(31,182,168,0.3));
-        }
-
-        .testimonial-glow-card-inner {
-          position: relative;
-          height: 100%;
-          border-radius: 20px;
-          padding: 26px 24px 22px;
-          background: linear-gradient(160deg, rgba(255,255,255,0.98), rgba(247,250,248,0.94));
-          backdrop-filter: blur(6px);
-          overflow: hidden;
-          transition: transform 0.4s cubic-bezier(0.16,1,0.3,1), box-shadow 0.4s ease;
-          box-shadow: 0 8px 24px rgba(15,40,35,0.06);
-        }
-
-        .testimonial-glow-card:hover .testimonial-glow-card-inner {
-          transform: translateY(-8px) scale(1.02);
-          box-shadow: 0 24px 48px rgba(15,40,35,0.16), 0 0 0 1px rgba(19,143,156,0.15);
-        }
-
-        .testimonial-glow-card-inner::before {
-          content: "\\201C";
-          position: absolute;
-          top: -18px;
-          right: 6px;
-          font-size: 110px;
-          line-height: 1;
-          font-family: Georgia, serif;
-          font-weight: 700;
-          background: linear-gradient(135deg, rgba(19,143,156,0.14), rgba(19,143,156,0.03));
-          -webkit-background-clip: text;
-          background-clip: text;
-          -webkit-text-fill-color: transparent;
-          pointer-events: none;
-          user-select: none;
-        }
-
-        .ts-stars {
-          display: flex;
-          gap: 3px;
-          margin-bottom: 14px;
-          position: relative;
-          z-index: 1;
-        }
-        .ts-star {
-          width: 14px;
-          height: 14px;
-          color: #f5b400;
-        }
-
-        .ts-quote {
-          position: relative;
-          z-index: 1;
-          font-size: 14.5px;
-          line-height: 1.7;
-          color: #33413c;
-          margin: 0 0 22px;
-          min-height: 132px;
-        }
-
-        .ts-meta {
-          position: relative;
-          z-index: 1;
-          display: flex;
-          align-items: center;
-          gap: 13px;
-          padding-top: 16px;
-          border-top: 1px solid rgba(19,143,156,0.12);
-        }
-
-        .ts-avatar-ring {
-          position: relative;
-          width: 48px;
-          height: 48px;
-          flex-shrink: 0;
-          border-radius: 50%;
-          padding: 2px;
-          background: conic-gradient(from 0deg, #138f9c, #1fb6a8, #f5b400, #138f9c);
-          animation: tsRingSpin 5s linear infinite;
-        }
-        @keyframes tsRingSpin {
-          to { transform: rotate(360deg); }
-        }
-        .ts-avatar-inner {
-          width: 100%;
-          height: 100%;
-          border-radius: 50%;
-          background: linear-gradient(135deg, #0e5f68, #138f9c);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          color: #fff;
-          font-weight: 800;
-          font-size: 15px;
-          border: 2px solid #fbfdfc;
-        }
-
-        .ts-by {
-          display: flex;
-          flex-direction: column;
-          gap: 3px;
-          min-width: 0;
-        }
-        .ts-by strong {
-          font-size: 14.5px;
-          color: #16211d;
-          font-weight: 700;
-        }
-        .ts-by small {
-          font-size: 12px;
-          color: #6b7a75;
-        }
-        .ts-status {
-          margin-top: 3px;
-          display: inline-flex;
-          align-items: center;
-          gap: 4px;
-          width: fit-content;
-          font-size: 10.5px;
-          font-weight: 800;
-          letter-spacing: 0.02em;
-          color: #0d7a6c;
-          background: linear-gradient(135deg, rgba(19,143,156,0.14), rgba(31,182,168,0.14));
-          padding: 3px 9px 3px 7px;
-          border-radius: 999px;
-        }
-
-        @media (max-width: 640px) {
-          .testimonial-showcase {
-            padding: 40px 0 28px;
-          }
-          .testimonial-showcase::before,
-          .testimonial-showcase::after {
-            width: 36px;
-          }
-          .testimonial-glow-card {
-            width: min(300px, 82vw);
-          }
-          .testimonial-glow-card-inner {
-            padding: 20px 18px 18px;
-          }
-          .ts-quote {
-            min-height: 150px;
-            font-size: 13.5px;
-          }
-          .testimonial-marquee-track {
-            animation-duration: 32s;
-          }
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-          .testimonial-marquee-track {
-            animation: none;
-            flex-wrap: wrap;
-            justify-content: center;
-          }
-          .ts-avatar-ring {
-            animation: none;
-          }
-          .testimonial-showcase-head {
-            opacity: 1 !important;
-            transform: none !important;
-          }
-        }
-      `}</style>
-
-      <div className="testimonial-showcase-head">
-        <span className="testimonial-showcase-badge">
-          <span className="dot" />
-          REAL RESULTS
-        </span>
-        <h2>Loved by JRF aspirants everywhere</h2>
-        <p>
-          Hear directly from learners who turned focused preparation into
-          cleared exams and confident results.
-        </p>
+    <div className="container">
+      <div className="section-heading">
+        <div>
+          <span className="eyebrow">TESTIMONIALS</span>
+          <h2>Success Stories from Our Students</h2>
+        </div>
+        <span className="muted">Real learners — concise feedback</span>
       </div>
 
-      <div className="testimonial-marquee-track">
-        {loopItems.map((t, index) => (
-          <div className="testimonial-glow-card" key={`${t.name}-${index}`}>
-            <div className="testimonial-glow-card-inner">
-              <div className="ts-stars">
-                {Array.from({ length: 5 }).map((_, starIndex) => (
-                  <Sparkles className="ts-star" key={starIndex} fill="#f5b400" strokeWidth={0} />
-                ))}
+      <div className="testimonial-row">
+        {testimonials.map((t) => (
+          <div className="testimonial-card" key={t.name}>
+            <div className="testimonial-quote">“{t.text}”</div>
+            <div className="testimonial-meta">
+              {/* Use initials avatar for learners; staff photo is not used in testimonials */}
+              <div className="testimonial-initials">
+                {t.name
+                  .split(" ")
+                  .map((p) => p[0])
+                  .slice(0, 2)
+                  .join("")
+                  .toUpperCase()}
               </div>
-              <p className="ts-quote">"{t.text}"</p>
-              <div className="ts-meta">
-                <div className="ts-avatar-ring">
-                  <div className="ts-avatar-inner">
-                    {t.name
-                      .split(" ")
-                      .map((p) => p[0])
-                      .slice(0, 2)
-                      .join("")
-                      .toUpperCase()}
-                  </div>
-                </div>
-                <div className="ts-by">
-                  <strong>{t.name}</strong>
-                  <small>{t.affiliation}</small>
-                  {t.status && (
-                    <span className="ts-status">
-                      <CheckCircle2 size={10} />
-                      {t.status}
-                    </span>
-                  )}
-                </div>
+              <div className="testimonial-by">
+                <strong>{t.name}</strong>
+                <small>{t.affiliation}</small>
+                {t.status && (
+                  <div className="testimonial-status">{t.status}</div>
+                )}
               </div>
             </div>
           </div>
@@ -9203,8 +8900,9 @@ function Testimonials() {
     </div>
   );
 }
+
 function NameMarquee() {
-  const proverb = "🎯 JRF NIKALNA HAI, SAMJHO DONE HAI! 🏆✨";
+  const proverb = "Learn deeply, practice consistently, perform confidently.";
   const repeats = Array(3).fill(0);
   return (
     <div className="proverb-marquee-wrap">
@@ -9705,6 +9403,11 @@ function Admin({ user }: { user: User | null }) {
     resources: number;
     revenue_paise: number;
   } | null>(null);
+  const [recordedSummary, setRecordedSummary] = useState<{
+    total: number;
+    assigned: number;
+    unassigned: number;
+  }>({ total: 0, assigned: 0, unassigned: 0 });
   const [payments, setPayments] = useState<AdminPayment[]>([]);
   const [storage, setStorage] = useState<{
     provider: string;
@@ -9742,6 +9445,7 @@ function Admin({ user }: { user: User | null }) {
   const [courseImageFile, setCourseImageFile] = useState<File | null>(null);
   const [courseImageUrl, setCourseImageUrl] = useState<string | null>(null);
   const [mockPriceRupees, setMockPriceRupees] = useState("");
+  const [questionArchivePriceRupees, setQuestionArchivePriceRupees] = useState("399");
   const [freeMockAttempts, setFreeMockAttempts] = useState("");
   const [savingMockSettings, setSavingMockSettings] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
@@ -9764,6 +9468,8 @@ function Admin({ user }: { user: User | null }) {
   const [directoryTypeFilter, setDirectoryTypeFilter] = useState("all");
   const [directoryResourcePages, setDirectoryResourcePages] = useState<Record<number, number>>({});
   const [directoryResourcePageSizes, setDirectoryResourcePageSizes] = useState<Record<number, number>>({});
+  const [orderingTopicId, setOrderingTopicId] = useState<number | null>(null);
+  const [orderingModuleId, setOrderingModuleId] = useState<number | null>(null);
   const [broadcastTitle, setBroadcastTitle] = useState("");
   const [broadcastMessage, setBroadcastMessage] = useState("");
   const [broadcastAudience, setBroadcastAudience] = useState<"all" | "student" | "admin">("all");
@@ -9794,7 +9500,9 @@ function Admin({ user }: { user: User | null }) {
       for (const resource of resources) {
         if (resource?.id != null) deduped.set(resource.id, resource);
       }
-      return Array.from(deduped.values());
+      return Array.from(deduped.values()).sort(
+        (left, right) => (left.sort_order ?? 0) - (right.sort_order ?? 0) || left.id - right.id,
+      );
     };
 
     const normalizeTopics = (topics: Course["modules"][number]["topics"] = []) => {
@@ -9860,11 +9568,13 @@ function Admin({ user }: { user: User | null }) {
       api<typeof storage>("/admin/storage"),
       api<AdminPayment[]>("/admin/payments"),
     ]);
+    const recordings = await api<typeof recordedSummary>("/admin/recorded-videos/summary").catch(() => ({ total: 0, assigned: 0, unassigned: 0 }));
     const normalizedItems = normalizeCourses(items);
     setOverview(stats);
     setCourses(normalizedItems);
     setStorage(storageInfo);
     setPayments(paymentItems);
+    setRecordedSummary(recordings);
     setSelected((id) =>
       id && normalizedItems.some((item) => String(item.id) === id)
         ? id
@@ -9888,6 +9598,9 @@ function Admin({ user }: { user: User | null }) {
         setMockPriceRupees((configuration.price_paise / 100).toString());
         setFreeMockAttempts(String(configuration.free_attempt_limit));
       })
+      .catch(() => undefined);
+    void api<{ price_paise: number }>("/admin/settings/question-archive")
+      .then((configuration) => setQuestionArchivePriceRupees((configuration.price_paise / 100).toString()))
       .catch(() => undefined);
   }, [user?.id]);
 
@@ -10162,6 +9875,24 @@ function Admin({ user }: { user: User | null }) {
       adminError("Settings save failed", cause, "Unable to save mock-test settings.");
     } finally {
       setSavingMockSettings(false);
+    }
+  };
+
+  const saveQuestionArchivePrice = async (event: FormEvent) => {
+    event.preventDefault();
+    const parsedPrice = Number(questionArchivePriceRupees);
+    if (!Number.isFinite(parsedPrice) || parsedPrice < 1) return setMessage("Enter a Question Archive price of at least ₹1.");
+    try {
+      const configuration = await api<{ price_paise: number }>("/admin/settings/question-archive", {
+        method: "PATCH",
+        body: JSON.stringify({ price_paise: Math.round(parsedPrice * 100) }),
+      });
+      setQuestionArchivePriceRupees((configuration.price_paise / 100).toString());
+      setMessage("Question Archive price saved.");
+      adminSuccess("Settings saved", "The Question Archive unlock price was updated.");
+    } catch (cause) {
+      setMessage((cause as Error).message);
+      adminError("Settings save failed", cause, "Unable to save the Question Archive price.");
     }
   };
 
@@ -10567,6 +10298,60 @@ function Admin({ user }: { user: User | null }) {
       adminError("File move failed", cause, "Unable to move the file.");
     }
   };
+  const reorderTopicResources = async (
+    topicId: number,
+    resources: Topic["resources"],
+    index: number,
+    direction: -1 | 1,
+  ) => {
+    const targetIndex = index + direction;
+    if (targetIndex < 0 || targetIndex >= resources.length || orderingTopicId !== null) return;
+    const reordered = [...resources];
+    [reordered[index], reordered[targetIndex]] = [reordered[targetIndex], reordered[index]];
+    setOrderingTopicId(topicId);
+    setMessage("");
+    try {
+      await api(`/courses/topics/${topicId}/resources/order`, {
+        method: "PUT",
+        body: JSON.stringify({ resource_ids: reordered.map((resource) => resource.id) }),
+      });
+      await refresh();
+      setMessage("File order saved. Learners will see the same order.");
+      adminSuccess("File order saved", "The topic order is now visible to learners.");
+    } catch (cause) {
+      setMessage((cause as Error).message || "Could not save the file order.");
+      adminError("File reorder failed", cause, "Unable to save the new topic order.");
+    } finally {
+      setOrderingTopicId(null);
+    }
+  };
+  const reorderCourseModules = async (
+    courseId: number,
+    courseModules: Course["modules"],
+    index: number,
+    direction: -1 | 1,
+  ) => {
+    const targetIndex = index + direction;
+    if (targetIndex < 0 || targetIndex >= courseModules.length || orderingModuleId !== null) return;
+    const reordered = [...courseModules];
+    [reordered[index], reordered[targetIndex]] = [reordered[targetIndex], reordered[index]];
+    setOrderingModuleId(reordered[index].id);
+    setMessage("");
+    try {
+      await api(`/courses/${courseId}/modules/order`, {
+        method: "PUT",
+        body: JSON.stringify({ module_ids: reordered.map((module) => module.id) }),
+      });
+      await refresh();
+      setMessage("Module order saved. Learners will see the same order.");
+      adminSuccess("Module order saved", "The course module order was updated in the database.");
+    } catch (cause) {
+      setMessage((cause as Error).message || "Could not save the module order.");
+      adminError("Module reorder failed", cause, "Unable to save the new module order.");
+    } finally {
+      setOrderingModuleId(null);
+    }
+  };
   const deleteResource = async (id: number) => {
     const confirmed = await notifications.confirmAction({
       title: "Delete file",
@@ -10624,6 +10409,7 @@ function Admin({ user }: { user: User | null }) {
   const metricCards = [
     { label: "Students", value: overview?.students ?? "—", icon: "👥" },
     { label: "Materials", value: overview?.resources ?? "—", icon: "🗂️" },
+    { label: "Recorded videos", value: recordedSummary.total, icon: "🎬" },
     {
       label: "Revenue",
       value: overview ? `₹${(overview.revenue_paise / 100).toLocaleString("en-IN")}` : "—",
@@ -10739,6 +10525,16 @@ function Admin({ user }: { user: User | null }) {
           </span>
           <ArrowRight size={15} />
         </Link>
+        <Link to="/admin/recorded-videos" className="admin-quicklink-card">
+          <span className="admin-quicklink-icon">🎬</span>
+          <span>
+            <b>Recorded videos</b>
+            <small>
+              {recordedSummary.assigned} assigned · {recordedSummary.unassigned} awaiting assignment · upload, thumbnails &amp; reorder
+            </small>
+          </span>
+          <ArrowRight size={15} />
+        </Link>
       </div>
       {renameTarget && (
         <div className="rename-modal-backdrop" onClick={closeRenameTarget}>
@@ -10839,6 +10635,25 @@ function Admin({ user }: { user: User | null }) {
             <button className="button button-dark" type="submit" disabled={savingMockSettings}>
               <Save size={14} /> {savingMockSettings ? "Saving..." : "Save settings"}
             </button>
+          </div>
+        </form>
+      </section>
+      <section className="panel admin-mock-settings">
+        <div className="section-heading compact">
+          <div>
+            <span className="eyebrow">QUESTION ARCHIVE ACCESS</span>
+            <h2>Three free papers, then unlock</h2>
+          </div>
+        </div>
+        <form className="admin-mock-settings-form" onSubmit={saveQuestionArchivePrice}>
+          <div className="inline-builder">
+            <label>
+              Unlimited archive price (INR)
+              <input type="number" min="1" step="0.01" value={questionArchivePriceRupees} onChange={(event) => setQuestionArchivePriceRupees(event.target.value)} required />
+            </label>
+          </div>
+          <div className="form-action-row">
+            <button className="button button-dark" type="submit"><Save size={14} /> Save archive price</button>
           </div>
         </form>
       </section>
@@ -11398,6 +11213,7 @@ function Admin({ user }: { user: User | null }) {
               (count, topic) => count + (topic.resources || []).length,
               0,
             );
+            const moduleIndex = modules.findIndex((item) => item.id === module.id);
 
             return (
               <div className="directory-admin-module" key={module.id}>
@@ -11408,6 +11224,26 @@ function Admin({ user }: { user: User | null }) {
                     <small>{moduleTotalFiles} files</small>
                   </div>
                   <div className="directory-action-row">
+                    <button
+                      type="button"
+                      className="button-link"
+                      title="Move module up"
+                      aria-label={`Move module ${module.title} up`}
+                      disabled={moduleIndex <= 0 || orderingModuleId !== null}
+                      onClick={() => void reorderCourseModules(Number(selected), modules, moduleIndex, -1)}
+                    >
+                      <ChevronUp size={14} />
+                    </button>
+                    <button
+                      type="button"
+                      className="button-link"
+                      title="Move module down"
+                      aria-label={`Move module ${module.title} down`}
+                      disabled={moduleIndex < 0 || moduleIndex >= modules.length - 1 || orderingModuleId !== null}
+                      onClick={() => void reorderCourseModules(Number(selected), modules, moduleIndex, 1)}
+                    >
+                      <ChevronDown size={14} />
+                    </button>
                     <button
                       type="button"
                       className="button button-small"
@@ -11497,6 +11333,7 @@ function Admin({ user }: { user: User | null }) {
                             {visibleTopicResources.map((resource) => (
                               <div className="material-row" key={resource.id}>
                                 {(() => {
+                                  const resourceIndex = topicResources.findIndex((item) => item.id === resource.id);
                                   const filename = resource.original_filename || resource.title || "Unnamed file";
                                   const extension = filename.split(".").pop()?.toUpperCase() || resource.resource_type.toUpperCase() || "FILE";
                                   const fileType = extension.length <= 5 ? extension : resource.resource_type.toUpperCase();
@@ -11508,10 +11345,30 @@ function Admin({ user }: { user: User | null }) {
                                 <div className="directory-file-meta">
                                   <strong title={filename}>{filename}</strong>
                                   <small>
-                                    {resource.title && resource.title !== resource.original_filename ? `${resource.title} · ` : ""}{module.title} / {topic.title}
+                                    #{resource.sort_order ?? resourceIndex + 1} · {resource.title && resource.title !== resource.original_filename ? `${resource.title} · ` : ""}{module.title} / {topic.title}
                                   </small>
                                 </div>
                                 <div className="resource-actions">
+                                  <button
+                                    className="button-link"
+                                    type="button"
+                                    title="Move file up"
+                                    aria-label={`Move ${filename} up`}
+                                    disabled={resourceIndex <= 0 || orderingTopicId === topic.id}
+                                    onClick={() => void reorderTopicResources(topic.id, topicResources, resourceIndex, -1)}
+                                  >
+                                    <ChevronUp size={14} />
+                                  </button>
+                                  <button
+                                    className="button-link"
+                                    type="button"
+                                    title="Move file down"
+                                    aria-label={`Move ${filename} down`}
+                                    disabled={resourceIndex >= topicResources.length - 1 || orderingTopicId === topic.id}
+                                    onClick={() => void reorderTopicResources(topic.id, topicResources, resourceIndex, 1)}
+                                  >
+                                    <ChevronDown size={14} />
+                                  </button>
                                   <button
                                     className="button-link"
                                     type="button"
@@ -11996,7 +11853,8 @@ function CourseLiveClasses({
   const recordings = classes.filter(
     (item) => item.recording_status === "COMPLETED",
   );
-  if (!user || (classroomClasses.length === 0 && recordings.length === 0))
+  if (!user || (!courseAccess && classroomClasses.length === 0 && recordings.length === 0))
+    
     return null;
   if (!courseAccess) {
     return (
@@ -12060,7 +11918,7 @@ function CourseLiveClasses({
           .map((item) => (
             <LiveClassRoomPanel key={`room-${item.id}`} liveClassId={item.id} />
           ))}
-        {recordings.length > 0 && (
+                {recordings.length > 0 && (
           <div className="recording-grid course-recordings">
             {recordings.map((item) => (
               <RecordingCard
@@ -12076,6 +11934,18 @@ function CourseLiveClasses({
             ))}
           </div>
         )}
+        <div className="recording-grid course-recordings">
+          <RecordingCard
+            key={`course-prerecorded-${courseId}`}
+            data={{
+              courseId,
+              hideWhenEmpty: true,
+              title: "Prerecorded course videos",
+              topic: "Course recordings",
+              paymentUrl: `/payment/course/${courseSlug}`,
+            }}
+          />
+        </div>
       </section>
     </>
   );
@@ -12317,564 +12187,20 @@ type AdminRecordedVideo = {
   duration_seconds?: number | null;
   live_class_id?: number | null;
   live_class_title?: string | null;
+  course_id?: number | null;
+  course_title?: string | null;
+  media_type?: "audio" | "video";
+  format?: string;
+  recording_id?: number | null;
   status: string;
   matching_source?: string | null;
   match_confidence?: string | null;
+  unassigned_reason?: string | null;
   available?: boolean;
   last_error?: string | null;
   created_at?: string | null;
   updated_at?: string | null;
 };
-
-function AdminRecordedVideosPage({ user }: { user: User | null }) {
-  const notifications = useNotifications();
-  const [records, setRecords] = useState<AdminRecordedVideo[]>([]);
-  const [liveClasses, setLiveClasses] = useState<LiveClass[]>([]);
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [summary, setSummary] = useState({ total: 0, assigned: 0, unassigned: 0 });
-  const [loading, setLoading] = useState(true);
-  const [syncing, setSyncing] = useState(false);
-  const [assigningId, setAssigningId] = useState<number | null>(null);
-  const [tab, setTab] = useState<"all" | "assigned" | "needs-assignment">("all");
-  const [search, setSearch] = useState("");
-  const [courseFilter, setCourseFilter] = useState("all");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [sortBy, setSortBy] = useState<"newest" | "oldest" | "name">("newest");
-  const [assignmentCourseByRecord, setAssignmentCourseByRecord] = useState<Record<number, string>>({});
-  const [page, setPage] = useState(1);
-  const [notice, setNotice] = useState("");
-  const [error, setError] = useState("");
-  const [previewItem, setPreviewItem] = useState<AdminRecordedVideo | null>(null);
-  const [previewUrl, setPreviewUrl] = useState("");
-  const [previewBusy, setPreviewBusy] = useState(false);
-  const pageSize = 8;
-
-  const load = async () => {
-    setLoading(true);
-    try {
-      const [items, stats, classes, allCourses] = await Promise.all([
-        api<AdminRecordedVideo[]>("/admin/recorded-videos"),
-        api<{ total: number; assigned: number; unassigned: number }>("/admin/recorded-videos/summary"),
-        api<LiveClass[]>("/live-classes"),
-        api<Course[]>("/admin/courses"),
-      ]);
-      setRecords(items);
-      setSummary(stats);
-      setLiveClasses(classes);
-      setCourses(allCourses);
-      setError("");
-    } catch (cause) {
-      setError((cause as Error).message || "Unable to load recorded videos.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (user?.role !== "admin") return;
-    void load();
-  }, [user]);
-
-  useEffect(() => {
-    setPage(1);
-  }, [tab, search, courseFilter, statusFilter, sortBy]);
-
-  const courseOptions = useMemo(() => {
-    const ids = new Set<number>();
-    for (const item of liveClasses) {
-      if (item.course_id) ids.add(item.course_id);
-    }
-    return courses
-      .filter((course) => ids.has(course.id))
-      .map((course) => ({ id: course.id, title: course.title }));
-  }, [courses, liveClasses]);
-
-  const normalizedRecords = useMemo(() => {
-    return records.map((record) => {
-      const liveClass = liveClasses.find((item) => item.id === record.live_class_id) || null;
-      const course = liveClass ? courses.find((item) => item.id === liveClass.course_id) || null : null;
-      return {
-        ...record,
-        courseTitle: course?.title || "",
-        courseId: course?.id ?? null,
-        liveClassTitle: record.live_class_title || liveClass?.title || "Unassigned",
-      };
-    });
-  }, [courses, liveClasses, records]);
-
-  const visibleRecords = useMemo(() => {
-    const query = search.trim().toLowerCase();
-    const filtered = normalizedRecords.filter((record) => {
-      const matchesTab =
-        tab === "all" ||
-        (tab === "assigned" && (record.status === "ASSIGNED" || Boolean(record.live_class_id))) ||
-        (tab === "needs-assignment" && (!record.live_class_id || record.status === "UNASSIGNED"));
-      const matchesSearch = !query || `${record.file_name} ${record.courseTitle} ${record.liveClassTitle}`.toLowerCase().includes(query);
-      const matchesCourse = courseFilter === "all" || String(record.courseId ?? "") === courseFilter || String(record.live_class_id ?? "") === courseFilter;
-      const matchesStatus = statusFilter === "all" || record.status === statusFilter;
-      return matchesTab && matchesSearch && matchesCourse && matchesStatus;
-    });
-
-    return [...filtered].sort((left, right) => {
-      const leftDate = left.drive_created_at ? Date.parse(left.drive_created_at) : new Date(left.created_at || 0).getTime();
-      const rightDate = right.drive_created_at ? Date.parse(right.drive_created_at) : new Date(right.created_at || 0).getTime();
-      if (sortBy === "name") {
-        return (left.file_name || "").localeCompare(right.file_name || "");
-      }
-      return sortBy === "oldest" ? leftDate - rightDate : rightDate - leftDate;
-    });
-  }, [courseFilter, normalizedRecords, search, sortBy, statusFilter, tab]);
-
-  const totalPages = Math.max(1, Math.ceil(visibleRecords.length / pageSize));
-  const safePage = Math.min(page, totalPages);
-  const paginatedRecords = useMemo(() => {
-    const start = (safePage - 1) * pageSize;
-    return visibleRecords.slice(start, start + pageSize);
-  }, [safePage, visibleRecords]);
-
-  const syncNow = async () => {
-    setSyncing(true);
-    setError("");
-    setNotice("");
-    try {
-      const result = await api<{ checked: number; assigned: number; unassigned: number; message: string }>("/admin/recorded-videos/sync", { method: "POST" });
-      setNotice(`${result.message}. ${result.checked} videos checked, ${result.assigned} assigned, ${result.unassigned} need review.`);
-      notifications.showToast({ kind: "success", title: "Recordings synced", message: `${result.checked} videos checked and ${result.assigned} assigned.` });
-      await load();
-    } catch (cause) {
-      setError((cause as Error).message || "Unable to sync recordings right now. Please try again shortly.");
-      notifications.showToast({ kind: "error", title: "Recording sync failed", message: (cause as Error).message || "Unable to sync recordings." });
-    } finally {
-      setSyncing(false);
-    }
-  };
-
-  const assignRecording = async (recordId: number, liveClassId: string) => {
-    const selectedId = Number(liveClassId);
-    if (!selectedId) return;
-    setAssigningId(recordId);
-    setError("");
-    setNotice("");
-    try {
-      await api(`/admin/recorded-videos/${recordId}/assign`, {
-        method: "PATCH",
-        body: JSON.stringify({ live_class_id: selectedId }),
-      });
-      setNotice("Recording assigned successfully.");
-      notifications.showToast({ kind: "success", title: "Recording assigned", message: "The recording is now linked to the selected live class." });
-      await load();
-    } catch (cause) {
-      setError((cause as Error).message || "Unable to assign this recording. Please try again.");
-      notifications.showToast({ kind: "error", title: "Assignment failed", message: (cause as Error).message || "Unable to assign this recording." });
-    } finally {
-      setAssigningId(null);
-    }
-  };
-
-  const assignToCourse = async (recordId: number, courseId: string) => {
-    const targetCourseId = Number(courseId);
-    if (!targetCourseId) {
-      setError("Please select a course before assigning this recording.");
-      return;
-    }
-
-    const matchingClass = liveClasses.find((item) => Number(item.course_id) === targetCourseId);
-    if (!matchingClass) {
-      setError("No live class is available for this course yet.");
-      return;
-    }
-
-    setAssignmentCourseByRecord((current) => ({ ...current, [recordId]: String(targetCourseId) }));
-    await assignRecording(recordId, String(matchingClass.id));
-  };
-
-  const openPreview = async (record: AdminRecordedVideo) => {
-    setPreviewBusy(true);
-    setPreviewUrl("");
-    try {
-      const result = await api<{ url: string }>(`/library/recorded-videos/${record.drive_file_id}/drive-view`, { method: "POST" });
-      setPreviewItem(record);
-      setPreviewUrl(result.url);
-    } catch (cause) {
-      setError((cause as Error).message || "Unable to load the preview right now.");
-    } finally {
-      setPreviewBusy(false);
-    }
-  };
-
-  const pageNumbers = Array.from({ length: totalPages }, (_, index) => index + 1); 
-
-  if (!user || user.role !== "admin") {
-    return (
-      <div className="container">
-        <div className="empty-state">
-          <ShieldCheck size={26} />
-          <h2>Admin access only.</h2>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="container admin-page" style={{ paddingBottom: 32 }}>
-      <div className="admin-head" style={{ alignItems: "center" }}>
-        <div>
-          <span className="eyebrow">RECORDED VIDEOS</span>
-          <h1 style={{ margin: "8px 0 4px" }}>Recorded Videos</h1>
-          <p style={{ margin: 0 }}>Manage, assign and organize Live Class recordings.</p>
-        </div>
-        <button
-          className="button button-dark"
-          disabled={syncing}
-          onClick={() => void syncNow()}
-          style={{ minWidth: 180 }}
-        >
-          <RefreshCw size={15} className={syncing ? "spin" : ""} />
-          {syncing ? "Syncing..." : "Sync Google Drive"}
-        </button>
-      </div>
-
-      {notice && (
-        <div className="notice notice-success" style={{ marginTop: 14 }}>
-          <Check size={16} />
-          <span>{notice}</span>
-        </div>
-      )}
-      {error && (
-        <div className="notice notice-error" style={{ marginTop: 14 }}>
-          <span>{error}</span>
-        </div>
-      )}
-
-      <div className="admin-stats" style={{ marginTop: 18 }}>
-        <div className="admin-stat">
-          <small>Total Videos</small>
-          <b>{summary.total || records.length}</b>
-          <span>recordings</span>
-        </div>
-        <div className="admin-stat">
-          <small>Assigned</small>
-          <b>{summary.assigned || records.filter((item) => item.status === "ASSIGNED" || Boolean(item.live_class_id)).length}</b>
-          <span>matched</span>
-        </div>
-        <div className="admin-stat">
-          <small>Unassigned</small>
-          <b>{summary.unassigned || records.filter((item) => !item.live_class_id || item.status === "UNASSIGNED").length}</b>
-          <span>needs review</span>
-        </div>
-      </div>
-
-      <section className="panel" style={{ padding: 18, marginTop: 22, borderRadius: 18 }}>
-        <div
-          className="recorded-admin-toolbar"
-          style={{
-            display: "grid",
-            gridTemplateColumns: "minmax(240px, 1.7fr) repeat(4, minmax(150px, 1fr))",
-            gap: 12,
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              border: "1px solid rgba(148,163,184,0.22)",
-              borderRadius: 12,
-              background: "rgba(248,250,252,0.7)",
-              padding: "0 14px",
-              minHeight: 46,
-            }}
-          >
-            <Search size={16} style={{ color: "#64748b", marginRight: 8 }} />
-            <input
-              className="payments-search"
-              placeholder="Search recordings..."
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              style={{
-                width: "100%",
-                background: "transparent",
-                border: 0,
-                outline: "none",
-                fontSize: 15,
-                color: "#0f172a",
-              }}
-            />
-          </div>
-
-          <select value={courseFilter} onChange={(event) => setCourseFilter(event.target.value)} style={{ minHeight: 46 }}>
-            <option value="all">Course</option>
-            {courseOptions.map((course) => (
-              <option key={course.id} value={String(course.id)}>{course.title}</option>
-            ))}
-          </select>
-          <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)} style={{ minHeight: 46 }}>
-            <option value="all">Status</option>
-            <option value="ASSIGNED">Assigned</option>
-            <option value="UNASSIGNED">Needs Assignment</option>
-          </select>
-          <select value={sortBy} onChange={(event) => setSortBy(event.target.value as typeof sortBy)} style={{ minHeight: 46 }}>
-            <option value="newest">Newest</option>
-            <option value="oldest">Oldest</option>
-            <option value="name">Name</option>
-          </select>
-        </div>
-
-        <div className="section-heading compact" style={{ marginTop: 18, marginBottom: 16, alignItems: "center" }}>
-          <div>
-            <span className="eyebrow">MANAGE</span>
-            <h2 style={{ margin: "6px 0 0" }}>Manage recordings</h2>
-          </div>
-          <div className="tab-row" role="tablist" aria-label="Recorded video tabs" style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-            {[
-              { key: "all", label: "All" },
-              { key: "assigned", label: "Assigned" },
-              { key: "needs-assignment", label: "Needs Assignment" },
-            ].map((item) => (
-              <button
-                key={item.key}
-                type="button"
-                className={`button button-small ${tab === item.key ? "button-dark" : "button-outline"}`}
-                onClick={() => setTab(item.key as typeof tab)}
-              >
-                {item.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {loading ? (
-          <div className="empty-state">Loading recordings…</div>
-        ) : !visibleRecords.length ? (
-          <div className="empty-state" style={{ padding: 28 }}>
-            <Play size={26} />
-            <h3>No recorded videos found.</h3>
-            <p>Use Sync Google Drive to discover recordings.</p>
-          </div>
-        ) : (
-          <>
-            <div className="recorded-admin-grid" style={{ display: "grid", gap: 14 }}>
-              {paginatedRecords.map((record) => {
-                const isAssigned = Boolean(record.live_class_id) || record.status === "ASSIGNED";
-                const selectedAssignment = String(record.live_class_id ?? "");
-                const dateText = record.drive_created_at ? new Date(record.drive_created_at).toLocaleDateString("en-IN") : "Date unavailable";
-                const sizeText = record.file_size ? `${(record.file_size / (1024 * 1024)).toFixed(1)} MB` : "Size unavailable";
-
-                return (
-                  <article
-                    key={record.id}
-                    className="recorded-admin-card panel"
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "220px minmax(0, 1fr)",
-                      gap: 18,
-                      padding: 14,
-                      borderRadius: 16,
-                      alignItems: "center",
-                    }}
-                  >
-                    <div
-                      className="recorded-admin-thumb"
-                      aria-label={record.file_name}
-                      style={{
-                        position: "relative",
-                        height: 150,
-                        borderRadius: 14,
-                        background: "linear-gradient(135deg, #0b1f2c 0%, #1e3a5f 100%)",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        overflow: "hidden",
-                        boxShadow: "inset 0 0 0 1px rgba(148,163,184,0.1)",
-                      }}
-                    >
-                      <div
-                        style={{
-                          width: 76,
-                          height: 76,
-                          borderRadius: "50%",
-                          background: "linear-gradient(135deg, #3b82f6, #67e8f9)",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          boxShadow: "0 12px 28px rgba(59,130,246,0.4)",
-                        }}
-                      >
-                        <Play size={28} color="#fff" fill="white" />
-                      </div>
-                    </div>
-
-                    <div style={{ minWidth: 0 }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, marginBottom: 10 }}>
-                        <div style={{ minWidth: 0, flex: 1 }}>
-                          <div style={{ fontSize: 13, color: "#64748b", textTransform: "uppercase", letterSpacing: 1.2, marginBottom: 6 }}>
-                            {record.courseTitle || "Course"}
-                          </div>
-                          <strong style={{ display: "block", fontSize: 18, color: "#0f172a", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                            {record.file_name}
-                          </strong>
-                        </div>
-                        <span
-                          className={`recorded-pill ${isAssigned ? "success" : "warn"}`}
-                          style={{
-                            display: "inline-flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            padding: "6px 10px",
-                            borderRadius: 999,
-                            fontSize: 12,
-                            fontWeight: 700,
-                            background: isAssigned ? "rgba(16,185,129,0.12)" : "rgba(245,158,11,0.12)",
-                            color: isAssigned ? "#047857" : "#b45309",
-                            whiteSpace: "nowrap",
-                          }}
-                        >
-                          {isAssigned ? "Assigned" : "Needs Assignment"}
-                        </span>
-                      </div>
-
-                      <div style={{ display: "flex", gap: 16, flexWrap: "wrap", color: "#475569", fontSize: 13, marginBottom: 12 }}>
-                        <span>{dateText}</span>
-                        <span>{sizeText}</span>
-                        {record.duration_seconds ? <span>{Math.round(record.duration_seconds / 60)} min</span> : null}
-                      </div>
-
-                      {isAssigned ? (
-                        <>
-                          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 10, marginBottom: 14 }}>
-                            <div style={{ fontSize: 13, color: "#475569" }}>
-                              <strong style={{ color: "#0f172a" }}>Course:</strong> {record.courseTitle || "Course unavailable"}
-                            </div>
-                            {record.liveClassTitle ? (
-                              <div style={{ fontSize: 13, color: "#475569" }}>
-                                <strong style={{ color: "#0f172a" }}>Live Class:</strong> {record.liveClassTitle}
-                              </div>
-                            ) : null}
-                          </div>
-                          <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
-                            <button className="button button-small button-outline" type="button" onClick={() => void openPreview(record)} disabled={previewBusy}>
-                              Preview
-                            </button>
-                          </div>
-                        </>
-                      ) : (
-                        <>
-                          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 10, marginBottom: 14 }}>
-                            <label style={{ display: "grid", gap: 6, fontSize: 12, color: "#475569", fontWeight: 600 }}>
-                              Course
-                              <select
-                                value={assignmentCourseByRecord[record.id] ?? ""}
-                                onChange={(event) => {
-                                  const nextValue = event.target.value;
-                                  setAssignmentCourseByRecord((current) => ({ ...current, [record.id]: nextValue }));
-                                }}
-                              >
-                                <option value="">Select Course</option>
-                                {courses.map((course) => (
-                                  <option key={course.id} value={String(course.id)}>{course.title}</option>
-                                ))}
-                              </select>
-                            </label>
-                          </div>
-                          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-                            <button
-                              className="button button-small button-dark"
-                              type="button"
-                              onClick={async () => {
-                                const selectedCourse = assignmentCourseByRecord[record.id] ?? (courseFilter === "all" ? "" : courseFilter);
-                                if (!selectedCourse) {
-                                  setError("Please choose a course before assigning this recording.");
-                                  return;
-                                }
-                                await assignToCourse(record.id, selectedCourse);
-                              }}
-                              disabled={assigningId === record.id}
-                            >
-                              {assigningId === record.id ? "Assigning..." : "Assign Recording"}
-                            </button>
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  </article>
-                );
-              })}
-            </div>
-
-            {totalPages > 1 && (
-              <div
-                className="admin-pagination"
-                style={{
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  gap: 10,
-                  marginTop: 24,
-                  flexWrap: "wrap",
-                }}
-              >
-                <button
-                  type="button"
-                  className="button button-small button-outline"
-                  disabled={safePage === 1}
-                  onClick={() => setPage((current) => Math.max(1, current - 1))}
-                >
-                  <ChevronLeft size={14} /> Previous
-                </button>
-
-                {pageNumbers.map((pageNumber) => (
-                  <button
-                    key={pageNumber}
-                    type="button"
-                    className={`button button-small ${safePage === pageNumber ? "button-dark" : "button-outline"}`}
-                    onClick={() => setPage(pageNumber)}
-                  >
-                    {pageNumber}
-                  </button>
-                ))}
-
-                <button
-                  type="button"
-                  className="button button-small button-outline"
-                  disabled={safePage === totalPages}
-                  onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
-                >
-                  Next <ChevronRight size={14} />
-                </button>
-              </div>
-            )}
-          </>
-        )}
-      </section>
-
-      {previewItem && (
-        <div className="google-auth-modal" role="dialog" aria-modal="true" aria-labelledby="recording-preview-title">
-          <div className="google-auth-backdrop" aria-hidden="true" onClick={() => setPreviewItem(null)} />
-          <div className="google-auth-modal-card" style={{ maxWidth: "900px", width: "min(90vw, 900px)" }}>
-            <button className="google-auth-close" type="button" aria-label="Close preview" onClick={() => setPreviewItem(null)}>
-              <X size={18} />
-            </button>
-            <h2 id="recording-preview-title">Preview recording</h2>
-            <p>{previewItem.file_name}</p>
-            {previewUrl ? (
-              <video
-                src={previewUrl}
-                controls
-                playsInline
-                autoPlay
-                style={{ width: "100%", maxHeight: "65vh", borderRadius: "12px", background: "#06151d" }}
-              />
-            ) : (
-              <div className="empty-state">
-                <Play size={22} />
-                <h3>Preparing preview…</h3>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
 
 function UnifiedAdminLivePage({ user }: { user: User | null }) {
   return <MeetAdminPanel user={user} />;
