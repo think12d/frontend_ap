@@ -19,6 +19,7 @@ export type QuestionLibraryFile = {
   modified_at?: string | null;
   is_question_file: boolean;
   is_answer_key: boolean;
+  free_access?: boolean;
 };
 
 export type QuestionLibrary = {
@@ -29,6 +30,7 @@ export type QuestionLibrary = {
   file_count: number;
   years: { year: string; files: QuestionLibraryFile[] }[];
   files: QuestionLibraryFile[];
+  free_papers_remaining?: number;
 };
 
 export type RecordedLibraryFile = QuestionLibraryFile & {
