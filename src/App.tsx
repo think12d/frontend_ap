@@ -748,8 +748,8 @@ function AppContent() {
           <Route path="/study-planner" element={<StudyPlanner user={user} />} />
           <Route path="/jrf-strategy" element={<JRFStrategyBuilder user={user} />} />
           <Route path="/mock-tests" element={<MockTests user={user} />} />
-          <Route path="/question-bank" element={<QuestionArchivePage user={user} />} />
-          <Route path="/question-archive" element={<QuestionArchivePage user={user} />} />
+          <Route path="/question-bank" element={<QuestionBankPage user={user} />} />
+          <Route path="/question-archive" element={<QuestionBankPage user={user} />} />
           <Route path="/recorded-classes" element={<RecordedVideoLibraryPage user={user} />} />
           <Route path="/live" element={<UnifiedLivePage user={user} />} />
           <Route path="/live/:liveClassId" element={<FullLiveClassPage user={user} />} />
