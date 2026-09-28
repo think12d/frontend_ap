@@ -81,6 +81,7 @@ import type {
   PaginatedCourseListResponse,
   PaymentReceipt,
   PremiumAccess,
+  QuestionArchivePaper,
   QuestionLibrary,
   QuestionLibraryFile,
   Quiz,
@@ -747,7 +748,8 @@ function AppContent() {
           <Route path="/study-planner" element={<StudyPlanner user={user} />} />
           <Route path="/jrf-strategy" element={<JRFStrategyBuilder user={user} />} />
           <Route path="/mock-tests" element={<MockTests user={user} />} />
-          <Route path="/question-bank" element={<QuestionBankPage user={user} />} />
+          <Route path="/question-bank" element={<QuestionArchivePage user={user} />} />
+          <Route path="/question-archive" element={<QuestionArchivePage user={user} />} />
           <Route path="/recorded-classes" element={<RecordedVideoLibraryPage user={user} />} />
           <Route path="/live" element={<UnifiedLivePage user={user} />} />
           <Route path="/live/:liveClassId" element={<FullLiveClassPage user={user} />} />
@@ -5020,6 +5022,9 @@ function MockTests({ user }: { user: User | null }) {
 }
 
 function QuizStudio({ user }: { user: User | null }) {
+  // Reuse the same key only while a generation is in flight. The backend
+  // resolves a retry to the already-created quiz instead of creating another.
+  const generationKeyRef = useRef<string | null>(null);
   const [courses, setCourses] = useState<Course[]>([]);
   const [selectedCourse, setSelectedCourse] = useState("");
   const [selectedSubjectArea, setSelectedSubjectArea] = useState("");
@@ -5331,8 +5336,11 @@ function QuizStudio({ user }: { user: User | null }) {
     );
     setResult(null);
     try {
+      const generationKey = generationKeyRef.current || crypto.randomUUID();
+      generationKeyRef.current = generationKey;
       const generated = await api<Quiz>("/quizzes/generate", {
         method: "POST",
+        headers: { "Idempotency-Key": generationKey },
         body: JSON.stringify({
           topic_ids: topicSelection,
           exam: "UGC NET",
@@ -5365,6 +5373,7 @@ function QuizStudio({ user }: { user: User | null }) {
       persistQuizDraft(user, null);
       setResumeDraft(null);
       setPaymentRequired(false);
+      generationKeyRef.current = null;
       setMessage(
         `${generated.questions.length} questions loaded. ${generated.availability_notice || "You can move between questions and return to skipped ones."}`,
       );
@@ -7434,6 +7443,40 @@ function getLibraryCategory(file: QuestionLibraryFile) {
   if (file.is_question_file || normalized.includes("question") || normalized.includes("paper")) return "Question Paper";
   if (normalized.includes("merged") || normalized.includes("combined") || normalized.includes("final")) return "Merged Paper";
   return "Other";
+}
+
+function QuestionArchivePage({ user }: { user: User | null }) {
+  const [papers, setPapers] = useState<QuestionArchivePaper[]>([]);
+  const [selected, setSelected] = useState<QuestionArchivePaper | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [busyId, setBusyId] = useState<number | null>(null);
+  const [error, setError] = useState("");
+  const load = async () => {
+    setLoading(true);
+    try {
+      setPapers(await api<QuestionArchivePaper[]>("/question-archive?page=1&limit=100"));
+      setError("");
+    } catch (cause) { setError((cause as Error).message || "Could not load the question archive."); }
+    finally { setLoading(false); }
+  };
+  useEffect(() => { if (user) void load(); else setLoading(false); }, [user]);
+  const openPaper = async (id: number) => {
+    setBusyId(id);
+    try { setSelected(await api<QuestionArchivePaper>(`/question-archive/${id}`)); }
+    catch (cause) { setError((cause as Error).message || "Could not open this paper."); }
+    finally { setBusyId(null); }
+  };
+  const buyPaper = async (paper: QuestionArchivePaper) => {
+    setBusyId(paper.id);
+    await startPremiumCheckout(
+      async () => { await load(); await openPaper(paper.id); },
+      (message) => setError(message),
+      { question_archive_paper_id: paper.id },
+    );
+    setBusyId(null);
+  };
+  if (!user) return <div className="container"><div className="empty-state"><Lock size={24} /><h2>Sign in to browse the Question Archive.</h2></div></div>;
+  return <main className="container page-section"><div className="section-heading"><div><span className="eyebrow">QUESTION ARCHIVE</span><h1>Previous-year papers</h1><p>Free papers open immediately. Paid papers are released only after verified payment.</p></div></div>{error && <div className="notice notice-error">{error}</div>}{loading ? <div className="empty-state">Loading papers…</div> : !papers.length ? <div className="empty-state"><Library size={24} /><h2>No papers are published yet.</h2></div> : <div className="course-grid">{papers.map((paper) => <article className="course-card" key={paper.id}><div className="course-card-content"><span className={`status-chip ${paper.owned || paper.is_free ? "status-live" : "status-archived"}`}>{paper.owned || paper.is_free ? "Available" : "Locked"}</span><h2>{paper.title}</h2><p>{paper.description || `${paper.subject}${paper.year ? ` · ${paper.year}` : ""}`}</p><p><b>{paper.is_free ? "Free" : `${paper.currency} ${(paper.price_paise / 100).toLocaleString("en-IN")}`}</b></p><button className="button button-dark" disabled={busyId === paper.id} onClick={() => void (paper.owned || paper.is_free ? openPaper(paper.id) : buyPaper(paper))}>{busyId === paper.id ? "Please wait…" : paper.owned || paper.is_free ? "Open paper" : "Unlock paper"}</button></div></article>)}</div>}{selected && <section className="panel" style={{ marginTop: 24, padding: 20 }}><div className="section-heading compact"><h2>{selected.title}</h2><button className="button button-outline button-small" onClick={() => setSelected(null)}>Close</button></div>{selected.owned || selected.is_free ? <pre style={{ whiteSpace: "pre-wrap", overflowWrap: "anywhere" }}>{JSON.stringify(selected.content, null, 2)}</pre> : <p>This paper is locked. Purchase it to view its questions.</p>}</section>}</main>;
 }
 
 function QuestionBankPage({ user }: { user: User | null }) {
