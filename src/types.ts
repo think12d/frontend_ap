@@ -62,6 +62,20 @@ export type Resource = {
   updated_at?: string | null;
 };
 
+export type QuestionArchivePaper = {
+  id: number;
+  title: string;
+  description: string;
+  year?: number | null;
+  subject: string;
+  is_free: boolean;
+  price_paise: number;
+  currency: string;
+  is_published: boolean;
+  owned: boolean;
+  content?: Record<string, unknown> | null;
+};
+
 export type ResourceRevision = {
   id: number;
   version: number;
