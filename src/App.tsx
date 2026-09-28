@@ -580,7 +580,7 @@ function PremiumPaywall({
             ? "Opening payment…"
             : access.mock_mode
               ? "Complete mock payment"
-                : `Unlock ${feature === "mock" ? "mock tests" : "premium"} · ${access.currency} ${((feature === "mock" ? access.mock_test_price_paise : access.premium_price_paise) / 100).toLocaleString("en-IN")}`}
+                : `Unlock ${feature === "mock" ? "mock tests" : "Question Archive"} · ${access.currency} ${((feature === "mock" ? access.mock_test_price_paise : pricePaise ?? access.premium_price_paise) / 100).toLocaleString("en-IN")}`}
         </button>
       )}
       {error && <small>{error}</small>}
@@ -7709,7 +7709,13 @@ function QuestionBankPage({ user }: { user: User | null }) {
         </div>
       ) : (
         <>
-          {showArchivePaywall && (
+          {!library?.library_access && (library?.free_papers_remaining ?? 0) > 0 && (
+            <div className="notice premium-paywall" role="status">
+              <b>{library.free_papers_remaining} free paper{library.free_papers_remaining === 1 ? "" : "s"} remaining</b>
+              <span>Preview, download, or open any paper in Drive. After three different papers, archive access requires payment.</span>
+            </div>
+          )}
+          {!library?.library_access && (showArchivePaywall || (library?.free_papers_remaining ?? 0) === 0) && (
             <PremiumPaywall access={access} feature="library" pricePaise={library?.price_paise} orderBody={{ question_archive_access: true }} onPaid={async () => { setShowArchivePaywall(false); load(); }} />
           )}
           <div className="archive-toolbar">
