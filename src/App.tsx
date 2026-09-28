@@ -7640,13 +7640,10 @@ function QuestionBankPage({ user }: { user: User | null }) {
     }
   };
   const openQuestionInDrive = async (file: QuestionLibraryFile) => {
-    const driveWindow = window.open("about:blank", "_blank", "noopener,noreferrer");
     try {
       const result = await api<{ url: string }>(`/library/question-bank/file/${encodeURIComponent(file.id)}/drive-view`, { method: "POST" });
-      if (driveWindow) driveWindow.location.replace(result.url);
-      else window.location.assign(result.url);
+      window.location.assign(result.url);
     } catch (cause) {
-      driveWindow?.close();
       setError((cause as Error).message || "Google Drive access could not be granted.");
     }
   };
