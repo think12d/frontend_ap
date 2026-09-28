@@ -31,6 +31,7 @@ export type QuestionLibrary = {
   years: { year: string; files: QuestionLibraryFile[] }[];
   files: QuestionLibraryFile[];
   free_papers_remaining?: number;
+  price_paise?: number;
 };
 
 export type RecordedLibraryFile = QuestionLibraryFile & {
