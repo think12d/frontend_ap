@@ -40,6 +40,8 @@ export type RecordedLibraryFile = QuestionLibraryFile & {
 export type QuestionLibrary = {
   premium_required?: boolean;
   library_access?: boolean;
+  free_papers_remaining?: number;
+  price_paise?: number;
   folder_id: string;
   folder_url?: string;
   file_count: number;
@@ -401,8 +403,11 @@ export type PaymentReceipt = {
 
 export type RazorpayOrder = {
   already_paid: boolean;
+  message?: string;
   already_enrolled?: boolean;
-  course_id?: number;
+  course_id?: number | null;
+  question_archive_paper_id?: number | null;
+  mock_test_access?: boolean;
   mock_mode?: boolean;
   key_id?: string;
   order_id?: string;
@@ -410,6 +415,8 @@ export type RazorpayOrder = {
   currency?: string;
   name?: string;
   description?: string;
+  receipt?: string;
+  access_duration_days?: number;
   prefill?: { name?: string; email?: string };
 };
 
@@ -429,18 +436,7 @@ export type PremiumAccess = {
   mock_test_price_paise: number;
   currency: string;
 };
-export type Resource = {
-  id: number;
-  title: string;
-  original_filename: string;
-  resource_type: string;
-  sort_order?: number;
-  public_url?: string | null;
-  storage_provider: string;
-  file_size?: number | null;
-  duration_sec?: number | null;
-  updated_at?: string | null;
-};
+
 
 export type ResourceMediaUrl = {
   url: string;
