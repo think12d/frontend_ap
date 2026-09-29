@@ -5198,10 +5198,9 @@ function QuizStudio({ user }: { user: User | null }) {
   const paperTwoSelected = papers.length === 0 || papers.some((paper) => /paper\s*2|\b2\b/i.test(paper));
   const selectedFilterSummary = [
     paper1Enabled && paper2Enabled ? "Paper 1 + Paper 2" : paper1Enabled ? "Paper 1" : paper2Enabled ? "Paper 2" : "No paper selected",
-    parsedSelectedYears.length ? `${parsedSelectedYears.length} year${parsedSelectedYears.length === 1 ? "" : "s"}` : "All years",
-    questionBankTopics.length ? `${questionBankTopics.length} topic${questionBankTopics.length === 1 ? "" : "s"}` : "All topics",
-    selectedSubjectCode && paperTwoSelected ? selectedSubjectArea || selectedSubjectCode : "All subjects",
-    difficulty === "mixed" ? "Mixed difficulty" : difficulty,
+    (paper1Years.length || paper2Years.length) ? `${new Set([...paper1Years, ...paper2Years]).size} year${new Set([...paper1Years, ...paper2Years]).size === 1 ? "" : "s"}` : "All years",
+    (paper1Topics.length || paper2Topics.length) ? `${new Set([...paper1Topics, ...paper2Topics]).size} topic${new Set([...paper1Topics, ...paper2Topics]).size === 1 ? "" : "s"}` : "All topics",
+    paper1Enabled && paper2Enabled && paper1Difficulty !== paper2Difficulty ? "Mixed difficulty" : (paper2Enabled ? paper2Difficulty : paper1Difficulty),
   ].join("  ·  ");
   const paper1Facets = paper1BankOptions || bankOptions;
   const paper2Facets = paper2BankOptions || bankOptions;
@@ -5209,7 +5208,6 @@ function QuizStudio({ user }: { user: User | null }) {
   const paper2TopicOptions = (paper2Facets?.topics || []).filter((topic) => topic.toLocaleLowerCase().includes(paperTopicSearch.paper2.toLocaleLowerCase().trim()));
   const paper1YearOptions = (paper1Facets?.years || availableYears).slice().sort((a, b) => a - b);
   const paper2YearOptions = (paper2Facets?.years || availableYears).slice().sort((a, b) => a - b);
-  const paper2SubjectOptions = paper2Facets?.subjects || availableSubjects;
   const togglePaperTopic = (paper: "paper1" | "paper2", topic: string) => {
     const setter = paper === "paper1" ? setPaper1Topics : setPaper2Topics;
     setter((current) => current.includes(topic) ? current.filter((item) => item !== topic) : [...current, topic]);
@@ -5434,13 +5432,13 @@ function QuizStudio({ user }: { user: User | null }) {
           topic_ids: topicSelection,
           exam: "UGC NET",
           years: selectedYears,
-          sessions,
+          sessions: [],
           papers: selectedPapers.length ? selectedPapers : papers,
-          subject_code: selectedSubjectCode || undefined,
-          subject_name: selectedSubjectArea || undefined,
-          categories,
+          subject_code: undefined,
+          subject_name: undefined,
+          categories: [],
           question_bank_topics: selectedQuestionBankTopics,
-          subtopics,
+          subtopics: [],
           difficulty: paper1Enabled && paper2Enabled && paper1Difficulty !== paper2Difficulty
             ? "mixed"
             : (paper2Enabled ? paper2Difficulty : paper1Difficulty),
@@ -5660,7 +5658,8 @@ function QuizStudio({ user }: { user: User | null }) {
           <div className="quiz-builder-head">
             <div>
               <span className="eyebrow">QUIZ SETUP</span>
-              <h3>Build your question paper</h3>
+              <h3>Quiz Setup</h3>
+              <small className="muted">Select the papers and topics you want to include in your quiz.</small>
             </div>
             <ListChecks size={24} />
           </div>
@@ -5740,7 +5739,6 @@ function QuizStudio({ user }: { user: User | null }) {
               <div className="paper-config-head"><div><span className="eyebrow">PAPER 2</span><h4>Subject-specific questions</h4></div><button type="button" className="paper-enable" aria-pressed={paper2Enabled} onClick={() => setPaper2Enabled((value) => !value)}>{paper2Enabled ? "Included" : "Add paper"}</button></div>
               {paper2Enabled && <>
                 <label className="paper-config-label">Years</label><div className="paper-mini-chips">{paper2YearOptions.map((year) => <button type="button" className={paper2Years.includes(year) ? "filter-chip active" : "filter-chip"} key={`p2-${year}`} onClick={() => setPaper2Years((current) => current.includes(year) ? current.filter((item) => item !== year) : [...current, year])}>{year}</button>)}</div>
-                <label className="paper-config-label">Subject<select value={selectedSubjectCode} onChange={(event) => { const subject = paper2SubjectOptions.find((item) => item.code === event.target.value); setSelectedSubjectCode(event.target.value); setSelectedSubjectArea(subject?.name || ""); }}><option value="">All Paper 2 subjects</option>{paper2SubjectOptions.map((subject) => <option key={`p2-subject-${subject.code}`} value={subject.code}>{subject.code} · {subject.name}</option>)}</select></label>
                 <label className="paper-config-label">Difficulty<select value={paper2Difficulty} onChange={(event) => setPaper2Difficulty(event.target.value)}><option value="mixed">All difficulties</option>{availableDifficulties.map((value) => <option key={`p2-${value}`} value={value}>{value}</option>)}</select></label>
                 <label className="paper-config-label">Topics <span>{paper2Topics.length ? `${paper2Topics.length} selected` : "All topics"}</span></label><div className="paper-topic-picker"><input placeholder="Search Paper 2 topics" value={paperTopicSearch.paper2} onChange={(event) => setPaperTopicSearch((current) => ({ ...current, paper2: event.target.value }))} /><div className="paper-topic-actions"><button type="button" onClick={() => setPaper2Topics(paper2TopicOptions)}>Select all</button><button type="button" onClick={() => setPaper2Topics([])}>Clear all</button></div><div className="paper-topic-list">{paper2TopicOptions.map((topic) => <label key={`p2-topic-${topic}`}><input type="checkbox" checked={paper2Topics.includes(topic)} onChange={() => togglePaperTopic("paper2", topic)} /><span>{topic}</span></label>)}</div></div>
               </>}
@@ -5941,12 +5939,12 @@ function QuizStudio({ user }: { user: User | null }) {
             )}
           </div>}
           {!paperTwoSelected && <div className="paper-filter-note"><BookOpen size={16} /> Paper 1 selected. Subject areas are used for Paper 2 questions, so no subject filter is required.</div>}
-          <div className="quiz-selection-summary"><div><span className="eyebrow">YOUR PAPER</span><strong>{selectedFilterSummary}</strong></div>{bankOptions?.question_count === 0 && <span className="quiz-no-results">No questions match these filters. Broaden a filter to continue.</span>}</div>
+          <div className="quiz-selection-summary"><div><span className="eyebrow">YOUR PAPER</span><strong>{selectedFilterSummary}</strong><small className="muted">At least one paper must be included to start the quiz.</small></div>{bankOptions?.question_count === 0 && <span className="quiz-no-results">No questions match these filters. Broaden a filter to continue.</span>}</div>
           <div className="quiz-builder-submit-row">
           <small className="quiz-builder-note">Questions are selected from the verified question bank using your filters.</small>
           <button
             className="button button-lime"
-            disabled={loading || !selectedCourse}
+            disabled={loading || !selectedCourse || (!paper1Enabled && !paper2Enabled)}
           >
             {loading
               ? sourceMode === "verified_previous_year"
