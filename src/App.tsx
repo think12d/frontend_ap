@@ -5039,6 +5039,15 @@ function QuizStudio({ user }: { user: User | null }) {
   const [selectedSubjectArea, setSelectedSubjectArea] = useState("");
   const [selectedSubjectCode, setSelectedSubjectCode] = useState("");
   const [years, setYears] = useState<number[]>([]);
+  const [paper1Enabled, setPaper1Enabled] = useState(true);
+  const [paper2Enabled, setPaper2Enabled] = useState(false);
+  const [paper1Years, setPaper1Years] = useState<number[]>([]);
+  const [paper2Years, setPaper2Years] = useState<number[]>([]);
+  const [paper1Topics, setPaper1Topics] = useState<string[]>([]);
+  const [paper2Topics, setPaper2Topics] = useState<string[]>([]);
+  const [paper1Difficulty, setPaper1Difficulty] = useState("mixed");
+  const [paper2Difficulty, setPaper2Difficulty] = useState("mixed");
+  const [paperTopicSearch, setPaperTopicSearch] = useState({ paper1: "", paper2: "" });
   const [sessions, setSessions] = useState<string[]>([]);
   const [papers, setPapers] = useState<string[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
@@ -5077,6 +5086,8 @@ function QuizStudio({ user }: { user: User | null }) {
   const [bankOptions, setBankOptions] = useState<QuestionBankOptions | null>(
     null,
   );
+  const [paper1BankOptions, setPaper1BankOptions] = useState<QuestionBankOptions | null>(null);
+  const [paper2BankOptions, setPaper2BankOptions] = useState<QuestionBankOptions | null>(null);
   const [allAvailableYears, setAllAvailableYears] = useState<number[]>([]);
   const [paymentRequired, setPaymentRequired] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -5131,9 +5142,31 @@ function QuizStudio({ user }: { user: User | null }) {
   }, [user, years.join(","), sessions.join("|"), papers.join("|"), selectedSubjectCode, difficulty, allAvailableYears.join(",")]);
 
   useEffect(() => {
+    if (!user) return;
+    const loadPaperFacets = async (paper: string) => {
+      const params = new URLSearchParams({ exam: "UGC NET", papers: paper });
+      return api<QuestionBankOptions>(`/quizzes/question-bank/options?${params.toString()}`);
+    };
+    Promise.all([loadPaperFacets("Paper 1"), loadPaperFacets("Paper 2")])
+      .then(([paper1, paper2]) => { setPaper1BankOptions(paper1); setPaper2BankOptions(paper2); })
+      .catch(() => undefined);
+  }, [user]);
+
+  useEffect(() => {
     const validTopics = new Set(bankOptions?.topics || []);
     setQuestionBankTopics((current) => current.filter((topic) => validTopics.has(topic)));
   }, [bankOptions?.topics]);
+
+  useEffect(() => {
+    const papersInBank = bankOptions?.papers || [];
+    if (!papersInBank.length) return;
+    const hasPaper1 = papersInBank.some((paper) => /paper\s*1|\b1\b/i.test(paper));
+    const hasPaper2 = papersInBank.some((paper) => /paper\s*2|\b2\b/i.test(paper));
+    if (!hasPaper1 && hasPaper2) {
+      setPaper1Enabled(false);
+      setPaper2Enabled(true);
+    }
+  }, [bankOptions?.papers]);
 
   useEffect(() => {
     const includesPaperTwo = papers.length === 0 || papers.some((paper) => /paper\s*2|\b2\b/i.test(paper));
@@ -5164,12 +5197,23 @@ function QuizStudio({ user }: { user: User | null }) {
   const parsedSelectedYears = years.slice().sort((a, b) => a - b);
   const paperTwoSelected = papers.length === 0 || papers.some((paper) => /paper\s*2|\b2\b/i.test(paper));
   const selectedFilterSummary = [
-    papers.length ? papers.join(" + ") : "All papers",
+    paper1Enabled && paper2Enabled ? "Paper 1 + Paper 2" : paper1Enabled ? "Paper 1" : paper2Enabled ? "Paper 2" : "No paper selected",
     parsedSelectedYears.length ? `${parsedSelectedYears.length} year${parsedSelectedYears.length === 1 ? "" : "s"}` : "All years",
     questionBankTopics.length ? `${questionBankTopics.length} topic${questionBankTopics.length === 1 ? "" : "s"}` : "All topics",
     selectedSubjectCode && paperTwoSelected ? selectedSubjectArea || selectedSubjectCode : "All subjects",
     difficulty === "mixed" ? "Mixed difficulty" : difficulty,
   ].join("  ·  ");
+  const paper1Facets = paper1BankOptions || bankOptions;
+  const paper2Facets = paper2BankOptions || bankOptions;
+  const paper1TopicOptions = (paper1Facets?.topics || []).filter((topic) => topic.toLocaleLowerCase().includes(paperTopicSearch.paper1.toLocaleLowerCase().trim()));
+  const paper2TopicOptions = (paper2Facets?.topics || []).filter((topic) => topic.toLocaleLowerCase().includes(paperTopicSearch.paper2.toLocaleLowerCase().trim()));
+  const paper1YearOptions = (paper1Facets?.years || availableYears).slice().sort((a, b) => a - b);
+  const paper2YearOptions = (paper2Facets?.years || availableYears).slice().sort((a, b) => a - b);
+  const paper2SubjectOptions = paper2Facets?.subjects || availableSubjects;
+  const togglePaperTopic = (paper: "paper1" | "paper2", topic: string) => {
+    const setter = paper === "paper1" ? setPaper1Topics : setPaper2Topics;
+    setter((current) => current.includes(topic) ? current.filter((item) => item !== topic) : [...current, topic]);
+  };
   const availableDifficulties = Array.from(
     new Set(["easy", "medium", "hard", ...(bankOptions?.difficulties || [])]),
   );
@@ -5350,8 +5394,25 @@ function QuizStudio({ user }: { user: User | null }) {
       setMessage("Sign in before starting a quiz.");
       return;
     }
-    const selectedYears = years.slice().sort((a, b) => a - b);
+    if (!paper1Enabled && !paper2Enabled) {
+      setMessage("Select Paper 1, Paper 2, or both before generating the quiz.");
+      return;
+    }
+    const selectedYears = Array.from(new Set([
+      ...(paper1Enabled ? paper1Years : []),
+      ...(paper2Enabled ? paper2Years : []),
+      ...years,
+    ])).sort((a, b) => a - b);
     const topicSelection = topics.map((topic) => topic.id);
+    const selectedQuestionBankTopics = Array.from(new Set([
+      ...(paper1Enabled ? paper1Topics : []),
+      ...(paper2Enabled ? paper2Topics : []),
+      ...questionBankTopics,
+    ]));
+    const selectedPapers = [
+      ...(paper1Enabled ? [availablePapers.find((paper) => /paper\s*1|\b1\b/i.test(paper)) || "Paper 1"] : []),
+      ...(paper2Enabled ? [availablePapers.find((paper) => /paper\s*2|\b2\b/i.test(paper)) || "Paper 2"] : []),
+    ];
     if (!topicSelection.length) {
       setMessage("Select at least one UGC NET topic.");
       return;
@@ -5374,13 +5435,15 @@ function QuizStudio({ user }: { user: User | null }) {
           exam: "UGC NET",
           years: selectedYears,
           sessions,
-          papers,
+          papers: selectedPapers.length ? selectedPapers : papers,
           subject_code: selectedSubjectCode || undefined,
           subject_name: selectedSubjectArea || undefined,
           categories,
-          question_bank_topics: questionBankTopics,
+          question_bank_topics: selectedQuestionBankTopics,
           subtopics,
-          difficulty,
+          difficulty: paper1Enabled && paper2Enabled && paper1Difficulty !== paper2Difficulty
+            ? "mixed"
+            : (paper2Enabled ? paper2Difficulty : paper1Difficulty),
           subject: course?.subject || "UGC NET",
           count,
           time_limit_minutes: minutes,
@@ -5507,7 +5570,7 @@ function QuizStudio({ user }: { user: User | null }) {
       return matchesSearch && matchesScore;
     });
   }, [history, historySearch, historyScoreFilter]);
-  const historyPageSize = 5;
+  const historyPageSize = 10;
   const historyPageCount = Math.max(1, Math.ceil(filteredHistory.length / historyPageSize));
   const visibleHistory = filteredHistory.slice((historyPage - 1) * historyPageSize, historyPage * historyPageSize);
   useEffect(() => setHistoryPage(1), [historySearch, historyScoreFilter]);
@@ -5664,7 +5727,26 @@ function QuizStudio({ user }: { user: User | null }) {
               </select>
             </label>
           </div>
-          <div className="quiz-filter-block quiz-filter-section">
+          <section className="paper-config-grid">
+            <article className={`paper-config-card ${paper1Enabled ? "active" : ""}`}>
+              <div className="paper-config-head"><div><span className="eyebrow">PAPER 1</span><h4>Teaching & research aptitude</h4></div><button type="button" className="paper-enable" aria-pressed={paper1Enabled} onClick={() => setPaper1Enabled((value) => !value)}>{paper1Enabled ? "Included" : "Add paper"}</button></div>
+              {paper1Enabled && <>
+                <label className="paper-config-label">Years</label><div className="paper-mini-chips">{paper1YearOptions.map((year) => <button type="button" className={paper1Years.includes(year) ? "filter-chip active" : "filter-chip"} key={`p1-${year}`} onClick={() => setPaper1Years((current) => current.includes(year) ? current.filter((item) => item !== year) : [...current, year])}>{year}</button>)}</div>
+                <label className="paper-config-label">Difficulty<select value={paper1Difficulty} onChange={(event) => setPaper1Difficulty(event.target.value)}><option value="mixed">All difficulties</option>{availableDifficulties.map((value) => <option key={`p1-${value}`} value={value}>{value}</option>)}</select></label>
+                <label className="paper-config-label">Topics <span>{paper1Topics.length ? `${paper1Topics.length} selected` : "All topics"}</span></label><div className="paper-topic-picker"><input placeholder="Search Paper 1 topics" value={paperTopicSearch.paper1} onChange={(event) => setPaperTopicSearch((current) => ({ ...current, paper1: event.target.value }))} /><div className="paper-topic-actions"><button type="button" onClick={() => setPaper1Topics(paper1TopicOptions)}>Select all</button><button type="button" onClick={() => setPaper1Topics([])}>Clear all</button></div><div className="paper-topic-list">{paper1TopicOptions.map((topic) => <label key={`p1-topic-${topic}`}><input type="checkbox" checked={paper1Topics.includes(topic)} onChange={() => togglePaperTopic("paper1", topic)} /><span>{topic}</span></label>)}</div></div>
+              </>}
+            </article>
+            <article className={`paper-config-card ${paper2Enabled ? "active" : ""}`}>
+              <div className="paper-config-head"><div><span className="eyebrow">PAPER 2</span><h4>Subject-specific questions</h4></div><button type="button" className="paper-enable" aria-pressed={paper2Enabled} onClick={() => setPaper2Enabled((value) => !value)}>{paper2Enabled ? "Included" : "Add paper"}</button></div>
+              {paper2Enabled && <>
+                <label className="paper-config-label">Years</label><div className="paper-mini-chips">{paper2YearOptions.map((year) => <button type="button" className={paper2Years.includes(year) ? "filter-chip active" : "filter-chip"} key={`p2-${year}`} onClick={() => setPaper2Years((current) => current.includes(year) ? current.filter((item) => item !== year) : [...current, year])}>{year}</button>)}</div>
+                <label className="paper-config-label">Subject<select value={selectedSubjectCode} onChange={(event) => { const subject = paper2SubjectOptions.find((item) => item.code === event.target.value); setSelectedSubjectCode(event.target.value); setSelectedSubjectArea(subject?.name || ""); }}><option value="">All Paper 2 subjects</option>{paper2SubjectOptions.map((subject) => <option key={`p2-subject-${subject.code}`} value={subject.code}>{subject.code} · {subject.name}</option>)}</select></label>
+                <label className="paper-config-label">Difficulty<select value={paper2Difficulty} onChange={(event) => setPaper2Difficulty(event.target.value)}><option value="mixed">All difficulties</option>{availableDifficulties.map((value) => <option key={`p2-${value}`} value={value}>{value}</option>)}</select></label>
+                <label className="paper-config-label">Topics <span>{paper2Topics.length ? `${paper2Topics.length} selected` : "All topics"}</span></label><div className="paper-topic-picker"><input placeholder="Search Paper 2 topics" value={paperTopicSearch.paper2} onChange={(event) => setPaperTopicSearch((current) => ({ ...current, paper2: event.target.value }))} /><div className="paper-topic-actions"><button type="button" onClick={() => setPaper2Topics(paper2TopicOptions)}>Select all</button><button type="button" onClick={() => setPaper2Topics([])}>Clear all</button></div><div className="paper-topic-list">{paper2TopicOptions.map((topic) => <label key={`p2-topic-${topic}`}><input type="checkbox" checked={paper2Topics.includes(topic)} onChange={() => togglePaperTopic("paper2", topic)} /><span>{topic}</span></label>)}</div></div>
+              </>}
+            </article>
+          </section>
+          <div className="quiz-filter-block quiz-filter-section legacy-filter-section">
             <span className="eyebrow">YEARS · MULTI-SELECT</span>
             <div className="filter-picker">
               <button type="button" className="filter-picker-trigger" onClick={() => setYearMenuOpen((open) => !open)} aria-expanded={yearMenuOpen}>
@@ -5693,7 +5775,7 @@ function QuizStudio({ user }: { user: User | null }) {
               {parsedSelectedYears.join(", ") || "All years"}
             </small>
           </div>
-          <div className="quiz-filter-block quiz-filter-section">
+          <div className="quiz-filter-block quiz-filter-section legacy-filter-section">
             <div className="section-heading compact">
               <div>
                 <span className="eyebrow">QUESTION BANK FILTERS</span>
@@ -5819,7 +5901,7 @@ function QuizStudio({ user }: { user: User | null }) {
               </>
             )}
           </div>
-          {paperTwoSelected && <div className="quiz-filter-block subject-area-block quiz-filter-section">
+          {paperTwoSelected && <div className="quiz-filter-block subject-area-block quiz-filter-section legacy-filter-section">
             <div className="subject-area-heading">
               <div>
                 <span className="eyebrow">UGC NET SUBJECT AREAS</span>
