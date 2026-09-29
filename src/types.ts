@@ -19,6 +19,22 @@ export type QuestionLibraryFile = {
   modified_at?: string | null;
   is_question_file: boolean;
   is_answer_key: boolean;
+  free_access?: boolean;
+};
+
+export type RecordedLibraryFile = QuestionLibraryFile & {
+  day_number: number;
+  display_name: string;
+  meeting_name?: string | null;
+  session_label: string;
+  recorded_at?: string | null;
+  play_url: string;
+  download_url: string;
+  course_id?: number | null;
+  live_class_id?: number | null;
+  display_order?: number | null;
+  description?: string;
+  thumbnail_url?: string | null;
 };
 
 export type QuestionLibrary = {
@@ -31,15 +47,7 @@ export type QuestionLibrary = {
   files: QuestionLibraryFile[];
 };
 
-export type RecordedLibraryFile = QuestionLibraryFile & {
-  day_number: number;
-  display_name: string;
-  meeting_name?: string | null;
-  session_label: string;
-  recorded_at?: string | null;
-  play_url: string;
-  download_url: string;
-};
+
 
 export type RecordedLibrary = {
   premium_required: boolean;
@@ -419,5 +427,47 @@ export type PremiumAccess = {
   mock_mode: boolean;
   premium_price_paise: number;
   mock_test_price_paise: number;
+  currency: string;
+};
+export type Resource = {
+  id: number;
+  title: string;
+  original_filename: string;
+  resource_type: string;
+  sort_order?: number;
+  public_url?: string | null;
+  storage_provider: string;
+  file_size?: number | null;
+  duration_sec?: number | null;
+  updated_at?: string | null;
+};
+
+export type ResourceMediaUrl = {
+  url: string;
+  download_url: string;
+};
+
+export type QuestionArchivePaper = {
+  id: number;
+  title: string;
+  description: string;
+  year?: number | null;
+  subject: string;
+  is_free: boolean;
+  price_paise: number;
+  currency: string;
+  is_published: boolean;
+  owned: boolean;
+  content?: Record<string, unknown> | null;
+  created_at?: string | null;
+  updated_at?: string | null;
+};
+
+export type QuestionArchiveMetrics = {
+  total_papers: number;
+  free_papers: number;
+  paid_papers: number;
+  purchases: number;
+  revenue_paise: number;
   currency: string;
 };
