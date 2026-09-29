@@ -9223,6 +9223,27 @@ function NameMarquee() {
   );
 }
 
+type NormalizedAiAnswer = {
+  answer: string;
+  sources: { resource_id: number; excerpt: string }[];
+  mode: string;
+  retry_after?: string | null;
+};
+
+function normalizeAiAnswer(value: unknown): NormalizedAiAnswer {
+  const payload = (value && typeof value === "object" ? value : {}) as Record<string, unknown>;
+  const rawSources = Array.isArray(payload.sources) ? payload.sources : [];
+  return {
+    answer: typeof payload.answer === "string" ? payload.answer : typeof payload.message === "string" ? payload.message : "The AI tutor returned no answer.",
+    sources: rawSources.filter((source): source is Record<string, unknown> => Boolean(source && typeof source === "object")).map((source) => ({
+      resource_id: Number(source.resource_id) || 0,
+      excerpt: typeof source.excerpt === "string" ? source.excerpt : "",
+    })),
+    mode: typeof payload.mode === "string" ? payload.mode : "llm",
+    retry_after: typeof payload.retry_after === "string" ? payload.retry_after : null,
+  };
+}
+
 function AiLab({ user }: { user: User | null }) {
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
@@ -9245,10 +9266,10 @@ function AiLab({ user }: { user: User | null }) {
     setLoading(true);
     try {
       setAnswer(
-        await api(`/rag/ask`, {
+        normalizeAiAnswer(await api(`/rag/ask`, {
           method: "POST",
           body: JSON.stringify({ query }),
-        }),
+        })),
       );
     } catch (e) {
       setAnswer({ answer: (e as Error).message, sources: [], mode: "error" });
@@ -9404,13 +9425,13 @@ function AiLabWithImage({ user }: { user: User | null }) {
         const form = new FormData();
         form.append("image", image);
         form.append("query", query);
-        setAnswer(await api("/rag/ask-image", { method: "POST", body: form }));
+        setAnswer(normalizeAiAnswer(await api("/rag/ask-image", { method: "POST", body: form })));
       } else {
         setAnswer(
-          await api("/rag/ask", {
+          normalizeAiAnswer(await api("/rag/ask", {
             method: "POST",
             body: JSON.stringify({ query }),
-          }),
+          })),
         );
       }
     } catch (cause) {
