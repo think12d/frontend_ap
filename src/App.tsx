@@ -4517,7 +4517,10 @@ function PaymentPage({ user }: { user: User | null }) {
     navigate(`/payment/course/${course.slug}`, { replace: true });
   };
 
-  const freeCourse = course.price_paise === 0;
+  const payablePricePaise = course.offer_enabled && course.offer_price_paise != null && course.offer_price_paise > 0 && course.offer_price_paise < course.price_paise
+    ? course.offer_price_paise
+    : course.price_paise;
+  const freeCourse = payablePricePaise === 0;
   const notConfigured = Boolean(
     !freeCourse && access && !access.razorpay_configured && !access.mock_mode,
   );
@@ -4554,7 +4557,7 @@ function PaymentPage({ user }: { user: User | null }) {
           <b>
             {freeCourse
               ? "Free"
-              : `₹${(course.price_paise / 100).toLocaleString("en-IN")}`}
+              : `₹${(payablePricePaise / 100).toLocaleString("en-IN")}`}
           </b>
           <span>
             {course.access_duration_days === 0
