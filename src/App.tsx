@@ -5487,10 +5487,13 @@ function QuizStudio({ user }: { user: User | null }) {
     } catch (cause) {
       const detail = (cause as Error).message;
       if (
+        (cause instanceof ApiError && cause.status === 402) ||
         detail.toLowerCase().includes("free mock") ||
         detail.toLowerCase().includes("premium access")
-      )
+      ) {
         setPaymentRequired(true);
+        api<PremiumAccess>("/payments/status").then(setAccess).catch(() => undefined);
+      }
       setMessage(`Quiz generation failed: ${detail}`);
     } finally {
       setLoading(false);
