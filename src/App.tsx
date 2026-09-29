@@ -6340,7 +6340,7 @@ function JRFStrategyBuilder({ user }: { user: User | null }) {
       return;
     }
     setLoading(true);
-    setMessage("Generating your day-by-day UGC NET/JRF strategy with Groq…");
+    setMessage("Generating your day-by-day UGC NET/JRF strategy with JRF-AI…");
     try {
       const generated = await api<JRFStrategyPlan>("/jrf-strategy", {
         method: "POST",
@@ -6407,7 +6407,7 @@ function JRFStrategyBuilder({ user }: { user: User | null }) {
     <div className="container jrf-page">
       <div className="section-heading">
         <div>
-          <span className="eyebrow">GROQ STUDY COACH</span>
+          <span className="eyebrow">JRF-AI STUDY COACH</span>
           <h2>Custom JRF Study Strategy &amp; Timetable Builder</h2>
           <p className="muted">
             Get an AI-generated day-by-day roadmap tailored to your Paper 2 and
@@ -8604,7 +8604,7 @@ function LegalPage({ page }: { page: LegalPageKind }) {
             <p>
               Some features use specialist providers: Razorpay for payment
               processing, Google services for authorised Meet, Calendar or Drive
-              workflows, Groq for configured AI responses, and SMTP providers
+              workflows, JRF-AI for configured AI responses, and SMTP providers
               for account email. Information is sent to a provider only when
               required for the feature you use and according to that provider’s
               terms and privacy practices.
@@ -9452,14 +9452,14 @@ function AiLabWithImage({ user }: { user: User | null }) {
             <em>Read the question.</em>
           </h1>
           <p>
-            Groq analyzes your uploaded image directly and explains it using the
+            JRF-AI analyzes your uploaded image directly and explains it using the
             selected course material.
           </p>
         </div>
         <div className="ai-badge">
           <Bot size={29} />
           <span>
-            <b>Groq vision tutor</b>
+            <b>JRF-AI tutor</b>
             <small>image + text analysis</small>
           </span>
         </div>
@@ -9535,7 +9535,7 @@ function AiLabWithImage({ user }: { user: User | null }) {
                 type="submit"
                 disabled={loading}
               >
-                {loading ? "Analyzing…" : "Ask Groq"}
+                {loading ? "Analyzing…" : "Ask JRF-AI"}
                 <Send size={15} />
               </button>
             </div>
@@ -9543,7 +9543,7 @@ function AiLabWithImage({ user }: { user: User | null }) {
           {error && <div className="form-error ai-error">{error}</div>}
           <small className="ai-scope-note">
             Scope guard: UGC NET Paper 1 topics only. Common image formats are
-            sent directly; other image formats are converted to JPEG for Groq.
+            sent directly; other image formats are converted to JPEG for JRF-AI.
             Uploads are limited to 8 MB.
           </small>
         </div>
