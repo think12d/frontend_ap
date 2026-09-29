@@ -65,7 +65,7 @@ export type Resource = {
   title: string;
   original_filename: string;
   resource_type: string;
-  sort_order?: number;
+
   public_url?: string | null;
   storage_provider: string;
   file_size?: number | null;
