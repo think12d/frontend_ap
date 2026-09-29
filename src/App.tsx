@@ -5629,6 +5629,15 @@ function QuizStudio({ user }: { user: User | null }) {
         </div>
       </div>
       {message && <div className="notice">{message}</div>}
+      {!quiz && paymentRequired && (
+        <div className="mock-payment-required-banner" role="alert">
+          <div>
+            <strong>Your 3 free mock tests are used.</strong>
+            <span>Payment is required to generate another quiz{access?.mock_test_price_paise ? ` · ${access.currency} ${(access.mock_test_price_paise / 100).toLocaleString("en-IN")}` : ""}.</span>
+          </div>
+          <span className="mock-payment-required-badge">PAYMENT REQUIRED</span>
+        </div>
+      )}
       {!quiz && (
         <section className="active-tests-section">
           <div className="section-heading compact">
