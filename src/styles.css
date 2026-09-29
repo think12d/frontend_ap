@@ -10,6 +10,26 @@
 }
 
 /* Mock-test filter and exam controls */
+.legacy-filter-section { display: none !important; }
+.paper-config-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin: 16px 0; }
+.paper-config-card { display: grid; gap: 11px; border: 1px solid #dce7ed; border-radius: 16px; padding: 16px; background: #f8fbfc; transition: .18s ease; }
+.paper-config-card.active { border-color: #2a9a98; background: linear-gradient(145deg, #f1fbf8, #f8fbff); box-shadow: 0 8px 20px rgba(36,139,164,.08); }
+.paper-config-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+.paper-config-head h4 { margin: 3px 0 0; color: var(--ink, #19344d); }
+.paper-enable { border: 1px solid #c9dce4; border-radius: 999px; padding: 7px 11px; background: #fff; color: #39738b; font-weight: 800; cursor: pointer; white-space: nowrap; }
+.paper-config-card.active .paper-enable { border-color: #258e88; background: #258e88; color: #fff; }
+.paper-config-label { display: grid; gap: 6px; color: #526b80; font-size: .78rem; font-weight: 800; }
+.paper-config-label > span { color: #168ca1; font-weight: 700; }
+.paper-config-label select { width: 100%; }
+.paper-mini-chips { display: flex; flex-wrap: wrap; gap: 6px; min-height: 28px; }
+.paper-topic-picker { display: grid; gap: 7px; border: 1px solid #d8e5eb; border-radius: 11px; padding: 8px; background: #fff; }
+.paper-topic-picker > input { width: 100%; }
+.paper-topic-actions { display: flex; gap: 12px; }
+.paper-topic-actions button { border: 0; background: transparent; color: #168ca1; font-weight: 800; cursor: pointer; padding: 0; }
+.paper-topic-list { display: grid; gap: 2px; max-height: 142px; overflow-y: auto; }
+.paper-topic-list label { display: flex; align-items: center; gap: 8px; border-radius: 7px; padding: 6px; cursor: pointer; color: #38566b; font-size: .8rem; }
+.paper-topic-list label:hover { background: #edf7f8; }
+.paper-topic-list input[type="checkbox"] { width: 16px !important; min-width: 16px !important; height: 16px !important; margin: 0; flex: 0 0 16px; accent-color: #168ca1; }
 .filter-picker { position: relative; max-width: 420px; }
 .filter-picker-trigger { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 12px; border: 1px solid var(--line, #d8e2ec); border-radius: 12px; background: #fff; padding: 12px 14px; color: var(--ink, #19344d); font-weight: 700; cursor: pointer; }
 .filter-picker-menu { position: absolute; z-index: 20; inset: calc(100% + 6px) 0 auto; padding: 10px; border: 1px solid var(--line, #d8e2ec); border-radius: 14px; background: #fff; box-shadow: 0 16px 36px rgba(25,52,77,.16); }
@@ -38,6 +58,7 @@
 .mobile-palette-toggle { display: none; }
 
 @media (max-width: 700px) {
+  .paper-config-grid { grid-template-columns: 1fr; }
   .filter-picker { max-width: none; }
   .filter-picker-options { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .quiz-selection-summary { align-items: flex-start; flex-direction: column; }
@@ -17272,4 +17293,17 @@ textarea { min-height: 108px; }
     padding: 8px !important;
   }
 
+}
+
+/* Final override: filter checkboxes must stay compact inside the quiz builder. */
+.quiz-builder .topic-picker-option input[type="checkbox"],
+.quiz-builder .filter-picker-option input[type="checkbox"] {
+  width: 16px !important;
+  min-width: 16px !important;
+  max-width: 16px !important;
+  height: 16px !important;
+  min-height: 16px !important;
+  margin: 0;
+  flex: 0 0 16px;
+  accent-color: #168ca1;
 }
