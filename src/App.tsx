@@ -5744,35 +5744,7 @@ function QuizStudio({ user }: { user: User | null }) {
               </>}
             </article>
           </section>
-          <div className="quiz-filter-block quiz-filter-section legacy-filter-section">
-            <span className="eyebrow">YEARS · MULTI-SELECT</span>
-            <div className="filter-picker">
-              <button type="button" className="filter-picker-trigger" onClick={() => setYearMenuOpen((open) => !open)} aria-expanded={yearMenuOpen}>
-                <span>{parsedSelectedYears.length ? `${parsedSelectedYears.length} year${parsedSelectedYears.length === 1 ? "" : "s"} selected` : "All available years"}</span>
-                <ChevronDown size={16} />
-              </button>
-              {yearMenuOpen && (
-                <div className="filter-picker-menu">
-                  <input value={yearSearch} onChange={(event) => setYearSearch(event.target.value)} placeholder="Search years" autoFocus />
-                  <div className="filter-picker-actions">
-                    <button type="button" onClick={() => setYears(availableYears)}>Select all</button>
-                    <button type="button" onClick={() => setYears([])}>Clear</button>
-                  </div>
-                  <div className="filter-picker-options">
-                    {visibleYears.map((year) => (
-                      <label key={year} className="filter-picker-option"><input type="checkbox" checked={years.includes(year)} onChange={() => toggleYear(year)} /><span>{year}</span></label>
-                    ))}
-                    {!visibleYears.length && <small className="muted">No matching years.</small>}
-                  </div>
-                </div>
-              )}
-            </div>
-            {parsedSelectedYears.length > 0 && <div className="selected-filter-chips">{parsedSelectedYears.map((year) => <button type="button" className="filter-chip active" key={year} onClick={() => toggleYear(year)}>{year} ×</button>)}</div>}
-            <small className="muted">
-              Selected years:{" "}
-              {parsedSelectedYears.join(", ") || "All years"}
-            </small>
-          </div>
+          
           <div className="quiz-filter-block quiz-filter-section legacy-filter-section">
             <div className="section-heading compact">
               <div>
