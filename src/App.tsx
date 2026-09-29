@@ -5113,10 +5113,6 @@ function QuizStudio({ user }: { user: User | null }) {
           setSelectedCourse(String(items[0].id));
           setSelectedSubjectArea(items[0].subject || "");
         }
-        if (!selectedSubjectCode && options.subjects?.[0]) {
-          setSelectedSubjectCode(options.subjects[0].code);
-          setSelectedSubjectArea(options.subjects[0].name);
-        }
       })
       .catch((cause) => setMessage((cause as Error).message));
   }, [user]);
