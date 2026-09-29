@@ -50,6 +50,20 @@
 .quiz-selection-summary > div { display: grid; gap: 4px; }
 .quiz-selection-summary strong { color: var(--ink, #19344d); font-size: .9rem; }
 .quiz-no-results { color: #b04a41; font-weight: 700; font-size: .84rem; }
+.mock-payment-required-banner { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin: 0 0 16px; padding: 15px 18px; border: 1px solid #e6b5bd; border-radius: 14px; background: linear-gradient(135deg, #fff6f7, #fffaf0); color: #7d2f3d; box-shadow: 0 8px 22px rgba(155, 56, 73, .08); }
+.mock-payment-required-banner > div { display: grid; gap: 4px; }
+.mock-payment-required-banner span { font-size: .86rem; }
+.mock-payment-required-badge { flex: 0 0 auto; border-radius: 999px; padding: 7px 10px; background: #b43c4d; color: #fff !important; font-size: .7rem !important; font-weight: 900; letter-spacing: .06em; }
+.mock-payment-modal-backdrop { position: fixed; z-index: 1000; inset: 0; display: grid; place-items: center; padding: 20px; background: rgba(15, 31, 44, .58); backdrop-filter: blur(5px); }
+.mock-payment-modal { position: relative; display: grid; gap: 12px; width: min(100%, 480px); padding: 30px; border: 1px solid rgba(255,255,255,.7); border-radius: 22px; background: #fff; box-shadow: 0 26px 80px rgba(10, 28, 42, .3); }
+.mock-payment-modal h3, .mock-payment-modal p { margin: 0; }
+.mock-payment-modal h3 { color: #19344d; font-size: 1.55rem; }
+.mock-payment-modal p { color: #5d7487; line-height: 1.6; }
+.mock-payment-modal-close { position: absolute; top: 12px; right: 14px; width: 32px; height: 32px; border: 0; border-radius: 50%; background: #eef4f7; color: #526b80; font-size: 1.4rem; cursor: pointer; }
+.mock-payment-modal-price { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin: 4px 0; padding: 15px; border-radius: 13px; background: #eef9f7; color: #1e6d68; }
+.mock-payment-modal-price strong { font-size: 1.25rem; color: #138d86; }
+.mock-payment-modal .premium-paywall { margin: 0; padding: 0; border: 0; background: transparent; box-shadow: none; }
+.mock-payment-modal .premium-paywall > b, .mock-payment-modal .premium-paywall > span { display: none; }
 .question-tools { display: flex; flex-wrap: wrap; gap: 8px; margin: 15px 0 4px; }
 .question-tool { display: inline-flex; align-items: center; gap: 6px; border: 1px solid #d4e0e8; border-radius: 999px; background: #fff; color: #4d687e; padding: 8px 12px; font-weight: 700; cursor: pointer; }
 .question-tool:hover, .question-tool.active { border-color: #d29b35; color: #9a6813; background: #fff8e9; }
@@ -62,6 +76,8 @@
   .filter-picker { max-width: none; }
   .filter-picker-options { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .quiz-selection-summary { align-items: flex-start; flex-direction: column; }
+  .mock-payment-required-banner { align-items: flex-start; flex-direction: column; }
+  .mock-payment-modal { padding: 25px 20px; }
   .mobile-palette-toggle { display: inline-flex; }
   .question-jump:not(.is-open) { display: none; }
   .question-jump.is-open { display: grid; grid-template-columns: repeat(5, 1fr); width: 100%; order: 3; }
@@ -17307,13 +17323,3 @@ textarea { min-height: 108px; }
   flex: 0 0 16px;
   accent-color: #168ca1;
 }
-.quiz-no-results { color: #b04a41; font-weight: 700; font-size: .84rem; }
-.mock-payment-required-banner { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin: 0 0 16px; padding: 15px 18px; border: 1px solid #e6b5bd; border-radius: 14px; background: linear-gradient(135deg, #fff6f7, #fffaf0); color: #7d2f3d; box-shadow: 0 8px 22px rgba(155, 56, 73, .08); }
-.mock-payment-required-banner > div { display: grid; gap: 4px; }
-.mock-payment-required-banner span { font-size: .86rem; }
-.mock-payment-required-badge { flex: 0 0 auto; border-radius: 999px; padding: 7px 10px; background: #b43c4d; color: #fff !important; font-size: .7rem !important; font-weight: 900; letter-spacing: .06em; }
-.question-tools { display: flex; flex-wrap: wrap; gap: 8px; margin: 15px 0 4px; }
-  .quiz-selection-summary { align-items: flex-start; flex-direction: column; }
-  .mock-payment-required-banner { align-items: flex-start; flex-direction: column; }
-  .mobile-palette-toggle { display: inline-flex; }
-
