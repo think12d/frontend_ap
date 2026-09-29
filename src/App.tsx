@@ -5111,15 +5111,13 @@ function QuizStudio({ user }: { user: User | null }) {
       api<Course[]>("/courses"),
       api<typeof history>("/quizzes/attempts/me"),
       api<QuizAttempt | null>("/quizzes/attempts/active"),
-      api<PremiumAccess>("/payments/status"),
       api<QuestionBankOptions>("/quizzes/question-bank/options"),
     ])
-      .then(([items, attempts, active, premium, options]) => {
+      .then(([items, attempts, active, options]) => {
         setCourses(items);
         setHistory(attempts.filter((attempt) => attempt.status === "completed"));
         setActiveAttempt(active);
         setSessionExpiresAt(active?.expires_at ? new Date(active.expires_at).getTime() : 0);
-        setAccess(premium);
         setBankOptions(options);
         setAllAvailableYears(options.years || []);
         if (!selectedCourse && items[0]) {
@@ -5128,6 +5126,18 @@ function QuizStudio({ user }: { user: User | null }) {
         }
       })
       .catch((cause) => setMessage((cause as Error).message));
+  }, [user]);
+
+  // Payment status must load independently. A temporary question-bank/facet
+  // failure must never hide the mock-test payment panel.
+  useEffect(() => {
+    if (!user) {
+      setAccess(null);
+      return;
+    }
+    api<PremiumAccess>("/payments/status")
+      .then(setAccess)
+      .catch((cause) => setMessage(`Payment status could not be loaded: ${(cause as Error).message}`));
   }, [user]);
 
   useEffect(() => {
