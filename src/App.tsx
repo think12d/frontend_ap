@@ -562,7 +562,7 @@ function PremiumPaywall({
   };
   return (
     <div className="notice premium-paywall">
-      <b>{freeAvailable ? `${access.free_mock_attempts_remaining} free mock attempts remaining` : "Paid access required"}</b>
+      <b>{freeAvailable ? `${access.free_mock_attempts_remaining} free mock attempts remaining` : `Paid access required · ${access.currency} ${((feature === "mock" ? access.mock_test_price_paise : pricePaise ?? 39900) / 100).toLocaleString("en-IN")}`}</b>
       <span>
         {freeAvailable
           ? "Use your remaining free mock tests before choosing unlimited access."
@@ -584,7 +584,7 @@ function PremiumPaywall({
           {busy
             ? "Opening payment…"
             : access.mock_mode
-              ? "Complete mock payment"
+              ? `Complete mock payment · ${access.currency} ${((feature === "mock" ? access.mock_test_price_paise : pricePaise ?? 39900) / 100).toLocaleString("en-IN")}`
                 : `Unlock ${feature === "mock" ? "mock tests" : "Question Archive"} · ${access.currency} ${((feature === "mock" ? access.mock_test_price_paise : pricePaise ?? 39900) / 100).toLocaleString("en-IN")}`}
         </button>
       )}
@@ -5081,6 +5081,9 @@ function QuizStudio({ user }: { user: User | null }) {
   const [historySearch, setHistorySearch] = useState("");
   const [historyScoreFilter, setHistoryScoreFilter] = useState("all");
   const [historyPage, setHistoryPage] = useState(1);
+  const [reportPage, setReportPage] = useState(1);
+  const [historyReportPage, setHistoryReportPage] = useState(1);
+  const [printAllReport, setPrintAllReport] = useState(false);
   const [activeAttempt, setActiveAttempt] = useState<QuizAttempt | null>(null);
   const [access, setAccess] = useState<PremiumAccess | null>(null);
   const [bankOptions, setBankOptions] = useState<QuestionBankOptions | null>(
@@ -5521,7 +5524,8 @@ function QuizStudio({ user }: { user: User | null }) {
   };
   const downloadReportPdf = () => {
     setShowDetailedReport(true);
-    window.setTimeout(() => window.print(), 120);
+    setPrintAllReport(true);
+    window.setTimeout(() => { window.print(); setPrintAllReport(false); }, 180);
   };
   const downloadHistoryReportPdf = async (attempt: QuizAttempt) => {
     if (!attempt.report_available) return;
@@ -5529,7 +5533,8 @@ function QuizStudio({ user }: { user: User | null }) {
     try {
       const reportQuiz = await api<Quiz>(`/quizzes/${attempt.quiz_id}`);
       setHistoryReport({ attempt, quiz: reportQuiz });
-      window.setTimeout(() => window.print(), 160);
+      setPrintAllReport(true);
+      window.setTimeout(() => { window.print(); setPrintAllReport(false); }, 220);
     } catch (cause) {
       setMessage(`Report download failed: ${(cause as Error).message}`);
     } finally {
@@ -5571,7 +5576,16 @@ function QuizStudio({ user }: { user: User | null }) {
   const historyPageSize = 10;
   const historyPageCount = Math.max(1, Math.ceil(filteredHistory.length / historyPageSize));
   const visibleHistory = filteredHistory.slice((historyPage - 1) * historyPageSize, historyPage * historyPageSize);
+  const reportPageSize = 5;
+  const reportQuestionCount = quiz?.questions.length || 0;
+  const reportPageCount = Math.max(1, Math.ceil(reportQuestionCount / reportPageSize));
+  const visibleReportQuestions = quiz?.questions.slice((reportPage - 1) * reportPageSize, reportPage * reportPageSize) || [];
+  const historyReportQuestionCount = historyReport?.quiz.questions.length || 0;
+  const historyReportPageCount = Math.max(1, Math.ceil(historyReportQuestionCount / reportPageSize));
+  const visibleHistoryReportQuestions = historyReport?.quiz.questions.slice((historyReportPage - 1) * reportPageSize, historyReportPage * reportPageSize) || [];
   useEffect(() => setHistoryPage(1), [historySearch, historyScoreFilter]);
+  useEffect(() => { setReportPage(1); }, [showDetailedReport, quiz?.id]);
+  useEffect(() => { setHistoryReportPage(1); }, [historyReport?.attempt.id]);
 
   if (!user)
     return (
@@ -5728,7 +5742,7 @@ function QuizStudio({ user }: { user: User | null }) {
           </div>
           <section className="paper-config-grid">
             <article className={`paper-config-card ${paper1Enabled ? "active" : ""}`}>
-              <div className="paper-config-head"><div><span className="eyebrow">PAPER 1</span><h4>Teaching & research aptitude</h4></div><button type="button" className="paper-enable" aria-pressed={paper1Enabled} onClick={() => setPaper1Enabled((value) => !value)}>{paper1Enabled ? "Included" : "Add paper"}</button></div>
+              <div className="paper-config-head"><div><span className="eyebrow">PAPER 1</span><h4>Paper 1 — Teaching &amp; Research Aptitude</h4></div><button type="button" className="paper-enable" aria-pressed={paper1Enabled} onClick={() => setPaper1Enabled((value) => !value)}>{paper1Enabled ? "Included" : "Add paper"}</button></div>
               {paper1Enabled && <>
                 <label className="paper-config-label">Years</label><div className="paper-mini-chips">{paper1YearOptions.map((year) => <button type="button" className={paper1Years.includes(year) ? "filter-chip active" : "filter-chip"} key={`p1-${year}`} onClick={() => setPaper1Years((current) => current.includes(year) ? current.filter((item) => item !== year) : [...current, year])}>{year}</button>)}</div>
                 <label className="paper-config-label">Difficulty<select value={paper1Difficulty} onChange={(event) => setPaper1Difficulty(event.target.value)}><option value="mixed">All difficulties</option>{availableDifficulties.map((value) => <option key={`p1-${value}`} value={value}>{value}</option>)}</select></label>
@@ -5736,7 +5750,7 @@ function QuizStudio({ user }: { user: User | null }) {
               </>}
             </article>
             <article className={`paper-config-card ${paper2Enabled ? "active" : ""}`}>
-              <div className="paper-config-head"><div><span className="eyebrow">PAPER 2</span><h4>Subject-specific questions</h4></div><button type="button" className="paper-enable" aria-pressed={paper2Enabled} onClick={() => setPaper2Enabled((value) => !value)}>{paper2Enabled ? "Included" : "Add paper"}</button></div>
+              <div className="paper-config-head"><div><span className="eyebrow">PAPER 2</span><h4>Paper 2 — Subject-specific questions</h4></div><button type="button" className="paper-enable" aria-pressed={paper2Enabled} onClick={() => setPaper2Enabled((value) => !value)}>{paper2Enabled ? "Included" : "Add paper"}</button></div>
               {paper2Enabled && <>
                 <label className="paper-config-label">Years</label><div className="paper-mini-chips">{paper2YearOptions.map((year) => <button type="button" className={paper2Years.includes(year) ? "filter-chip active" : "filter-chip"} key={`p2-${year}`} onClick={() => setPaper2Years((current) => current.includes(year) ? current.filter((item) => item !== year) : [...current, year])}>{year}</button>)}</div>
                 <label className="paper-config-label">Difficulty<select value={paper2Difficulty} onChange={(event) => setPaper2Difficulty(event.target.value)}><option value="mixed">All difficulties</option>{availableDifficulties.map((value) => <option key={`p2-${value}`} value={value}>{value}</option>)}</select></label>
@@ -5744,7 +5758,35 @@ function QuizStudio({ user }: { user: User | null }) {
               </>}
             </article>
           </section>
-          
+          <div className="quiz-filter-block quiz-filter-section legacy-filter-section">
+            <span className="eyebrow">YEARS · MULTI-SELECT</span>
+            <div className="filter-picker">
+              <button type="button" className="filter-picker-trigger" onClick={() => setYearMenuOpen((open) => !open)} aria-expanded={yearMenuOpen}>
+                <span>{parsedSelectedYears.length ? `${parsedSelectedYears.length} year${parsedSelectedYears.length === 1 ? "" : "s"} selected` : "All available years"}</span>
+                <ChevronDown size={16} />
+              </button>
+              {yearMenuOpen && (
+                <div className="filter-picker-menu">
+                  <input value={yearSearch} onChange={(event) => setYearSearch(event.target.value)} placeholder="Search years" autoFocus />
+                  <div className="filter-picker-actions">
+                    <button type="button" onClick={() => setYears(availableYears)}>Select all</button>
+                    <button type="button" onClick={() => setYears([])}>Clear</button>
+                  </div>
+                  <div className="filter-picker-options">
+                    {visibleYears.map((year) => (
+                      <label key={year} className="filter-picker-option"><input type="checkbox" checked={years.includes(year)} onChange={() => toggleYear(year)} /><span>{year}</span></label>
+                    ))}
+                    {!visibleYears.length && <small className="muted">No matching years.</small>}
+                  </div>
+                </div>
+              )}
+            </div>
+            {parsedSelectedYears.length > 0 && <div className="selected-filter-chips">{parsedSelectedYears.map((year) => <button type="button" className="filter-chip active" key={year} onClick={() => toggleYear(year)}>{year} ×</button>)}</div>}
+            <small className="muted">
+              Selected years:{" "}
+              {parsedSelectedYears.join(", ") || "All years"}
+            </small>
+          </div>
           <div className="quiz-filter-block quiz-filter-section legacy-filter-section">
             <div className="section-heading compact">
               <div>
@@ -6158,7 +6200,8 @@ function QuizStudio({ user }: { user: User | null }) {
           </div>
           <details className="answer-review">
             <summary>Review solutions and sources</summary>
-            {quiz.questions.map((item, index) => {
+            {(printAllReport ? quiz.questions : visibleReportQuestions).map((item, pageIndex) => {
+              const index = printAllReport ? pageIndex : (reportPage - 1) * reportPageSize + pageIndex;
               const solution = result.solutions.find(
                 (entry) => entry.question_id === item.id,
               );
@@ -6248,6 +6291,7 @@ function QuizStudio({ user }: { user: User | null }) {
                 {item.source_url && <a href={item.source_url} target="_blank" rel="noreferrer">View source</a>}
               </article>;
             })}
+            {!printAllReport && reportPageCount > 1 && <div className="history-pagination report-pagination"><button type="button" className="button button-small" disabled={reportPage === 1} onClick={() => setReportPage((page) => page - 1)}><ChevronLeft size={15} /> Previous</button><span>Questions {((reportPage - 1) * reportPageSize) + 1}–{Math.min(reportPage * reportPageSize, reportQuestionCount)} of {reportQuestionCount}</span><button type="button" className="button button-small" disabled={reportPage === reportPageCount} onClick={() => setReportPage((page) => page + 1)}>Next <ChevronRight size={15} /></button></div>}
           </div>
         </section>
       )}
@@ -6260,7 +6304,7 @@ function QuizStudio({ user }: { user: User | null }) {
               <small>Completed {new Date(historyReport.attempt.completed_at || historyReport.attempt.created_at).toLocaleDateString()}</small>
             </div>
             <div className="report-toolbar-actions">
-              <button type="button" className="button" onClick={() => window.print()}><Download size={15} /> Download PDF</button>
+              <button type="button" className="button" onClick={() => { setPrintAllReport(true); window.setTimeout(() => { window.print(); setPrintAllReport(false); }, 180); }}><Download size={15} /> Download PDF</button>
               <button type="button" className="button button-small" onClick={() => setHistoryReport(null)}>Close report</button>
             </div>
           </div>
@@ -6278,7 +6322,8 @@ function QuizStudio({ user }: { user: User | null }) {
           </div>
           <div className="report-question-list">
             <div className="section-heading compact"><div><span className="eyebrow">QUESTION-WISE REVIEW</span><h4>Questions, options and answers</h4></div></div>
-            {historyReport.quiz.questions.map((item, index) => {
+            {(printAllReport ? historyReport.quiz.questions : visibleHistoryReportQuestions).map((item, pageIndex) => {
+              const index = printAllReport ? pageIndex : (historyReportPage - 1) * reportPageSize + pageIndex;
               const userAnswer = historyReport.attempt.answers?.[String(item.id)];
               const correctAnswer = item.answer_index;
               const state = userAnswer === undefined ? "unanswered" : userAnswer === correctAnswer ? "correct" : "incorrect";
@@ -6301,6 +6346,7 @@ function QuizStudio({ user }: { user: User | null }) {
                 {item.source_url && <a href={item.source_url} target="_blank" rel="noreferrer">View source</a>}
               </article>;
             })}
+            {!printAllReport && historyReportPageCount > 1 && <div className="history-pagination report-pagination"><button type="button" className="button button-small" disabled={historyReportPage === 1} onClick={() => setHistoryReportPage((page) => page - 1)}><ChevronLeft size={15} /> Previous</button><span>Questions {((historyReportPage - 1) * reportPageSize) + 1}–{Math.min(historyReportPage * reportPageSize, historyReportQuestionCount)} of {historyReportQuestionCount}</span><button type="button" className="button button-small" disabled={historyReportPage === historyReportPageCount} onClick={() => setHistoryReportPage((page) => page + 1)}>Next <ChevronRight size={15} /></button></div>}
           </div>
         </section>
       )}
