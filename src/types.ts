@@ -70,6 +70,7 @@ export type Resource = {
   storage_provider: string;
   file_size?: number | null;
   duration_sec?: number | null;
+    sort_order?: number;
   updated_at?: string | null;
 };
 
