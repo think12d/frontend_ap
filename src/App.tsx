@@ -6376,7 +6376,7 @@ function QuizStudio({ user }: { user: User | null }) {
             <h3>Recent attempts</h3>
           </div>
           <span className="muted">
-            Scores remain available; reports expire after 30 days
+            {history.length} quiz attempt{history.length === 1 ? "" : "s"} · reports expire after 30 days
           </span>
         </div>
         {history.length ? (
