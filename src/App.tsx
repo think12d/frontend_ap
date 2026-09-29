@@ -23,8 +23,10 @@ import {
   EyeOff,
   ExternalLink,
   FileText,
+  Flag,
   Folder,
   FolderOpen,
+  Grid2X2,
   ImagePlus,
   LayoutDashboard,
   Library,
@@ -117,6 +119,7 @@ type QuestionBankOptions = {
   sessions: string[];
   papers: string[];
   subjects: { code: string; name: string }[];
+  question_count?: number;
   status: string;
 };
 
@@ -127,6 +130,7 @@ type QuizDraftState = {
   startedAt: number;
   expiresAt: number;
   savedAt: number;
+  markedForReview?: Record<string, boolean>;
 };
 
 function quizDraftKey(user: User | null): string {
@@ -159,6 +163,7 @@ function readQuizDraft(user: User | null): QuizDraftState | null {
       startedAt,
       expiresAt,
       savedAt,
+      markedForReview: parsed.markedForReview || {},
     };
   } catch {
     window.localStorage.removeItem(key);
@@ -5040,6 +5045,8 @@ function QuizStudio({ user }: { user: User | null }) {
   const [questionBankTopics, setQuestionBankTopics] = useState<string[]>([]);
   const [topicSearch, setTopicSearch] = useState("");
   const [topicMenuOpen, setTopicMenuOpen] = useState(false);
+  const [yearSearch, setYearSearch] = useState("");
+  const [yearMenuOpen, setYearMenuOpen] = useState(false);
   const [subtopics, setSubtopics] = useState<string[]>([]);
   const [difficulty, setDifficulty] = useState("mixed");
   const [customYears, setCustomYears] = useState("");
@@ -5050,6 +5057,8 @@ function QuizStudio({ user }: { user: User | null }) {
   >("verified_previous_year");
   const [quiz, setQuiz] = useState<Quiz | null>(null);
   const [answers, setAnswers] = useState<Record<string, number>>({});
+  const [markedForReview, setMarkedForReview] = useState<Record<string, boolean>>({});
+  const [paletteOpen, setPaletteOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [secondsLeft, setSecondsLeft] = useState(0);
   const [startedAt, setStartedAt] = useState(0);
@@ -5131,6 +5140,14 @@ function QuizStudio({ user }: { user: User | null }) {
     setQuestionBankTopics((current) => current.filter((topic) => validTopics.has(topic)));
   }, [bankOptions?.topics]);
 
+  useEffect(() => {
+    const includesPaperTwo = papers.length === 0 || papers.some((paper) => /paper\s*2|\b2\b/i.test(paper));
+    if (!includesPaperTwo && selectedSubjectCode) {
+      setSelectedSubjectCode("");
+      setSelectedSubjectArea("");
+    }
+  }, [papers.join("|"), selectedSubjectCode]);
+
   const course = courses.find((item) => String(item.id) === selectedCourse);
   const topics =
     course?.modules.flatMap((module) =>
@@ -5146,6 +5163,18 @@ function QuizStudio({ user }: { user: User | null }) {
   const visibleTopics = (bankOptions?.topics || []).filter((topic) =>
     topic.toLocaleLowerCase().includes(topicSearch.toLocaleLowerCase().trim()),
   );
+  const visibleYears = availableYears.filter((year) =>
+    String(year).includes(yearSearch.trim()),
+  );
+  const parsedSelectedYears = Array.from(new Set([...years, ...parseYearList(customYears)])).sort((a, b) => a - b);
+  const paperTwoSelected = papers.length === 0 || papers.some((paper) => /paper\s*2|\b2\b/i.test(paper));
+  const selectedFilterSummary = [
+    papers.length ? papers.join(" + ") : "All papers",
+    parsedSelectedYears.length ? `${parsedSelectedYears.length} year${parsedSelectedYears.length === 1 ? "" : "s"}` : "All years",
+    questionBankTopics.length ? `${questionBankTopics.length} topic${questionBankTopics.length === 1 ? "" : "s"}` : "All topics",
+    selectedSubjectCode && paperTwoSelected ? selectedSubjectArea || selectedSubjectCode : "All subjects",
+    difficulty === "mixed" ? "Mixed difficulty" : difficulty,
+  ].join("  ·  ");
   const availableDifficulties = Array.from(
     new Set(["easy", "medium", "hard", ...(bankOptions?.difficulties || [])]),
   );
@@ -5273,6 +5302,7 @@ function QuizStudio({ user }: { user: User | null }) {
       startedAt,
       expiresAt,
       savedAt: Date.now(),
+      markedForReview,
     };
     const remaining = Math.max(0, Math.ceil((draft.expiresAt - Date.now()) / 1000));
     setSecondsLeft(remaining);
@@ -5289,7 +5319,7 @@ function QuizStudio({ user }: { user: User | null }) {
       }).then(setActiveAttempt).catch((cause) => setMessage(`Progress could not be saved: ${(cause as Error).message}`));
     }, 250);
     return () => window.clearTimeout(saveTimer);
-  }, [quiz, answers, currentIndex, startedAt, result, user, activeAttempt?.id, activeAttempt?.expires_at, sessionExpiresAt]);
+  }, [quiz, answers, markedForReview, currentIndex, startedAt, result, user, activeAttempt?.id, activeAttempt?.expires_at, sessionExpiresAt]);
 
   const resumeSavedQuiz = async () => {
     if (!activeAttempt) {
@@ -5303,6 +5333,8 @@ function QuizStudio({ user }: { user: User | null }) {
       const restoredExpiresAt = activeAttempt.expires_at ? new Date(activeAttempt.expires_at).getTime() : Date.now() + restoredQuiz.time_limit_minutes * 60 * 1000;
       setQuiz(restoredQuiz);
       setAnswers(activeAttempt.answers || {});
+      setMarkedForReview({});
+      setPaletteOpen(false);
       setCurrentIndex(Math.min(activeAttempt.current_index || 0, Math.max(0, restoredQuiz.questions.length - 1)));
       setStartedAt(restoredStartedAt);
       setSessionExpiresAt(restoredExpiresAt);
@@ -5368,6 +5400,8 @@ function QuizStudio({ user }: { user: User | null }) {
       setQuiz(generated);
       setActiveAttempt(startedAttempt);
       setAnswers(startedAttempt.answers || {});
+      setMarkedForReview({});
+      setPaletteOpen(false);
       setCurrentIndex(startedAttempt.current_index || 0);
       setStartedAt(generatedStartedAt);
       const generatedExpiresAt = startedAttempt.expires_at ? new Date(startedAttempt.expires_at).getTime() : 0;
@@ -5406,6 +5440,8 @@ function QuizStudio({ user }: { user: User | null }) {
     setQuiz(null);
     setResult(null);
     setAnswers({});
+    setMarkedForReview({});
+    setPaletteOpen(false);
     setCurrentIndex(0);
     setMessage("");
   };
@@ -5420,6 +5456,8 @@ function QuizStudio({ user }: { user: User | null }) {
       setTimeExpired(false);
       setQuiz(null);
       setAnswers({});
+      setMarkedForReview({});
+      setPaletteOpen(false);
       setCurrentIndex(0);
       setMessage("The in-progress test was exited.");
     } catch (cause) {
@@ -5448,7 +5486,7 @@ function QuizStudio({ user }: { user: User | null }) {
   const exitAndSaveQuiz = () => {
     if (quiz) {
       const expiresAt = sessionExpiresAt || (startedAt + quiz.time_limit_minutes * 60 * 1000);
-      persistQuizDraft(user, { quiz, answers, currentIndex, startedAt, expiresAt, savedAt: Date.now() });
+      persistQuizDraft(user, { quiz, answers, markedForReview, currentIndex, startedAt, expiresAt, savedAt: Date.now() });
     }
     setShowExitDialog(false);
     setQuiz(null);
@@ -5636,20 +5674,28 @@ function QuizStudio({ user }: { user: User | null }) {
           </div>
           <div className="quiz-filter-block quiz-filter-section">
             <span className="eyebrow">YEARS · MULTI-SELECT</span>
-            <div className="chip-row">
-              {availableYears.map((year) => (
-                <button
-                  type="button"
-                  className={
-                    years.includes(year) ? "filter-chip active" : "filter-chip"
-                  }
-                  key={year}
-                  onClick={() => toggleYear(year)}
-                >
-                  {year}
-                </button>
-              ))}
+            <div className="filter-picker">
+              <button type="button" className="filter-picker-trigger" onClick={() => setYearMenuOpen((open) => !open)} aria-expanded={yearMenuOpen}>
+                <span>{parsedSelectedYears.length ? `${parsedSelectedYears.length} year${parsedSelectedYears.length === 1 ? "" : "s"} selected` : "All available years"}</span>
+                <ChevronDown size={16} />
+              </button>
+              {yearMenuOpen && (
+                <div className="filter-picker-menu">
+                  <input value={yearSearch} onChange={(event) => setYearSearch(event.target.value)} placeholder="Search years" autoFocus />
+                  <div className="filter-picker-actions">
+                    <button type="button" onClick={() => setYears(availableYears)}>Select all</button>
+                    <button type="button" onClick={() => { setYears([]); setCustomYears(""); }}>Clear</button>
+                  </div>
+                  <div className="filter-picker-options">
+                    {visibleYears.map((year) => (
+                      <label key={year} className="filter-picker-option"><input type="checkbox" checked={years.includes(year)} onChange={() => toggleYear(year)} /><span>{year}</span></label>
+                    ))}
+                    {!visibleYears.length && <small className="muted">No matching years.</small>}
+                  </div>
+                </div>
+              )}
             </div>
+            {parsedSelectedYears.length > 0 && <div className="selected-filter-chips">{parsedSelectedYears.map((year) => <button type="button" className="filter-chip active" key={year} onClick={() => toggleYear(year)}>{year} ×</button>)}</div>}
             <input
               value={customYears}
               onChange={(event) => setCustomYears(event.target.value)}
@@ -5657,9 +5703,7 @@ function QuizStudio({ user }: { user: User | null }) {
             />
             <small className="muted">
               Selected years:{" "}
-              {Array.from(new Set([...years, ...parseYearList(customYears)]))
-                .sort((a, b) => a - b)
-                .join(", ") || "All years"}
+              {parsedSelectedYears.join(", ") || "All years"}
             </small>
           </div>
           <div className="quiz-filter-block quiz-filter-section">
@@ -5731,8 +5775,11 @@ function QuizStudio({ user }: { user: User | null }) {
             )}
             {availablePapers.length > 0 && (
               <>
-                <span className="eyebrow">PAPER</span>
-                <div className="chip-row">{availablePapers.map((paper) => <button type="button" className={papers.includes(paper) ? "filter-chip active" : "filter-chip"} key={paper} onClick={() => togglePaper(paper)}>{paper}</button>)}</div>
+                <div className="paper-filter-heading"><span className="eyebrow">PAPER</span><small className="muted">Choose one paper or both. Leave unselected for all papers.</small></div>
+                <div className="paper-choice-grid">
+                  {availablePapers.map((paper) => <button type="button" className={papers.includes(paper) ? "paper-choice active" : "paper-choice"} key={paper} onClick={() => togglePaper(paper)}><strong>{paper}</strong><span>{papers.includes(paper) ? "Included" : "Add to test"}</span></button>)}
+                  {availablePapers.length > 1 && <button type="button" className={papers.length === availablePapers.length ? "paper-choice active" : "paper-choice"} onClick={() => setPapers(papers.length === availablePapers.length ? [] : availablePapers)}><strong>Both papers</strong><span>{papers.length === availablePapers.length ? "Included" : "Select all"}</span></button>}
+                </div>
               </>
             )}
             {showCategories && (
@@ -5785,7 +5832,7 @@ function QuizStudio({ user }: { user: User | null }) {
               </>
             )}
           </div>
-          <div className="quiz-filter-block subject-area-block quiz-filter-section">
+          {paperTwoSelected && <div className="quiz-filter-block subject-area-block quiz-filter-section">
             <div className="subject-area-heading">
               <div>
                 <span className="eyebrow">UGC NET SUBJECT AREAS</span>
@@ -5823,7 +5870,9 @@ function QuizStudio({ user }: { user: User | null }) {
             ) : (
               <small className="muted">No subjects are available for the selected question-bank filters.</small>
             )}
-          </div>
+          </div>}
+          {!paperTwoSelected && <div className="paper-filter-note"><BookOpen size={16} /> Paper 1 selected. Subject areas are used for Paper 2 questions, so no subject filter is required.</div>}
+          <div className="quiz-selection-summary"><div><span className="eyebrow">YOUR PAPER</span><strong>{selectedFilterSummary}</strong></div>{bankOptions?.question_count === 0 && <span className="quiz-no-results">No questions match these filters. Broaden a filter to continue.</span>}</div>
           <div className="quiz-builder-submit-row">
           <small className="quiz-builder-note">Questions are selected from the verified question bank using your filters.</small>
           <button
@@ -5943,6 +5992,13 @@ function QuizStudio({ user }: { user: User | null }) {
               </label>
             ))}
           </div>
+          <div className="question-tools">
+            <button type="button" className={markedForReview[String(question.id)] ? "question-tool active" : "question-tool"} onClick={() => setMarkedForReview((current) => ({ ...current, [String(question.id)]: !current[String(question.id)] }))} disabled={timeExpired || loading}>
+              <Flag size={15} /> {markedForReview[String(question.id)] ? "Marked for review" : "Mark for review"}
+            </button>
+            <button type="button" className="question-tool" onClick={() => setAnswers((current) => { const next = { ...current }; delete next[String(question.id)]; return next; })} disabled={answers[String(question.id)] === undefined || timeExpired || loading}>Clear response</button>
+            <button type="button" className="question-tool mobile-palette-toggle" onClick={() => setPaletteOpen((open) => !open)} aria-expanded={paletteOpen}><Grid2X2 size={15} /> {paletteOpen ? "Hide question palette" : "Show question palette"}</button>
+          </div>
           <div className="question-nav">
             <button
               className="button button-small"
@@ -5953,7 +6009,7 @@ function QuizStudio({ user }: { user: User | null }) {
               <ChevronLeft size={15} />
               Previous
             </button>
-            <div className="question-jump">
+            <div className={paletteOpen ? "question-jump is-open" : "question-jump"}>
               {quiz.questions.map((item, index) => (
                 <button
                   type="button"
@@ -5961,7 +6017,9 @@ function QuizStudio({ user }: { user: User | null }) {
                   className={
                     index === currentIndex
                       ? "question-dot active"
-                      : answers[String(item.id)] !== undefined
+                      : markedForReview[String(item.id)]
+                        ? "question-dot marked"
+                        : answers[String(item.id)] !== undefined
                         ? "question-dot answered"
                         : "question-dot"
                   }
@@ -6340,7 +6398,7 @@ function JRFStrategyBuilder({ user }: { user: User | null }) {
       return;
     }
     setLoading(true);
-    setMessage("Generating your day-by-day UGC NET/JRF strategy with JRF-AI…");
+    setMessage("Generating your day-by-day UGC NET/JRF strategy with Groq…");
     try {
       const generated = await api<JRFStrategyPlan>("/jrf-strategy", {
         method: "POST",
@@ -6407,7 +6465,7 @@ function JRFStrategyBuilder({ user }: { user: User | null }) {
     <div className="container jrf-page">
       <div className="section-heading">
         <div>
-          <span className="eyebrow">JRF-AI STUDY COACH</span>
+          <span className="eyebrow">GROQ STUDY COACH</span>
           <h2>Custom JRF Study Strategy &amp; Timetable Builder</h2>
           <p className="muted">
             Get an AI-generated day-by-day roadmap tailored to your Paper 2 and
@@ -8604,7 +8662,7 @@ function LegalPage({ page }: { page: LegalPageKind }) {
             <p>
               Some features use specialist providers: Razorpay for payment
               processing, Google services for authorised Meet, Calendar or Drive
-              workflows, JRF-AI for configured AI responses, and SMTP providers
+              workflows, Groq for configured AI responses, and SMTP providers
               for account email. Information is sent to a provider only when
               required for the feature you use and according to that provider’s
               terms and privacy practices.
@@ -9452,14 +9510,14 @@ function AiLabWithImage({ user }: { user: User | null }) {
             <em>Read the question.</em>
           </h1>
           <p>
-            JRF-AI analyzes your uploaded image directly and explains it using the
+            Groq analyzes your uploaded image directly and explains it using the
             selected course material.
           </p>
         </div>
         <div className="ai-badge">
           <Bot size={29} />
           <span>
-            <b>JRF-AI tutor</b>
+            <b>Groq vision tutor</b>
             <small>image + text analysis</small>
           </span>
         </div>
@@ -9535,7 +9593,7 @@ function AiLabWithImage({ user }: { user: User | null }) {
                 type="submit"
                 disabled={loading}
               >
-                {loading ? "Analyzing…" : "Ask JRF-AI"}
+                {loading ? "Analyzing…" : "Ask Groq"}
                 <Send size={15} />
               </button>
             </div>
@@ -9543,7 +9601,7 @@ function AiLabWithImage({ user }: { user: User | null }) {
           {error && <div className="form-error ai-error">{error}</div>}
           <small className="ai-scope-note">
             Scope guard: UGC NET Paper 1 topics only. Common image formats are
-            sent directly; other image formats are converted to JPEG for JRF-AI.
+            sent directly; other image formats are converted to JPEG for Groq.
             Uploads are limited to 8 MB.
           </small>
         </div>
