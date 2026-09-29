@@ -17307,3 +17307,14 @@ textarea { min-height: 108px; }
   flex: 0 0 16px;
   accent-color: #168ca1;
 }
+.quiz-no-results { color: #b04a41; font-weight: 700; font-size: .84rem; }
+.mock-payment-required-banner { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin: 0 0 16px; padding: 15px 18px; border: 1px solid #e6b5bd; border-radius: 14px; background: linear-gradient(135deg, #fff6f7, #fffaf0); color: #7d2f3d; box-shadow: 0 8px 22px rgba(155, 56, 73, .08); }
+.mock-payment-required-banner > div { display: grid; gap: 4px; }
+.mock-payment-required-banner span { font-size: .86rem; }
+.mock-payment-required-badge { flex: 0 0 auto; border-radius: 999px; padding: 7px 10px; background: #b43c4d; color: #fff !important; font-size: .7rem !important; font-weight: 900; letter-spacing: .06em; }
+.question-tools { display: flex; flex-wrap: wrap; gap: 8px; margin: 15px 0 4px; }
+  .quiz-selection-summary { align-items: flex-start; flex-direction: column; }
+  .mock-payment-required-banner { align-items: flex-start; flex-direction: column; }
+  .mobile-palette-toggle { display: inline-flex; }
+Filter files
+
