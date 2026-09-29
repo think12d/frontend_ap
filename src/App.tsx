@@ -5675,7 +5675,7 @@ function QuizStudio({ user }: { user: User | null }) {
           )}
         </section>
       )}
-      {!quiz && access && (!access.free_mock_available || paymentRequired) && (
+      {!quiz && access && (!access.free_mock_available || paymentRequired) && !paymentRequired && (
         <PremiumPaywall
           access={access}
           feature="mock"
@@ -5688,6 +5688,27 @@ function QuizStudio({ user }: { user: User | null }) {
             );
           }}
         />
+      )}
+      {!quiz && paymentRequired && access && (
+        <div className="mock-payment-modal-backdrop" role="presentation">
+          <div className="mock-payment-modal" role="dialog" aria-modal="true" aria-labelledby="mock-payment-title">
+            <button type="button" className="mock-payment-modal-close" aria-label="Close payment dialog" onClick={() => setPaymentRequired(false)}>×</button>
+            <span className="eyebrow">MOCK TEST ACCESS</span>
+            <h3 id="mock-payment-title">Payment required to continue</h3>
+            <p>Your 3 free mock tests are complete. Unlock unlimited mock tests to generate and start another quiz.</p>
+            <div className="mock-payment-modal-price"><span>Unlimited mock tests</span><strong>{access.currency} {(access.mock_test_price_paise / 100).toLocaleString("en-IN")}</strong></div>
+            <PremiumPaywall
+              access={access}
+              feature="mock"
+              onPaid={async () => {
+                const fresh = await api<PremiumAccess>("/payments/status");
+                setAccess(fresh);
+                setPaymentRequired(false);
+                setMessage("Payment successful. You can generate your next mock test now.");
+              }}
+            />
+          </div>
+        </div>
       )}
       {!quiz && (
         <form className="quiz-builder panel quiz-builder-card" onSubmit={generate}>
