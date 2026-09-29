@@ -5049,7 +5049,6 @@ function QuizStudio({ user }: { user: User | null }) {
   const [yearMenuOpen, setYearMenuOpen] = useState(false);
   const [subtopics, setSubtopics] = useState<string[]>([]);
   const [difficulty, setDifficulty] = useState("mixed");
-  const [customYears, setCustomYears] = useState("");
   const [count, setCount] = useState(20);
   const [minutes, setMinutes] = useState(30);
   const [sourceMode, setSourceMode] = useState<
@@ -5162,7 +5161,7 @@ function QuizStudio({ user }: { user: User | null }) {
   const visibleYears = availableYears.filter((year) =>
     String(year).includes(yearSearch.trim()),
   );
-  const parsedSelectedYears = Array.from(new Set([...years, ...parseYearList(customYears)])).sort((a, b) => a - b);
+  const parsedSelectedYears = years.slice().sort((a, b) => a - b);
   const paperTwoSelected = papers.length === 0 || papers.some((paper) => /paper\s*2|\b2\b/i.test(paper));
   const selectedFilterSummary = [
     papers.length ? papers.join(" + ") : "All papers",
@@ -5351,10 +5350,7 @@ function QuizStudio({ user }: { user: User | null }) {
       setMessage("Sign in before starting a quiz.");
       return;
     }
-    const parsedYears = parseYearList(customYears);
-    const selectedYears = Array.from(new Set([...years, ...parsedYears])).sort(
-      (a, b) => a - b,
-    );
+    const selectedYears = years.slice().sort((a, b) => a - b);
     const topicSelection = topics.map((topic) => topic.id);
     if (!topicSelection.length) {
       setMessage("Select at least one UGC NET topic.");
@@ -5680,7 +5676,7 @@ function QuizStudio({ user }: { user: User | null }) {
                   <input value={yearSearch} onChange={(event) => setYearSearch(event.target.value)} placeholder="Search years" autoFocus />
                   <div className="filter-picker-actions">
                     <button type="button" onClick={() => setYears(availableYears)}>Select all</button>
-                    <button type="button" onClick={() => { setYears([]); setCustomYears(""); }}>Clear</button>
+                    <button type="button" onClick={() => setYears([])}>Clear</button>
                   </div>
                   <div className="filter-picker-options">
                     {visibleYears.map((year) => (
@@ -5692,11 +5688,6 @@ function QuizStudio({ user }: { user: User | null }) {
               )}
             </div>
             {parsedSelectedYears.length > 0 && <div className="selected-filter-chips">{parsedSelectedYears.map((year) => <button type="button" className="filter-chip active" key={year} onClick={() => toggleYear(year)}>{year} ×</button>)}</div>}
-            <input
-              value={customYears}
-              onChange={(event) => setCustomYears(event.target.value)}
-              placeholder="Enter years e.g. 2018,2019"
-            />
             <small className="muted">
               Selected years:{" "}
               {parsedSelectedYears.join(", ") || "All years"}
