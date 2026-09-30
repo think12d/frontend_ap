@@ -5454,6 +5454,8 @@ function QuizStudio({ user }: { user: User | null }) {
           subject_name: undefined,
           categories: [],
           question_bank_topics: selectedQuestionBankTopics,
+          paper1: { included: paper1Enabled, years: paper1Enabled ? paper1Years : [], difficulty: paper1Enabled ? paper1Difficulty : "mixed", topics: paper1Enabled ? paper1Topics : [] },
+          paper2: { included: paper2Enabled, years: paper2Enabled ? paper2Years : [], difficulty: paper2Enabled ? paper2Difficulty : "mixed", topics: paper2Enabled ? paper2Topics : [] },
           subtopics: [],
           difficulty: paper1Enabled && paper2Enabled && paper1Difficulty !== paper2Difficulty
             ? "mixed"
@@ -5725,7 +5727,7 @@ function QuizStudio({ user }: { user: User | null }) {
           </div>
           <div className="quiz-builder-grid quiz-builder-primary">
             <label>
-              Subject / course
+              Course
               <select
                 value={selectedCourse}
                 onChange={(event) => setSelectedCourse(event.target.value)}
@@ -5804,6 +5806,7 @@ function QuizStudio({ user }: { user: User | null }) {
               </>}
             </article>
           </section>
+          {false && (<div className="quiz-legacy-filters" aria-hidden="true">
           <div className="quiz-filter-block quiz-filter-section legacy-filter-section">
             <span className="eyebrow">YEARS · MULTI-SELECT</span>
             <div className="filter-picker">
@@ -5874,8 +5877,8 @@ function QuizStudio({ user }: { user: User | null }) {
                   {topicMenuOpen && (
                     <div className="topic-picker-menu">
                       <input value={topicSearch} onChange={(event) => setTopicSearch(event.target.value)} placeholder="Search topics" autoFocus />
-                      <button type="button" className="topic-select-all" onClick={() => setQuestionBankTopics(questionBankTopics.length === bankOptions.topics.length ? [] : bankOptions.topics)}>
-                        {questionBankTopics.length === bankOptions.topics.length ? "Clear all" : "Select all"}
+                      <button type="button" className="topic-select-all" onClick={() => setQuestionBankTopics(questionBankTopics.length === (bankOptions?.topics?.length ?? 0) ? [] : (bankOptions?.topics ?? []))}>
+                        {questionBankTopics.length === (bankOptions?.topics?.length ?? 0) ? "Clear all" : "Select all"}
                       </button>
                       <div className="topic-picker-options">
                         {visibleTopics.map((topic) => (
@@ -5998,7 +6001,7 @@ function QuizStudio({ user }: { user: User | null }) {
               <small className="muted">No subjects are available for the selected question-bank filters.</small>
             )}
           </div>}
-          {!paperTwoSelected && <div className="paper-filter-note"><BookOpen size={16} /> Paper 1 selected. Subject areas are used for Paper 2 questions, so no subject filter is required.</div>}
+          </div>)}
           <div className="quiz-selection-summary"><div><span className="eyebrow">YOUR PAPER</span><strong>{selectedFilterSummary}</strong><small className="muted">At least one paper must be included to start the quiz.</small></div>{bankOptions?.question_count === 0 && <span className="quiz-no-results">No questions match these filters. Broaden a filter to continue.</span>}</div>
           <div className="quiz-builder-submit-row">
           <small className="quiz-builder-note">Questions are selected from the verified question bank using your filters.</small>
@@ -8147,8 +8150,10 @@ function QuestionBankPage({ user }: { user: User | null }) {
 }
 
 function RecordedVideoLibraryPage({ user }: { user: User | null }) {
+  const navigate = useNavigate();
   const [access, setAccess] = useState<PremiumAccess | null>(null);
   const [library, setLibrary] = useState<RecordedLibrary | null>(null);
+  const [paymentCourses, setPaymentCourses] = useState<Course[]>([]);
   const [playingId, setPlayingId] = useState<string | null>(null);
   const [playingUrl, setPlayingUrl] = useState<string | null>(null);
   const [loadingRecordingId, setLoadingRecordingId] = useState<string | null>(null);
@@ -8264,15 +8269,19 @@ function RecordedVideoLibraryPage({ user }: { user: User | null }) {
     void Promise.allSettled([
       api<PremiumAccess>("/payments/status"),
       api<RecordedLibrary>("/library/recorded-videos"),
+      api<Course[]>("/courses"),
     ])
-      .then(([paymentResult, videosResult]) => {
+      .then(([paymentResult, videosResult, coursesResult]) => {
         if (paymentResult.status === "fulfilled")
           setAccess(paymentResult.value);
         if (videosResult.status === "fulfilled") setLibrary(videosResult.value);
+        if (coursesResult.status === "fulfilled") setPaymentCourses(coursesResult.value);
         const failure =
           videosResult.status === "rejected"
             ? videosResult.reason
-            : paymentResult.status === "rejected"
+            : coursesResult.status === "rejected"
+              ? coursesResult.reason
+              : paymentResult.status === "rejected"
               ? paymentResult.reason
               : null;
         if (failure)
@@ -8380,7 +8389,18 @@ function RecordedVideoLibraryPage({ user }: { user: User | null }) {
       {loading ? (
         <div className="empty-state">Loading the recorded classroom…</div>
       ) : !library || library.premium_required ? (
-        <PremiumPaywall access={access} feature="library" onPaid={load} />
+        <section className="recorded-course-payment panel" role="status">
+          <span className="eyebrow">COURSE ACCESS REQUIRED</span>
+          <h2>Make a payment to watch recorded classes</h2>
+          <p>Choose the course you want to join. After successful payment, your recorded classes will unlock automatically.</p>
+          <div className="recorded-course-payment-list">
+            {paymentCourses.filter((course) => course.is_published !== false).map((course) => (
+              <button key={course.id} type="button" className="button button-lime" onClick={() => navigate(`/payment/course/${course.slug}`)}>
+                Make payment · {course.title}
+              </button>
+            ))}
+          </div>
+        </section>
       ) : !visibleItems.length ? (
         <div className="empty-state">
           <Play size={25} />
