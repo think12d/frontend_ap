@@ -4226,7 +4226,9 @@ function CoursePage({ user }: { user: User | null }) {
     (sum, item) => sum + item.topics.length,
     0,
   );
-  const visibleModules = modulePageData?.items ?? [];
+  const visibleModules = [...(modulePageData?.items ?? [])].sort(
+    (left, right) => (left.sort_order ?? Number.MAX_SAFE_INTEGER) - (right.sort_order ?? Number.MAX_SAFE_INTEGER) || left.id - right.id,
+  );
   const normalizedModuleSearch = moduleSearch.trim().toLowerCase();
   const filteredVisibleModules = visibleModules.flatMap((module) => {
     const searchableText = [
@@ -4234,9 +4236,14 @@ function CoursePage({ user }: { user: User | null }) {
       ...module.topics.flatMap((topic) => [topic.title, ...topic.resources.map((resource) => resource.title), ...topic.resources.map((resource) => resource.original_filename)]),
     ].join(" ").toLowerCase();
     const moduleMatches = !normalizedModuleSearch || searchableText.includes(normalizedModuleSearch);
-    const topics = module.topics.flatMap((topic) => {
+    const orderedTopics = [...module.topics].sort(
+      (left, right) => (left.sort_order ?? Number.MAX_SAFE_INTEGER) - (right.sort_order ?? Number.MAX_SAFE_INTEGER) || left.id - right.id,
+    );
+    const topics = orderedTopics.flatMap((topic) => {
       const topicMatches = !normalizedModuleSearch || topic.title.toLowerCase().includes(normalizedModuleSearch);
-      const resources = topic.resources.filter((resource) => {
+      const resources = [...topic.resources].sort(
+        (left, right) => (left.sort_order ?? Number.MAX_SAFE_INTEGER) - (right.sort_order ?? Number.MAX_SAFE_INTEGER) || left.id - right.id,
+      ).filter((resource) => {
         const typeMatches = resourceMatchesType(resource, moduleTypeFilter);
         const fileMatches = !normalizedModuleSearch || topicMatches || `${resource.title} ${resource.original_filename}`.toLowerCase().includes(normalizedModuleSearch);
         return typeMatches && fileMatches;
@@ -4811,7 +4818,9 @@ function TopicRoadmapRow({
     }
   };
 
-  const resources = topic.resources || [];
+  const resources = [...(topic.resources || [])].sort(
+    (left, right) => (left.sort_order ?? Number.MAX_SAFE_INTEGER) - (right.sort_order ?? Number.MAX_SAFE_INTEGER) || left.id - right.id,
+  );
   const resourceTotalPages = Math.max(1, Math.ceil(resources.length / resourcePageSize));
   const safeResourcePage = Math.min(resourcePage, resourceTotalPages);
   const visibleResources = resources.slice(
@@ -4842,9 +4851,15 @@ function TopicRoadmapRow({
             {completed ? "Completed" : "Mark complete"}
           </button>
           <div className="resource-pills">
-            {visibleResources.map((resource) => (
-              <ResourceMedia resource={resource} key={resource.id} />
-            ))}
+            {visibleResources.map((resource, visibleIndex) => {
+              const resourceOrder = resource.sort_order ?? resources.findIndex((item) => item.id === resource.id);
+              return (
+                <div className="resource-item-with-order" key={resource.id}>
+                  <span className="resource-order-badge">File #{(resourceOrder >= 0 ? resourceOrder : visibleIndex) + 1}</span>
+                  <ResourceMedia resource={resource} />
+                </div>
+              );
+            })}
             {resources.length > 0 && (
               <div className="resource-pagination" aria-label={`${topic.title} resources pagination`}>
                 <div className="resource-page-size">
@@ -8444,7 +8459,7 @@ function RecordedVideoLibraryPage({ user }: { user: User | null }) {
           </div>
 
           <section className="recorded-library-grid">
-            {visibleItems.map((item) => {
+            {visibleItems.map((item, visibleIndex) => {
               const meetingName =
                 item.meeting_name?.trim() ||
                 item.display_name?.trim() ||
@@ -8487,6 +8502,7 @@ function RecordedVideoLibraryPage({ user }: { user: User | null }) {
                       <span className="recording-tag">
                         <span className="dot" /> LIVE CLASS · {item.recorded_at ? new Date(item.recorded_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : item.session_label || "Recorded class"}
                       </span>
+                      <span className="recording-order-badge">Video #{(item.display_order ?? visibleIndex) + 1}</span>
                       <h3>{meetingName}</h3>
                     </div>
 
