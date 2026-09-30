@@ -5163,9 +5163,12 @@ function QuizStudio({ user }: { user: User | null }) {
       const params = new URLSearchParams({ exam: "UGC NET", papers: paper });
       return api<QuestionBankOptions>(`/quizzes/question-bank/options?${params.toString()}`);
     };
-    Promise.all([loadPaperFacets("Paper 1"), loadPaperFacets("Paper 2")])
-      .then(([paper1, paper2]) => { setPaper1BankOptions(paper1); setPaper2BankOptions(paper2); })
-      .catch(() => undefined);
+    loadPaperFacets("Paper 1")
+      .then(setPaper1BankOptions)
+      .catch((cause) => setMessage(`Paper 1 topics could not be loaded: ${(cause as Error).message}`));
+    loadPaperFacets("Paper 2")
+      .then(setPaper2BankOptions)
+      .catch((cause) => setMessage(`Paper 2 topics could not be loaded: ${(cause as Error).message}`));
   }, [user]);
 
   useEffect(() => {
@@ -5218,12 +5221,14 @@ function QuizStudio({ user }: { user: User | null }) {
     (paper1Topics.length || paper2Topics.length) ? `${new Set([...paper1Topics, ...paper2Topics]).size} topic${new Set([...paper1Topics, ...paper2Topics]).size === 1 ? "" : "s"}` : "All topics",
     paper1Enabled && paper2Enabled && paper1Difficulty !== paper2Difficulty ? "Mixed difficulty" : (paper2Enabled ? paper2Difficulty : paper1Difficulty),
   ].join("  ·  ");
-  const paper1Facets = paper1BankOptions || bankOptions;
-  const paper2Facets = paper2BankOptions || bankOptions;
+  // Keep each card tied to its own backend facet request. Falling back to the
+  // global bank here would mix Paper 1 and Paper 2 topics in the UI.
+  const paper1Facets = paper1BankOptions;
+  const paper2Facets = paper2BankOptions;
   const paper1TopicOptions = (paper1Facets?.topics || []).filter((topic) => topic.toLocaleLowerCase().includes(paperTopicSearch.paper1.toLocaleLowerCase().trim()));
   const paper2TopicOptions = (paper2Facets?.topics || []).filter((topic) => topic.toLocaleLowerCase().includes(paperTopicSearch.paper2.toLocaleLowerCase().trim()));
-  const paper1YearOptions = (paper1Facets?.years || availableYears).slice().sort((a, b) => a - b);
-  const paper2YearOptions = (paper2Facets?.years || availableYears).slice().sort((a, b) => a - b);
+  const paper1YearOptions = (paper1Facets?.years || []).slice().sort((a, b) => a - b);
+  const paper2YearOptions = (paper2Facets?.years || []).slice().sort((a, b) => a - b);
   const togglePaperTopic = (paper: "paper1" | "paper2", topic: string) => {
     const setter = paper === "paper1" ? setPaper1Topics : setPaper2Topics;
     setter((current) => current.includes(topic) ? current.filter((item) => item !== topic) : [...current, topic]);
@@ -5794,7 +5799,7 @@ function QuizStudio({ user }: { user: User | null }) {
               {paper1Enabled && <>
                 <label className="paper-config-label">Years</label><div className="paper-mini-chips">{paper1YearOptions.map((year) => <button type="button" className={paper1Years.includes(year) ? "filter-chip active" : "filter-chip"} key={`p1-${year}`} onClick={() => setPaper1Years((current) => current.includes(year) ? current.filter((item) => item !== year) : [...current, year])}>{year}</button>)}</div>
                 <label className="paper-config-label">Difficulty<select value={paper1Difficulty} onChange={(event) => setPaper1Difficulty(event.target.value)}><option value="mixed">All difficulties</option>{availableDifficulties.map((value) => <option key={`p1-${value}`} value={value}>{value}</option>)}</select></label>
-                <label className="paper-config-label">Topics <span>{paper1Topics.length ? `${paper1Topics.length} selected` : "All topics"}</span></label><div className="paper-topic-picker"><input placeholder="Search Paper 1 topics" value={paperTopicSearch.paper1} onChange={(event) => setPaperTopicSearch((current) => ({ ...current, paper1: event.target.value }))} /><div className="paper-topic-actions"><button type="button" onClick={() => setPaper1Topics(paper1TopicOptions)}>Select all</button><button type="button" onClick={() => setPaper1Topics([])}>Clear all</button></div><div className="paper-topic-list">{paper1TopicOptions.map((topic) => <label key={`p1-topic-${topic}`}><input type="checkbox" checked={paper1Topics.includes(topic)} onChange={() => togglePaperTopic("paper1", topic)} /><span>{topic}</span></label>)}</div></div>
+                <label className="paper-config-label">Topics <span>{paper1Topics.length ? `${paper1Topics.length} selected` : "All topics"}</span><small className="paper-source-note">Paper 1 topics from the verified question bank</small></label><div className="paper-topic-picker"><input placeholder="Search Paper 1 topics" value={paperTopicSearch.paper1} onChange={(event) => setPaperTopicSearch((current) => ({ ...current, paper1: event.target.value }))} /><div className="paper-topic-actions"><button type="button" onClick={() => setPaper1Topics(paper1TopicOptions)}>Select all</button><button type="button" onClick={() => setPaper1Topics([])}>Clear all</button></div><div className="paper-topic-list">{paper1TopicOptions.length ? paper1TopicOptions.map((topic) => <label key={`p1-topic-${topic}`}><input type="checkbox" checked={paper1Topics.includes(topic)} onChange={() => togglePaperTopic("paper1", topic)} /><span>{topic}</span></label>) : <small className="muted">Paper 1 topics are not available from the backend yet.</small>}</div></div>
               </>}
             </article>
             <article className={`paper-config-card ${paper2Enabled ? "active" : ""}`}>
@@ -5802,7 +5807,7 @@ function QuizStudio({ user }: { user: User | null }) {
               {paper2Enabled && <>
                 <label className="paper-config-label">Years</label><div className="paper-mini-chips">{paper2YearOptions.map((year) => <button type="button" className={paper2Years.includes(year) ? "filter-chip active" : "filter-chip"} key={`p2-${year}`} onClick={() => setPaper2Years((current) => current.includes(year) ? current.filter((item) => item !== year) : [...current, year])}>{year}</button>)}</div>
                 <label className="paper-config-label">Difficulty<select value={paper2Difficulty} onChange={(event) => setPaper2Difficulty(event.target.value)}><option value="mixed">All difficulties</option>{availableDifficulties.map((value) => <option key={`p2-${value}`} value={value}>{value}</option>)}</select></label>
-                <label className="paper-config-label">Topics <span>{paper2Topics.length ? `${paper2Topics.length} selected` : "All topics"}</span></label><div className="paper-topic-picker"><input placeholder="Search Paper 2 topics" value={paperTopicSearch.paper2} onChange={(event) => setPaperTopicSearch((current) => ({ ...current, paper2: event.target.value }))} /><div className="paper-topic-actions"><button type="button" onClick={() => setPaper2Topics(paper2TopicOptions)}>Select all</button><button type="button" onClick={() => setPaper2Topics([])}>Clear all</button></div><div className="paper-topic-list">{paper2TopicOptions.map((topic) => <label key={`p2-topic-${topic}`}><input type="checkbox" checked={paper2Topics.includes(topic)} onChange={() => togglePaperTopic("paper2", topic)} /><span>{topic}</span></label>)}</div></div>
+                <label className="paper-config-label">Topics <span>{paper2Topics.length ? `${paper2Topics.length} selected` : "All topics"}</span><small className="paper-source-note">Paper 2 topics from the verified question bank</small></label><div className="paper-topic-picker"><input placeholder="Search Paper 2 topics" value={paperTopicSearch.paper2} onChange={(event) => setPaperTopicSearch((current) => ({ ...current, paper2: event.target.value }))} /><div className="paper-topic-actions"><button type="button" onClick={() => setPaper2Topics(paper2TopicOptions)}>Select all</button><button type="button" onClick={() => setPaper2Topics([])}>Clear all</button></div><div className="paper-topic-list">{paper2TopicOptions.length ? paper2TopicOptions.map((topic) => <label key={`p2-topic-${topic}`}><input type="checkbox" checked={paper2Topics.includes(topic)} onChange={() => togglePaperTopic("paper2", topic)} /><span>{topic}</span></label>) : <small className="muted">Paper 2 topics are not available from the backend yet.</small>}</div></div>
               </>}
             </article>
           </section>
