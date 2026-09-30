@@ -18546,7 +18546,6 @@ textarea { min-height: 108px; }
   }
 }
 
-```css
 /* ============================================================
    UGC NET QUIZ — COLORFUL + FULLY RESPONSIVE
    Uses !important to override existing styles
@@ -19189,4 +19188,3 @@ textarea { min-height: 108px; }
 .quiz-run {
   overflow-x: hidden !important;
 }
-```
