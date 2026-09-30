@@ -8182,7 +8182,7 @@ function RecordedVideoLibraryPage({ user }: { user: User | null }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-  const [sortBy, setSortBy] = useState<"newest" | "oldest" | "alpha">("newest");
+  const [sortBy, setSortBy] = useState<"manual" | "newest" | "oldest" | "alpha">("manual");
 
   useEffect(() => {
     return () => {
@@ -8273,6 +8273,7 @@ function RecordedVideoLibraryPage({ user }: { user: User | null }) {
         })
       : items;
 
+    if (sortBy === "manual") return [...filtered].sort((a, b) => (a.display_order ?? Number.MAX_SAFE_INTEGER) - (b.display_order ?? Number.MAX_SAFE_INTEGER) || a.id.localeCompare(b.id));
     return [...filtered].sort((a, b) => {
       if (sortBy === "alpha") {
         return (a.display_name || a.name).localeCompare(b.display_name || b.name);
@@ -8444,6 +8445,7 @@ function RecordedVideoLibraryPage({ user }: { user: User | null }) {
             <label className="recordings-sort">
               <span>Sort</span>
               <select value={sortBy} onChange={(event) => setSortBy(event.target.value as typeof sortBy)}>
+                <option value="manual">Course order</option>
                 <option value="newest">Newest first</option>
                 <option value="oldest">Oldest first</option>
                 <option value="alpha">A–Z</option>
