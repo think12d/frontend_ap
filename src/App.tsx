@@ -4832,7 +4832,7 @@ function TopicRoadmapRow({
   return (
     <div className="module-topic-row" id={`topic-${topic.id}`}>
       <span className="module-topic-index">
-        {String(index + 1).padStart(2, "0")}
+        {String(topic.sort_order ?? index + 1).padStart(2, "0")}
       </span>
 
       <div className="module-topic-copy">
@@ -6315,18 +6315,6 @@ function QuizStudio({ user }: { user: User | null }) {
             <div><span className="eyebrow">DETAILED REPORT</span><h3>{quiz.title}</h3><small>Completed {new Date().toLocaleDateString()}</small></div>
             <button type="button" className="button" onClick={downloadReportPdf}><Download size={15} /> Download PDF</button>
           </div>
-          <div className="report-score-summary">
-            <div className="report-score-value">{result.score}%</div>
-            <div><strong>{result.correct} / {result.total}</strong><span>correct answers</span></div>
-            <div><strong>{wrongCount}</strong><span>wrong</span></div>
-            <div><strong>{unansweredCount}</strong><span>unanswered</span></div>
-          </div>
-          <div className="report-ai-panel">
-            <span className="eyebrow">AI PERFORMANCE ANALYSIS</span>
-            <h4>Study report</h4>
-            <p>{result.report || "AI report unavailable for this attempt."}</p>
-            <div className="report-strengths"><strong>Strong topics</strong><span>{result.strong_topics?.join(", ") || "Not enough data yet"}</span></div>
-          </div>
           <div className="report-question-list">
             <div className="section-heading compact"><div><span className="eyebrow">QUESTION-WISE REVIEW</span><h4>Every question</h4></div></div>
             {quiz.questions.map((item, index) => {
@@ -6356,12 +6344,11 @@ function QuizStudio({ user }: { user: User | null }) {
                   })}
                 </div>
                 <div className="report-answer-grid"><span>Your answer: <b>{userAnswer === undefined ? "Not answered" : String.fromCharCode(65 + userAnswer)}</b></span><span>Correct answer: <b>{correctAnswer === undefined ? "Not verified" : String.fromCharCode(65 + correctAnswer)}</b></span></div>
-                <p className="report-explanation"><strong>Explanation:</strong> {solution?.explanation || item.explanation || "No explanation provided."}</p>
-                {item.source_url && <a href={item.source_url} target="_blank" rel="noreferrer">View source</a>}
               </article>;
             })}
             {!printAllReport && reportPageCount > 1 && <div className="history-pagination report-pagination"><button type="button" className="button button-small" disabled={reportPage === 1} onClick={() => setReportPage((page) => page - 1)}><ChevronLeft size={15} /> Previous</button><span>Questions {((reportPage - 1) * reportPageSize) + 1}–{Math.min(reportPage * reportPageSize, reportQuestionCount)} of {reportQuestionCount}</span><button type="button" className="button button-small" disabled={reportPage === reportPageCount} onClick={() => setReportPage((page) => page + 1)}>Next <ChevronRight size={15} /></button></div>}
           </div>
+          <div className="report-final-summary"><span className="eyebrow">REPORT SUMMARY</span><strong>{result.score}% · {result.correct} / {result.total} correct</strong><span>{wrongCount} wrong · {unansweredCount} unanswered</span><p>{result.report || "Report summary unavailable for this attempt."}</p></div>
         </section>
       )}
       {historyReport && (
@@ -6376,18 +6363,6 @@ function QuizStudio({ user }: { user: User | null }) {
               <button type="button" className="button" onClick={() => { setPrintAllReport(true); window.setTimeout(() => { window.print(); setPrintAllReport(false); }, 180); }}><Download size={15} /> Download PDF</button>
               <button type="button" className="button button-small" onClick={() => setHistoryReport(null)}>Close report</button>
             </div>
-          </div>
-          <div className="report-score-summary">
-            <div className="report-score-value">{historyReport.attempt.score}%</div>
-            <div><strong>{historyReport.attempt.correct} / {historyReport.attempt.total}</strong><span>correct answers</span></div>
-            <div><strong>{Math.max(0, Object.keys(historyReport.attempt.answers || {}).length - historyReport.attempt.correct)}</strong><span>wrong</span></div>
-            <div><strong>{Math.max(0, historyReport.attempt.total - Object.keys(historyReport.attempt.answers || {}).length)}</strong><span>unanswered</span></div>
-          </div>
-          <div className="report-ai-panel">
-            <span className="eyebrow">AI PERFORMANCE ANALYSIS</span>
-            <h4>Study report</h4>
-            <p>{historyReport.attempt.report || "AI report unavailable for this attempt."}</p>
-            <div className="report-strengths"><strong>Strong topics</strong><span>{historyReport.attempt.strong_topics?.join(", ") || "Not enough data yet"}</span></div>
           </div>
           <div className="report-question-list">
             <div className="section-heading compact"><div><span className="eyebrow">QUESTION-WISE REVIEW</span><h4>Questions, options and answers</h4></div></div>
@@ -6411,12 +6386,11 @@ function QuizStudio({ user }: { user: User | null }) {
                   })}
                 </div>
                 <div className="report-answer-grid"><span>Your answer: <b>{userAnswer === undefined ? "Not answered" : String.fromCharCode(65 + userAnswer)}</b></span><span>Correct answer: <b>{correctAnswer >= 0 ? String.fromCharCode(65 + correctAnswer) : "Not verified"}</b></span></div>
-                <p className="report-explanation"><strong>Explanation:</strong> {item.explanation || "No explanation provided."}</p>
-                {item.source_url && <a href={item.source_url} target="_blank" rel="noreferrer">View source</a>}
               </article>;
             })}
             {!printAllReport && historyReportPageCount > 1 && <div className="history-pagination report-pagination"><button type="button" className="button button-small" disabled={historyReportPage === 1} onClick={() => setHistoryReportPage((page) => page - 1)}><ChevronLeft size={15} /> Previous</button><span>Questions {((historyReportPage - 1) * reportPageSize) + 1}–{Math.min(historyReportPage * reportPageSize, historyReportQuestionCount)} of {historyReportQuestionCount}</span><button type="button" className="button button-small" disabled={historyReportPage === historyReportPageCount} onClick={() => setHistoryReportPage((page) => page + 1)}>Next <ChevronRight size={15} /></button></div>}
           </div>
+          <div className="report-final-summary"><span className="eyebrow">REPORT SUMMARY</span><strong>{historyReport.attempt.score}% · {historyReport.attempt.correct} / {historyReport.attempt.total} correct</strong><span>{Math.max(0, Object.keys(historyReport.attempt.answers || {}).length - historyReport.attempt.correct)} wrong · {Math.max(0, historyReport.attempt.total - Object.keys(historyReport.attempt.answers || {}).length)} unanswered</span><p>{historyReport.attempt.report || "Report summary unavailable for this attempt."}</p></div>
         </section>
       )}
       {showExitDialog && quiz && (
