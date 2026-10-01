@@ -17994,3 +17994,338 @@ textarea { min-height: 108px; }
   overflow-x: hidden !important;
 }
 
+/* =========================================================
+   MOCK PAYMENT MODAL — RESPONSIVE PREMIUM UI
+   ========================================================= */
+
+.mock-payment-modal-backdrop {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 99999 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 20px !important;
+  background: rgba(8, 15, 13, 0.72) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  animation: paymentBackdropIn 0.22s ease-out !important;
+}
+
+.mock-payment-modal {
+  position: relative !important;
+  width: min(100%, 500px) !important;
+  max-height: calc(100vh - 40px) !important;
+  overflow-y: auto !important;
+  padding: 34px !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  border-radius: 24px !important;
+  background:
+    radial-gradient(
+      circle at 90% 0%,
+      rgba(184, 255, 94, 0.16),
+      transparent 34%
+    ),
+    radial-gradient(
+      circle at 0% 100%,
+      rgba(65, 210, 170, 0.12),
+      transparent 35%
+    ),
+    #10231d !important;
+  box-shadow:
+    0 30px 80px rgba(0, 0, 0, 0.45),
+    0 0 0 1px rgba(184, 255, 94, 0.04) !important;
+  color: #ffffff !important;
+  animation: paymentModalIn 0.28s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+}
+
+/* Close button */
+
+.mock-payment-modal-close {
+  position: absolute !important;
+  top: 16px !important;
+  right: 16px !important;
+  width: 38px !important;
+  height: 38px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-radius: 50% !important;
+  background: rgba(255, 255, 255, 0.07) !important;
+  color: rgba(255, 255, 255, 0.8) !important;
+  font-size: 25px !important;
+  line-height: 1 !important;
+  cursor: pointer !important;
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    color 0.2s ease !important;
+}
+
+.mock-payment-modal-close:hover {
+  transform: rotate(90deg) !important;
+  background: rgba(255, 255, 255, 0.14) !important;
+  color: #ffffff !important;
+}
+
+/* Eyebrow */
+
+.mock-payment-modal .eyebrow {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+  margin-bottom: 14px !important;
+  padding: 7px 11px !important;
+  border: 1px solid rgba(184, 255, 94, 0.22) !important;
+  border-radius: 999px !important;
+  background: rgba(184, 255, 94, 0.08) !important;
+  color: #c8ff8a !important;
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.12em !important;
+}
+
+/* Small glowing dot */
+
+.mock-payment-modal .eyebrow::before {
+  content: "" !important;
+  width: 7px !important;
+  height: 7px !important;
+  border-radius: 50% !important;
+  background: #b8ff5e !important;
+  box-shadow: 0 0 12px rgba(184, 255, 94, 0.8) !important;
+}
+
+/* Heading */
+
+.mock-payment-modal h3 {
+  margin: 0 45px 12px 0 !important;
+  color: #ffffff !important;
+  font-size: clamp(24px, 5vw, 32px) !important;
+  font-weight: 800 !important;
+  line-height: 1.15 !important;
+  letter-spacing: -0.025em !important;
+}
+
+/* Description */
+
+.mock-payment-modal > p {
+  margin: 0 0 24px !important;
+  color: rgba(255, 255, 255, 0.68) !important;
+  font-size: 15px !important;
+  line-height: 1.65 !important;
+}
+
+/* Price box */
+
+.mock-payment-modal-price {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 16px !important;
+  margin: 0 0 18px !important;
+  padding: 18px 20px !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 16px !important;
+  background: rgba(255, 255, 255, 0.055) !important;
+}
+
+.mock-payment-modal-price span {
+  color: rgba(255, 255, 255, 0.72) !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+}
+
+.mock-payment-modal-price strong {
+  color: #c8ff8a !important;
+  font-size: 24px !important;
+  font-weight: 850 !important;
+  letter-spacing: -0.02em !important;
+}
+
+/* Premium notice */
+
+.notice.premium-paywall {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 9px !important;
+  padding: 20px !important;
+  border: 1px solid rgba(184, 255, 94, 0.2) !important;
+  border-radius: 18px !important;
+  background:
+    linear-gradient(
+      135deg,
+      rgba(184, 255, 94, 0.11),
+      rgba(67, 210, 168, 0.07)
+    ) !important;
+}
+
+/* Notice title */
+
+.notice.premium-paywall b {
+  color: #d8ffa8 !important;
+  font-size: 14px !important;
+  font-weight: 800 !important;
+  line-height: 1.4 !important;
+}
+
+/* Notice description */
+
+.notice.premium-paywall span {
+  color: rgba(255, 255, 255, 0.62) !important;
+  font-size: 13px !important;
+  line-height: 1.55 !important;
+}
+
+/* Payment button */
+
+.notice.premium-paywall .button {
+  width: 100% !important;
+  min-height: 48px !important;
+  margin-top: 8px !important;
+  border: 0 !important;
+  border-radius: 12px !important;
+  background: #b8ff5e !important;
+  color: #10231d !important;
+  font-size: 14px !important;
+  font-weight: 850 !important;
+  letter-spacing: -0.01em !important;
+  cursor: pointer !important;
+  box-shadow:
+    0 8px 22px rgba(184, 255, 94, 0.18) !important;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    filter 0.2s ease !important;
+}
+
+.notice.premium-paywall .button:hover {
+  transform: translateY(-2px) !important;
+  filter: brightness(1.05) !important;
+  box-shadow:
+    0 12px 30px rgba(184, 255, 94, 0.28) !important;
+}
+
+.notice.premium-paywall .button:active {
+  transform: translateY(0) scale(0.98) !important;
+}
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 600px) {
+
+  .mock-payment-modal-backdrop {
+    align-items: flex-end !important;
+    padding: 10px !important;
+  }
+
+  .mock-payment-modal {
+    width: 100% !important;
+    max-height: calc(100vh - 20px) !important;
+    padding: 26px 20px 20px !important;
+    border-radius: 22px !important;
+  }
+
+  .mock-payment-modal-close {
+    top: 12px !important;
+    right: 12px !important;
+    width: 36px !important;
+    height: 36px !important;
+  }
+
+  .mock-payment-modal .eyebrow {
+    margin-bottom: 12px !important;
+  }
+
+  .mock-payment-modal h3 {
+    margin-right: 35px !important;
+    font-size: 25px !important;
+  }
+
+  .mock-payment-modal > p {
+    font-size: 14px !important;
+    line-height: 1.55 !important;
+  }
+
+  .mock-payment-modal-price {
+    padding: 15px !important;
+  }
+
+  .mock-payment-modal-price strong {
+    font-size: 21px !important;
+  }
+
+  .notice.premium-paywall {
+    padding: 16px !important;
+  }
+
+  .notice.premium-paywall .button {
+    min-height: 50px !important;
+  }
+}
+
+/* Small phones */
+
+@media (max-width: 380px) {
+
+  .mock-payment-modal {
+    padding: 23px 16px 16px !important;
+  }
+
+  .mock-payment-modal h3 {
+    font-size: 22px !important;
+  }
+
+  .mock-payment-modal-price {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 5px !important;
+  }
+
+  .mock-payment-modal-price strong {
+    font-size: 22px !important;
+  }
+}
+
+/* Accessibility */
+
+@media (prefers-reduced-motion: reduce) {
+
+  .mock-payment-modal-backdrop,
+  .mock-payment-modal {
+    animation: none !important;
+  }
+
+  .mock-payment-modal-close,
+  .notice.premium-paywall .button {
+    transition: none !important;
+  }
+}
+
+/* Animations */
+
+@keyframes paymentBackdropIn {
+  from {
+    opacity: 0 !important;
+  }
+
+  to {
+    opacity: 1 !important;
+  }
+}
+
+@keyframes paymentModalIn {
+  from {
+    opacity: 0 !important;
+    transform: translateY(18px) scale(0.97) !important;
+  }
+
+  to {
+    opacity: 1 !important;
+    transform: translateY(0) scale(1) !important;
+  }
+}
