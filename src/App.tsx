@@ -5568,7 +5568,10 @@ function QuizStudio({ user }: { user: User | null }) {
       const link = document.createElement("a");
       link.href = url;
       link.download = `mock-test-${result.attempt_id}-report.pdf`;
+      link.style.display = "none";
+      document.body.appendChild(link);
       link.click();
+      link.remove();
       URL.revokeObjectURL(url);
     } catch (cause) {
       setMessage(`Report download failed: ${(cause as Error).message}`);
@@ -5585,7 +5588,10 @@ function QuizStudio({ user }: { user: User | null }) {
       const link = document.createElement("a");
       link.href = url;
       link.download = `mock-test-${attempt.id}-report.pdf`;
+      link.style.display = "none";
+      document.body.appendChild(link);
       link.click();
+      link.remove();
       URL.revokeObjectURL(url);
     } catch (cause) {
       setMessage(`Report download failed: ${(cause as Error).message}`);
