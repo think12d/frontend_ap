@@ -5560,10 +5560,19 @@ function QuizStudio({ user }: { user: User | null }) {
       setLoading(false);
     }
   };
-  const downloadReportPdf = () => {
-    setShowDetailedReport(true);
-    setPrintAllReport(true);
-    window.setTimeout(() => { window.print(); setPrintAllReport(false); }, 180);
+  const downloadReportPdf = async () => {
+    if (!result?.attempt_id) return;
+    try {
+      const blob = await apiBlob(`/quizzes/attempts/${result.attempt_id}/pdf`);
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `mock-test-${result.attempt_id}-report.pdf`;
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch (cause) {
+      setMessage(`Report download failed: ${(cause as Error).message}`);
+    }
   };
   const downloadHistoryReportPdf = async (attempt: QuizAttempt) => {
     if (!attempt.report_available) return;
@@ -5571,8 +5580,13 @@ function QuizStudio({ user }: { user: User | null }) {
     try {
       const reportQuiz = await api<Quiz>(`/quizzes/${attempt.quiz_id}`);
       setHistoryReport({ attempt, quiz: reportQuiz });
-      setPrintAllReport(true);
-      window.setTimeout(() => { window.print(); setPrintAllReport(false); }, 220);
+      const blob = await apiBlob(`/quizzes/attempts/${attempt.id}/pdf`);
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `mock-test-${attempt.id}-report.pdf`;
+      link.click();
+      URL.revokeObjectURL(url);
     } catch (cause) {
       setMessage(`Report download failed: ${(cause as Error).message}`);
     } finally {
