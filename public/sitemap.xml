@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://jrf-hunters.in/</loc><priority>1.0</priority></url>
+  <url><loc>https://jrf-hunters.in/courses</loc><priority>0.9</priority></url>
+  <url><loc>https://jrf-hunters.in/mock-tests</loc><priority>0.8</priority></url>
+  <url><loc>https://jrf-hunters.in/question-bank</loc><priority>0.8</priority></url>
+  <url><loc>https://jrf-hunters.in/recorded-classes</loc><priority>0.8</priority></url>
+  <url><loc>https://jrf-hunters.in/live-classes</loc><priority>0.7</priority></url>
+  <url><loc>https://jrf-hunters.in/ai-lab</loc><priority>0.6</priority></url>
+  <url><loc>https://jrf-hunters.in/study-planner</loc><priority>0.6</priority></url>
+  <url><loc>https://jrf-hunters.in/jrf-strategy</loc><priority>0.6</priority></url>
+  <url><loc>https://jrf-hunters.in/contact</loc><priority>0.4</priority></url>
+  <url><loc>https://jrf-hunters.in/privacy</loc><priority>0.2</priority></url>
+  <url><loc>https://jrf-hunters.in/terms</loc><priority>0.2</priority></url>
+</urlset>
