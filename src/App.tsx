@@ -89,6 +89,7 @@ import type {
   Quiz,
   QuizAttempt,
   QuizResult,
+  PaginatedGlobalFiles,
   RazorpayOrder,
   RecordedLibrary,
   NotificationSettings,
@@ -1194,6 +1195,9 @@ function DashboardPage({ user }: { user: User | null }) {
   const [attempts, setAttempts] = useState<QuizAttempt[]>([]);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState("");
+  const [globalFiles, setGlobalFiles] = useState<PaginatedGlobalFiles | null>(null);
+  const [globalFilePage, setGlobalFilePage] = useState(1);
+  const [globalFileBusy, setGlobalFileBusy] = useState<number | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -1202,15 +1206,17 @@ function DashboardPage({ user }: { user: User | null }) {
       setLoading(true);
       setFetchError("");
       try {
-        const [courseResult, notificationResult, attemptResult] = await Promise.all([
+        const [courseResult, notificationResult, attemptResult, globalFileResult] = await Promise.all([
           api<Course[]>('/courses/dashboard'),
           api<Notification[]>('/notifications?include_read=true').catch(() => []),
           api<QuizAttempt[]>('/quizzes/attempts/me').catch(() => []),
+          api<PaginatedGlobalFiles>(`/global-files?page=${globalFilePage}&page_size=6`).catch(() => null),
         ]);
         if (!active) return;
         setCourses(courseResult);
         setNotifications(notificationResult.slice(0, 5));
         setAttempts(attemptResult.slice(0, 3));
+        setGlobalFiles(globalFileResult);
       } catch (cause) {
         if (!active) return;
         setFetchError((cause as Error).message || "Unable to load your dashboard right now.");
@@ -1222,7 +1228,7 @@ function DashboardPage({ user }: { user: User | null }) {
     return () => {
       active = false;
     };
-  }, [user?.id]);
+  }, [user?.id, globalFilePage]);
 
   if (!user) return <Navigate to="/login" replace />;
 
@@ -1371,6 +1377,55 @@ function DashboardPage({ user }: { user: User | null }) {
           </div>
         </div>
       </section>
+
+      {globalFiles && globalFiles.total > 0 && (
+        <section className="panel global-home-files-panel">
+          <div className="panel-header-row">
+            <div>
+              <span className="eyebrow">LEARNING LIBRARY</span>
+              <h3>Resources for everyone</h3>
+            </div>
+            <span className="muted-copy">{globalFiles.total} file{globalFiles.total === 1 ? "" : "s"}</span>
+          </div>
+          <div className="global-home-files-grid">
+            {globalFiles.items.map((file) => (
+              <div className="global-home-file-card" key={file.id}>
+                <div className="global-home-file-icon"><FileText size={20} /></div>
+                <div className="global-home-file-copy">
+                  <strong>{file.title}</strong>
+                  <small>{file.original_filename}</small>
+                </div>
+                <button
+                  type="button"
+                  className="button button-small button-dark"
+                  disabled={globalFileBusy === file.id}
+                  onClick={async () => {
+                    setGlobalFileBusy(file.id);
+                    try {
+                      const blob = await apiBlob(`/global-files/${file.id}/media?download=true`);
+                      const url = URL.createObjectURL(blob);
+                      const anchor = document.createElement("a");
+                      anchor.href = url; anchor.download = file.original_filename || file.title; anchor.click();
+                      URL.revokeObjectURL(url);
+                    } catch (cause) {
+                      setFetchError((cause as Error).message || "Unable to download this file.");
+                    } finally { setGlobalFileBusy(null); }
+                  }}
+                >
+                  <Download size={14} /> {globalFileBusy === file.id ? "Loading" : "Download"}
+                </button>
+              </div>
+            ))}
+          </div>
+          {globalFiles.total_pages > 1 && (
+            <div className="pagination-row">
+              <button className="button button-small" disabled={globalFilePage <= 1} onClick={() => setGlobalFilePage((page) => page - 1)}><ChevronLeft size={14} /> Previous</button>
+              <span>Page {globalFilePage} of {globalFiles.total_pages}</span>
+              <button className="button button-small" disabled={globalFilePage >= globalFiles.total_pages} onClick={() => setGlobalFilePage((page) => page + 1)}>Next <ChevronRight size={14} /></button>
+            </div>
+          )}
+        </section>
+      )}
     </div>
   );
 }
@@ -9962,6 +10017,34 @@ function BatchSalesControls({
   );
 }
 
+function GlobalFilesAdminPanel() {
+  const [data, setData] = useState<PaginatedGlobalFiles | null>(null);
+  const [page, setPage] = useState(1);
+  const [file, setFile] = useState<File | null>(null);
+  const [title, setTitle] = useState("");
+  const [busy, setBusy] = useState(false);
+  const load = () => api<PaginatedGlobalFiles>(`/admin/global-files?page=${page}&page_size=8`).then(setData).catch(() => undefined);
+  useEffect(() => { void load(); }, [page]);
+  const submit = async (event: FormEvent) => {
+    event.preventDefault();
+    if (!file) return;
+    setBusy(true);
+    try {
+      const form = new FormData(); form.append("file", file); if (title.trim()) form.append("title", title.trim());
+      await api("/admin/global-files", { method: "POST", body: form });
+      setFile(null); setTitle(""); await load();
+    } finally { setBusy(false); }
+  };
+  const remove = async (id: number) => { if (!window.confirm("Delete this homepage file?")) return; await api(`/admin/global-files/${id}`, { method: "DELETE" }); await load(); };
+  const toggle = async (item: PaginatedGlobalFiles["items"][number]) => { await api(`/admin/global-files/${item.id}`, { method: "PATCH", body: JSON.stringify({ is_published: !item.is_published }) }); await load(); };
+  return <section className="panel global-files-admin-panel">
+    <div className="panel-header-row"><div><span className="eyebrow">HOMEPAGE FILES</span><h3>Global learner resources</h3><small className="muted-copy">Visible to every signed-in learner, independent of courses.</small></div></div>
+    <form className="upload-inline-form global-files-upload-form" onSubmit={submit}><label>Title<input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Optional display title" /></label><label>File<input type="file" onChange={(event) => setFile(event.target.files?.[0] || null)} required /></label><button className="button button-dark" type="submit" disabled={!file || busy}><Upload size={14} /> {busy ? "Uploading…" : "Upload"}</button></form>
+    {data && data.items.length > 0 && <div className="global-files-admin-list">{data.items.map((item) => <div className="global-files-admin-row" key={item.id}><div><strong>{item.title}</strong><small>{item.original_filename}</small></div><span className={item.is_published ? "status-chip status-completed" : "status-chip"}>{item.is_published ? "Published" : "Hidden"}</span><button className="button button-small" type="button" onClick={() => void toggle(item)}>{item.is_published ? "Hide" : "Publish"}</button><button className="button button-small button-danger" type="button" onClick={() => void remove(item.id)}><Trash2 size={13} /> Delete</button></div>)}</div>}
+    {data && data.total_pages > 1 && <div className="pagination-row"><button className="button button-small" disabled={page <= 1} onClick={() => setPage((value) => value - 1)}><ChevronLeft size={14} /> Previous</button><span>Page {page} of {data.total_pages}</span><button className="button button-small" disabled={page >= data.total_pages} onClick={() => setPage((value) => value + 1)}>Next <ChevronRight size={14} /></button></div>}
+  </section>;
+}
+
 function Admin({ user }: { user: User | null }) {
   const [overview, setOverview] = useState<{
     students: number;
@@ -10949,6 +11032,8 @@ function Admin({ user }: { user: User | null }) {
           </button>
         </div>
       )}
+
+      <GlobalFilesAdminPanel />
 
       <section className="broadcast-panel">
         <div className="section-heading compact">
