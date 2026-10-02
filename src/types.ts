@@ -30,6 +30,7 @@ export type RecordedLibraryFile = QuestionLibraryFile & {
   recorded_at?: string | null;
   play_url: string;
   download_url: string;
+  thumbnail_url?: string | null;
   course_id?: number | null;
   live_class_id?: number | null;
   display_order?: number | null;
@@ -442,6 +443,7 @@ export type PremiumAccess = {
 export type ResourceMediaUrl = {
   url: string;
   download_url: string;
+  thumbnail_url?: string | null;
 };
 
 export type QuestionArchivePaper = {
