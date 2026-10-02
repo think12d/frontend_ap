@@ -4714,6 +4714,11 @@ function RegisteredCoursesPage({ user }: { user: User | null }) {
 
   useEffect(() => {
     if (user) void load();
+    if (!user) return;
+    const timer = window.setInterval(() => void load(), 15000);
+    const refreshOnReturn = () => { if (document.visibilityState === "visible") void load(); };
+    document.addEventListener("visibilitychange", refreshOnReturn);
+    return () => { window.clearInterval(timer); document.removeEventListener("visibilitychange", refreshOnReturn); };
   }, [user?.id]);
 
   if (!user) return <Navigate to="/login" replace />;
