@@ -2542,6 +2542,15 @@ function TopicLiveOutput({ topic, compact = false }: { topic: Topic; compact?: b
   );
 }
 
+function GlobalFilesHomeSection({ user }: { user: User | null }) {
+  const [data, setData] = useState<PaginatedGlobalFiles | null>(null);
+  const [page, setPage] = useState(1);
+  const [busy, setBusy] = useState<number | null>(null);
+  useEffect(() => { if (!user) { setData(null); return; } void api<PaginatedGlobalFiles>(`/global-files?page=${page}&page_size=6`).then(setData).catch(() => setData(null)); }, [user?.id, page]);
+  if (!user || !data || data.total === 0) return null;
+  return <section className="panel global-home-files-panel"><div className="panel-header-row"><div><span className="eyebrow">LEARNING LIBRARY</span><h3>Resources for everyone</h3></div><span className="muted-copy">{data.total} file{data.total === 1 ? "" : "s"}</span></div><div className="global-home-files-grid">{data.items.map((file) => <div className="global-home-file-card" key={file.id}><div className="global-home-file-icon"><FileText size={20} /></div><div className="global-home-file-copy"><strong>{file.title}</strong><small>{file.original_filename}</small></div><button type="button" className="button button-small button-dark" disabled={busy === file.id} onClick={async () => { setBusy(file.id); try { const blob = await apiBlob(`/global-files/${file.id}/media?download=true`); const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = file.original_filename || file.title; a.click(); URL.revokeObjectURL(url); } finally { setBusy(null); } }}><Download size={14} /> {busy === file.id ? "Loading" : "Download"}</button></div>)}</div>{data.total_pages > 1 && <div className="pagination-row"><button className="button button-small" disabled={page <= 1} onClick={() => setPage((value) => value - 1)}><ChevronLeft size={14} /> Previous</button><span>Page {page} of {data.total_pages}</span><button className="button button-small" disabled={page >= data.total_pages} onClick={() => setPage((value) => value + 1)}>Next <ChevronRight size={14} /></button></div>}</section>;
+}
+
 function Home({ user }: { user: User | null }) {
   const [courses, setCourses] = useState<Course[]>([]);
   const [pinnedCourse, setPinnedCourse] = useState<Course | null>(null);
@@ -2862,6 +2871,7 @@ function Home({ user }: { user: User | null }) {
       <FlagshipCard user={user} course={featuredCourse} />
       <DemoVideo />
       <LibraryLaunch />
+      <GlobalFilesHomeSection user={user} />
       <div className="section-heading">
         <div>
           <span className="eyebrow">
