@@ -8163,6 +8163,20 @@ function QuestionBankPage({ user }: { user: User | null }) {
   );
 }
 
+function LearnerRecordedThumbnail({ path }: { path: string }) {
+  const [url, setUrl] = useState("");
+  useEffect(() => {
+    let active = true;
+    let objectUrl = "";
+    void apiBlob(path).then((blob) => {
+      objectUrl = URL.createObjectURL(blob);
+      if (active) setUrl(objectUrl); else URL.revokeObjectURL(objectUrl);
+    }).catch(() => active && setUrl(""));
+    return () => { active = false; if (objectUrl) URL.revokeObjectURL(objectUrl); };
+  }, [path]);
+  return url ? <img className="recorded-cover-thumbnail" src={url} alt="" aria-hidden="true" /> : null;
+}
+
 function RecordedVideoLibraryPage({ user }: { user: User | null }) {
   const navigate = useNavigate();
   const [access, setAccess] = useState<PremiumAccess | null>(null);
@@ -8487,7 +8501,7 @@ function RecordedVideoLibraryPage({ user }: { user: User | null }) {
                     
                       aria-label={`Play recording: ${meetingName}`}
                     >
-                      {item.thumbnail_url && <img className="recorded-cover-thumbnail" src={item.thumbnail_url} alt="" aria-hidden="true" />}
+                      {item.thumbnail_url && <LearnerRecordedThumbnail path={item.thumbnail_url} />}
                       <span className="recorded-play">
                        {loadingRecordingId === item.id ? <RefreshCw size={19} className="spin" /> : <Play size={19} />}
                       </span>
