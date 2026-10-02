@@ -35,7 +35,6 @@ export type RecordedLibraryFile = QuestionLibraryFile & {
   live_class_id?: number | null;
   display_order?: number | null;
   description?: string;
-  thumbnail_url?: string | null;
 };
 
 export type QuestionLibrary = {
