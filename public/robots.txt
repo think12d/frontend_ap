@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /my-learning
+Disallow: /registered-courses
+Disallow: /login
+Disallow: /register
+Disallow: /payment/
+Sitemap: https://jrf-hunters.in/sitemap.xml
