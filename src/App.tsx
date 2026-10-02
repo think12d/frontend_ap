@@ -8487,6 +8487,7 @@ function RecordedVideoLibraryPage({ user }: { user: User | null }) {
                     
                       aria-label={`Play recording: ${meetingName}`}
                     >
+                      {item.thumbnail_url && <img className="recorded-cover-thumbnail" src={item.thumbnail_url} alt="" aria-hidden="true" />}
                       <span className="recorded-play">
                        {loadingRecordingId === item.id ? <RefreshCw size={19} className="spin" /> : <Play size={19} />}
                       </span>
