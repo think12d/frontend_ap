@@ -469,3 +469,23 @@ export type QuestionArchiveMetrics = {
   revenue_paise: number;
   currency: string;
 };
+export type GlobalFile = {
+  id: number;
+  title: string;
+  original_filename: string;
+  resource_type: string;
+  storage_provider: string;
+  file_size?: number | null;
+  sort_order: number;
+  is_published: boolean;
+  created_at?: string | null;
+  updated_at?: string | null;
+};
+
+export type PaginatedGlobalFiles = {
+  items: GlobalFile[];
+  total: number;
+  page: number;
+  page_size: number;
+  total_pages: number;
+};
