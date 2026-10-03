@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 
 type ToastKind = "success" | "error" | "warning" | "info" | "loading";
@@ -20,9 +20,18 @@ type ConfirmRequest = {
   onConfirm: () => void | Promise<void>;
 };
 
+type PromptRequest = {
+  title: string;
+  message?: string;
+  defaultValue?: string;
+  confirmLabel?: string;
+  cancelLabel?: string;
+};
+
 type NotificationContextValue = {
   showToast: (toast: Omit<ToastItem, "id">) => void;
   confirmAction: (request: Omit<ConfirmRequest, "onConfirm"> & { onConfirm: () => void | Promise<void> }) => Promise<boolean>;
+  promptAction: (request: PromptRequest) => Promise<string | null>;
 };
 
 const NotificationContext = createContext<NotificationContextValue | null>(null);
@@ -33,6 +42,7 @@ export function useNotifications() {
     return {
       showToast: () => undefined,
       confirmAction: async () => true,
+      promptAction: async () => null,
     } satisfies NotificationContextValue;
   }
   return context;
@@ -310,10 +320,28 @@ function ConfirmDialog({
   );
 }
 
+function PromptDialog({ request, value, setValue, onClose, onSubmit }: { request: PromptRequest | null; value: string; setValue: (value: string) => void; onClose: () => void; onSubmit: () => void }) {
+  if (!request) return null;
+  return <div role="dialog" aria-modal="true" className="confirm-overlay" onClick={onClose}>
+    <form className="confirm-dialog" onClick={(event) => event.stopPropagation()} onSubmit={(event) => { event.preventDefault(); onSubmit(); }}>
+      <div className="confirm-title">{request.title}</div>
+      {request.message && <div className="confirm-message">{request.message}</div>}
+      <input autoFocus className="input" value={value} onChange={(event) => setValue(event.target.value)} />
+      <div className="confirm-actions">
+        <button className="button button-outline" type="button" onClick={onClose}>{request.cancelLabel || "Cancel"}</button>
+        <button className="button button-dark" type="submit">{request.confirmLabel || "Save"}</button>
+      </div>
+    </form>
+  </div>;
+}
+
 export function NotificationProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<ToastItem[]>([]);
   const [confirmRequest, setConfirmRequest] = useState<ConfirmRequest | null>(null);
   const [confirmCancel, setConfirmCancel] = useState<(() => void) | null>(null);
+  const [promptRequest, setPromptRequest] = useState<PromptRequest | null>(null);
+  const [promptValue, setPromptValue] = useState("");
+  const promptResolver = useRef<((value: string | null) => void) | null>(null);
 
   const showToast = useCallback((toast: Omit<ToastItem, "id">) => {
     const id = Date.now() + Math.random();
@@ -366,8 +394,19 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     setConfirmRequest(null);
   }, []);
 
+  const promptAction = useCallback((request: PromptRequest) => new Promise<string | null>((resolve) => {
+    promptResolver.current = resolve;
+    setPromptValue(request.defaultValue || "");
+    setPromptRequest(request);
+  }), []);
+  const closePrompt = useCallback((value: string | null) => {
+    promptResolver.current?.(value);
+    promptResolver.current = null;
+    setPromptRequest(null);
+  }, []);
+
   return (
-    <NotificationContext.Provider value={{ showToast, confirmAction }}>
+    <NotificationContext.Provider value={{ showToast, confirmAction, promptAction }}>
       <NotificationStyles />
       {children}
       <ToastViewport toasts={toasts} />
@@ -376,6 +415,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
         onClose={closeConfirm}
         onConfirmStart={startConfirm}
       />
+      <PromptDialog request={promptRequest} value={promptValue} setValue={setPromptValue} onClose={() => closePrompt(null)} onSubmit={() => closePrompt(promptValue)} />
     </NotificationContext.Provider>
   );
 }
