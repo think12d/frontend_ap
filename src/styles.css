@@ -20812,3 +20812,851 @@ textarea { min-height: 108px; }
     transform: none !important;
   }
 }
+/* ============================================================
+   JRF HUNTERS — NOTIFICATION PANEL
+   Responsive / Mobile-first / No HTML changes
+   ============================================================ */
+
+.notification-panel {
+  --n-blue: #2563eb;
+  --n-blue-light: #eff6ff;
+  --n-text: #172033;
+  --n-muted: #667085;
+  --n-border: #e7ebf0;
+
+  position: fixed !important;
+  z-index: 999999 !important;
+
+  box-sizing: border-box !important;
+
+  width: 410px !important;
+  max-width: calc(100vw - 32px) !important;
+
+  max-height: calc(100vh - 32px) !important;
+
+  display: flex !important;
+  flex-direction: column !important;
+
+  background: #ffffff !important;
+
+  border: 1px solid #e5e7eb !important;
+  border-radius: 18px !important;
+
+  overflow: hidden !important;
+
+  box-shadow:
+    0 24px 70px rgba(15, 23, 42, .14),
+    0 8px 25px rgba(15, 23, 42, .07) !important;
+
+  animation: notificationOpen .22s ease-out both !important;
+}
+
+
+/* ============================================================
+   HEADER
+   ============================================================ */
+
+.notification-header {
+  box-sizing: border-box !important;
+
+  display: grid !important;
+
+  grid-template-columns: minmax(0, 1fr) 34px !important;
+
+  grid-template-areas:
+    "title close"
+    "actions actions" !important;
+
+  gap: 12px !important;
+
+  width: 100% !important;
+
+  padding: 16px !important;
+
+  background: #ffffff !important;
+
+  border-bottom: 1px solid #edf0f3 !important;
+
+  flex: 0 0 auto !important;
+}
+
+
+/* ============================================================
+   TITLE
+   ============================================================ */
+
+.notification-title-wrap {
+  grid-area: title !important;
+
+  min-width: 0 !important;
+
+  display: flex !important;
+  align-items: center !important;
+
+  gap: 9px !important;
+
+  color: var(--n-text) !important;
+
+  font-size: 15px !important;
+  font-weight: 750 !important;
+
+  line-height: 1.2 !important;
+}
+
+.notification-header-icon {
+  flex: 0 0 30px !important;
+
+  width: 30px !important;
+  height: 30px !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  border-radius: 9px !important;
+
+  background: var(--n-blue-light) !important;
+  color: var(--n-blue) !important;
+
+  border: 1px solid #dbeafe !important;
+}
+
+
+/* ============================================================
+   COUNT
+   ============================================================ */
+
+.notification-badge-inline {
+  flex: 0 0 auto !important;
+
+  min-width: 21px !important;
+  height: 21px !important;
+
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  padding: 0 6px !important;
+
+  box-sizing: border-box !important;
+
+  border-radius: 999px !important;
+
+  background: var(--n-blue) !important;
+  color: white !important;
+
+  font-size: 10px !important;
+  font-weight: 800 !important;
+}
+
+
+/* ============================================================
+   CLOSE
+   ============================================================ */
+
+.notification-close {
+  grid-area: close !important;
+
+  width: 34px !important;
+  height: 34px !important;
+
+  min-width: 34px !important;
+  min-height: 34px !important;
+
+  padding: 0 !important;
+  margin: 0 !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  border: 1px solid #e5e7eb !important;
+  border-radius: 9px !important;
+
+  background: #ffffff !important;
+
+  color: #667085 !important;
+
+  cursor: pointer !important;
+
+  transition:
+    background .18s ease,
+    color .18s ease,
+    border-color .18s ease,
+    transform .18s ease !important;
+}
+
+.notification-close:hover {
+  background: #f8fafc !important;
+  border-color: #d1d5db !important;
+  color: #111827 !important;
+}
+
+.notification-close:active {
+  transform: scale(.94) !important;
+}
+
+
+/* ============================================================
+   HEADER ACTIONS
+   ============================================================ */
+
+.notification-header-actions {
+  grid-area: actions !important;
+
+  width: 100% !important;
+  min-width: 0 !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+
+  gap: 6px !important;
+}
+
+
+/* mark all */
+
+.notification-mark-all {
+  min-width: 0 !important;
+
+  display: inline-flex !important;
+  align-items: center !important;
+
+  padding: 7px 8px !important;
+
+  border: 0 !important;
+  border-radius: 7px !important;
+
+  background: transparent !important;
+
+  color: #475467 !important;
+
+  font-size: 11px !important;
+  font-weight: 650 !important;
+
+  white-space: nowrap !important;
+
+  cursor: pointer !important;
+
+  transition: background .18s ease, color .18s ease !important;
+}
+
+.notification-mark-all:hover {
+  background: #eff6ff !important;
+  color: #2563eb !important;
+}
+
+
+/* settings */
+
+.notification-settings-link {
+  min-width: 0 !important;
+
+  display: inline-flex !important;
+  align-items: center !important;
+
+  gap: 5px !important;
+
+  padding: 7px 8px !important;
+
+  border-radius: 7px !important;
+
+  color: #475467 !important;
+
+  font-size: 11px !important;
+  font-weight: 650 !important;
+
+  text-decoration: none !important;
+
+  white-space: nowrap !important;
+
+  transition: background .18s ease, color .18s ease !important;
+}
+
+.notification-settings-link:hover {
+  background: #eff6ff !important;
+  color: #2563eb !important;
+}
+
+
+/* ============================================================
+   LIST
+   ============================================================ */
+
+.notification-list {
+  flex: 1 1 auto !important;
+
+  min-height: 0 !important;
+
+  width: 100% !important;
+
+  box-sizing: border-box !important;
+
+  padding: 7px !important;
+
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+
+  background: #ffffff !important;
+
+  overscroll-behavior: contain !important;
+
+  scrollbar-width: thin !important;
+}
+
+
+/* ============================================================
+   ITEM
+   ============================================================ */
+
+.notification-item {
+  position: relative !important;
+
+  width: 100% !important;
+  min-width: 0 !important;
+
+  box-sizing: border-box !important;
+
+  display: block !important;
+
+  margin: 0 !important;
+  padding: 13px 11px !important;
+
+  border: 1px solid transparent !important;
+  border-radius: 11px !important;
+
+  background: #ffffff !important;
+
+  overflow: hidden !important;
+
+  cursor: pointer !important;
+
+  transition:
+    background .18s ease,
+    border-color .18s ease,
+    transform .18s ease !important;
+}
+
+.notification-item + .notification-item {
+  margin-top: 3px !important;
+}
+
+.notification-item:hover {
+  background: #f8fafc !important;
+  border-color: #e5e7eb !important;
+}
+
+.notification-item.is-unread {
+  background: #f7faff !important;
+  border-color: #e4efff !important;
+}
+
+.notification-item.is-unread::before {
+  content: "";
+
+  position: absolute !important;
+
+  left: 0 !important;
+  top: 12px !important;
+  bottom: 12px !important;
+
+  width: 3px !important;
+
+  background: #2563eb !important;
+
+  border-radius: 0 3px 3px 0 !important;
+}
+
+
+/* ============================================================
+   TOP LINE
+   ============================================================ */
+
+.notification-item-topline {
+  width: 100% !important;
+  min-width: 0 !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+
+  gap: 8px !important;
+
+  margin-bottom: 7px !important;
+}
+
+.notification-item-meta {
+  min-width: 0 !important;
+
+  display: flex !important;
+  align-items: center !important;
+
+  gap: 7px !important;
+}
+
+.notification-item-topline-end {
+  flex: 0 0 auto !important;
+
+  min-width: 0 !important;
+
+  display: flex !important;
+  align-items: center !important;
+
+  gap: 6px !important;
+}
+
+
+/* ============================================================
+   DOT
+   ============================================================ */
+
+.notification-dot {
+  flex: 0 0 7px !important;
+
+  width: 7px !important;
+  height: 7px !important;
+
+  border-radius: 50% !important;
+
+  background: #2563eb !important;
+
+  box-shadow: 0 0 0 3px rgba(37,99,235,.09) !important;
+
+  animation: notificationPulse 2s ease-in-out infinite !important;
+}
+
+
+/* ============================================================
+   CATEGORY
+   ============================================================ */
+
+.notification-category {
+  display: inline-flex !important;
+  align-items: center !important;
+
+  max-width: 100% !important;
+
+  padding: 4px 7px !important;
+
+  border-radius: 6px !important;
+
+  font-size: 9px !important;
+  font-weight: 800 !important;
+
+  line-height: 1.2 !important;
+
+  text-transform: uppercase !important;
+  letter-spacing: .035em !important;
+
+  white-space: nowrap !important;
+}
+
+.notification-category.tone-meeting {
+  background: #eff6ff !important;
+  color: #2563eb !important;
+
+  border: 1px solid #dbeafe !important;
+}
+
+.notification-category.tone-study {
+  background: #f0fdf4 !important;
+  color: #15803d !important;
+
+  border: 1px solid #dcfce7 !important;
+}
+
+
+/* ============================================================
+   TIME
+   ============================================================ */
+
+.notification-time {
+  display: block !important;
+
+  max-width: 100px !important;
+  min-width: 0 !important;
+
+  color: #98a2b3 !important;
+
+  font-size: 9px !important;
+  font-weight: 500 !important;
+
+  line-height: 1.3 !important;
+
+  white-space: nowrap !important;
+
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+
+/* ============================================================
+   READ BUTTON
+   ============================================================ */
+
+.notification-mark-read-icon {
+  flex: 0 0 25px !important;
+
+  width: 25px !important;
+  height: 25px !important;
+
+  min-width: 25px !important;
+  min-height: 25px !important;
+
+  padding: 0 !important;
+  margin: 0 !important;
+
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  border: 1px solid #e5e7eb !important;
+  border-radius: 7px !important;
+
+  background: #ffffff !important;
+
+  color: #667085 !important;
+
+  cursor: pointer !important;
+
+  transition:
+    background .18s ease,
+    border-color .18s ease,
+    color .18s ease,
+    transform .18s ease !important;
+}
+
+.notification-mark-read-icon:hover {
+  background: #eff6ff !important;
+  border-color: #bfdbfe !important;
+  color: #2563eb !important;
+  transform: scale(1.04) !important;
+}
+
+
+/* ============================================================
+   TEXT
+   ============================================================ */
+
+.notification-item h4 {
+  width: 100% !important;
+  min-width: 0 !important;
+
+  margin: 0 0 4px !important;
+
+  color: #1f2937 !important;
+
+  font-size: 12px !important;
+  font-weight: 750 !important;
+
+  line-height: 1.4 !important;
+
+  overflow-wrap: anywhere !important;
+  word-break: break-word !important;
+}
+
+.notification-item p {
+  width: 100% !important;
+  min-width: 0 !important;
+
+  margin: 0 !important;
+
+  color: #667085 !important;
+
+  font-size: 10.5px !important;
+  font-weight: 450 !important;
+
+  line-height: 1.55 !important;
+
+  overflow-wrap: anywhere !important;
+  word-break: break-word !important;
+}
+
+
+/* ============================================================
+   MOBILE — TRUE BOTTOM SHEET
+   ============================================================ */
+
+@media (max-width: 600px) {
+
+  .notification-panel {
+    position: fixed !important;
+
+    left: 8px !important;
+    right: 8px !important;
+    bottom: 8px !important;
+
+    top: auto !important;
+
+    width: auto !important;
+    max-width: none !important;
+
+    height: calc(100dvh - 16px) !important;
+    max-height: calc(100dvh - 16px) !important;
+
+    border-radius: 18px !important;
+
+    box-shadow:
+      0 20px 60px rgba(15,23,42,.18),
+      0 5px 20px rgba(15,23,42,.08) !important;
+  }
+
+  .notification-header {
+    padding: 14px !important;
+
+    gap: 10px !important;
+  }
+
+  .notification-list {
+    padding: 6px !important;
+  }
+
+  .notification-item {
+    padding: 13px 10px !important;
+  }
+}
+
+
+/* ============================================================
+   MOBILE HEADER — STACK ACTIONS
+   ============================================================ */
+
+@media (max-width: 480px) {
+
+  .notification-header {
+    grid-template-columns: minmax(0, 1fr) 34px !important;
+
+    grid-template-areas:
+      "title close"
+      "actions actions" !important;
+  }
+
+  .notification-header-actions {
+    display: grid !important;
+
+    grid-template-columns: 1fr 1fr !important;
+
+    gap: 6px !important;
+  }
+
+  .notification-mark-all,
+  .notification-settings-link {
+    width: 100% !important;
+
+    min-width: 0 !important;
+
+    justify-content: center !important;
+
+    box-sizing: border-box !important;
+
+    background: #f8fafc !important;
+
+    border: 1px solid #edf0f3 !important;
+  }
+
+  .notification-settings-link {
+    overflow: hidden !important;
+  }
+
+  .notification-settings-link span {
+    min-width: 0 !important;
+
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .notification-item-topline {
+    align-items: flex-start !important;
+  }
+}
+
+
+/* ============================================================
+   SMALL PHONE — 390px
+   ============================================================ */
+
+@media (max-width: 390px) {
+
+  .notification-panel {
+    left: 5px !important;
+    right: 5px !important;
+    bottom: 5px !important;
+
+    width: auto !important;
+
+    height: calc(100dvh - 10px) !important;
+    max-height: calc(100dvh - 10px) !important;
+
+    border-radius: 15px !important;
+  }
+
+  .notification-header {
+    padding: 12px !important;
+  }
+
+  .notification-title-wrap {
+    font-size: 14px !important;
+  }
+
+  .notification-header-icon {
+    width: 28px !important;
+    height: 28px !important;
+
+    flex-basis: 28px !important;
+  }
+
+  .notification-header-actions {
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  .notification-mark-all,
+  .notification-settings-link {
+    min-height: 34px !important;
+
+    padding: 6px !important;
+
+    font-size: 10px !important;
+  }
+
+  .notification-item {
+    padding: 11px 9px !important;
+  }
+
+  .notification-item-topline {
+    gap: 5px !important;
+  }
+
+  .notification-item-topline-end {
+    gap: 4px !important;
+  }
+
+  .notification-time {
+    max-width: 62px !important;
+
+    font-size: 8.5px !important;
+  }
+
+  .notification-category {
+    padding: 3px 6px !important;
+
+    font-size: 8px !important;
+  }
+
+  .notification-item h4 {
+    font-size: 11px !important;
+  }
+
+  .notification-item p {
+    font-size: 10px !important;
+    line-height: 1.5 !important;
+  }
+}
+
+
+/* ============================================================
+   VERY SMALL PHONE — 340px
+   ============================================================ */
+
+@media (max-width: 340px) {
+
+  .notification-header-actions {
+    grid-template-columns: 1fr !important;
+  }
+
+  .notification-mark-all,
+  .notification-settings-link {
+    justify-content: flex-start !important;
+
+    padding-left: 9px !important;
+  }
+
+  .notification-item-topline {
+    flex-wrap: wrap !important;
+  }
+
+  .notification-item-topline-end {
+    margin-left: auto !important;
+  }
+
+  .notification-time {
+    max-width: 80px !important;
+  }
+}
+
+
+/* ============================================================
+   TOUCH DEVICES
+   ============================================================ */
+
+@media (hover: none) and (pointer: coarse) {
+
+  .notification-item:hover,
+  .notification-close:hover,
+  .notification-mark-read-icon:hover,
+  .notification-mark-all:hover,
+  .notification-settings-link:hover {
+    transform: none !important;
+  }
+
+  .notification-item {
+    -webkit-tap-highlight-color: transparent !important;
+  }
+
+  .notification-close,
+  .notification-mark-read-icon,
+  .notification-mark-all,
+  .notification-settings-link {
+    -webkit-tap-highlight-color: transparent !important;
+  }
+}
+
+
+/* ============================================================
+   ANIMATION
+   ============================================================ */
+
+@keyframes notificationOpen {
+
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes notificationPulse {
+
+  0%,
+  100% {
+    opacity: .65;
+    transform: scale(.9);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+}
+
+
+/* ============================================================
+   ACCESSIBILITY
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+
+  .notification-panel,
+  .notification-item,
+  .notification-close,
+  .notification-mark-read-icon,
+  .notification-dot {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+  }
+}
