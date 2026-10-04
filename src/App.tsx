@@ -7878,9 +7878,14 @@ function QuestionBankPage({ user }: { user: User | null }) {
         const filteredFiles = group.files.filter((file) => {
           const fileType = getLibraryFileType(file.name);
           const category = getLibraryCategory(file);
-          const matchesSearch =
-            !normalizedQuery ||
-            `${file.name} ${file.relative_path}`.toLowerCase().includes(normalizedQuery);
+          const matchesSearch = smartMatch(searchQuery, [
+  file.name,
+  file.relative_path,
+  category,
+  fileType,
+  group.year === "Other" ? "Other" : `UGC NET ${group.year}`,
+  group.year,
+]);
           const matchesYear =
             yearFilter === "all" ||
             (yearFilter === "Other" && group.year === "Other") ||
