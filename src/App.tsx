@@ -137,7 +137,33 @@ type QuizDraftState = {
 function quizDraftKey(user: User | null): string {
   return `jar_quiz_active_${user ? user.id : "guest"}`;
 }
+const normalizeSearchText = (value: unknown): string =>
+  String(value ?? "")
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
 
+const compactSearchText = (value: unknown): string =>
+  normalizeSearchText(value).replace(/[^a-z0-9]+/g, "");
+
+// Generic smart match: "user 1" == "User1" == "user-1", and "doe john" finds "John Doe"
+function smartMatch(rawQuery: string, fields: unknown[]): boolean {
+  const query = rawQuery.trim();
+  if (!query) return true;
+  const compactQuery = compactSearchText(query);
+  if (!compactQuery) return true;
+  const compactFields = fields.map(compactSearchText);
+  if (compactFields.some((field) => field.includes(compactQuery))) return true;
+  const tokens = normalizeSearchText(query)
+    .split(/[\s,;]+/)
+    .map((token) => token.replace(/[^a-z0-9]+/g, ""))
+    .filter(Boolean);
+  if (tokens.length > 1) {
+    const joined = compactFields.join("|");
+    return tokens.every((token) => joined.includes(token));
+  }
+  return false;
+}
 function readQuizDraft(user: User | null): QuizDraftState | null {
   if (typeof window === "undefined") return null;
   const key = quizDraftKey(user);
@@ -4304,17 +4330,17 @@ function CoursePage({ user }: { user: User | null }) {
       module.title,
       ...module.topics.flatMap((topic) => [topic.title, ...topic.resources.map((resource) => resource.title), ...topic.resources.map((resource) => resource.original_filename)]),
     ].join(" ").toLowerCase();
-    const moduleMatches = !normalizedModuleSearch || searchableText.includes(normalizedModuleSearch);
+    const moduleMatches = !normalizedModuleSearch || smartMatch(moduleSearch, [searchableText]);
     const orderedTopics = [...module.topics].sort(
       (left, right) => (left.sort_order ?? Number.MAX_SAFE_INTEGER) - (right.sort_order ?? Number.MAX_SAFE_INTEGER) || left.id - right.id,
     );
     const topics = orderedTopics.flatMap((topic) => {
-      const topicMatches = !normalizedModuleSearch || topic.title.toLowerCase().includes(normalizedModuleSearch);
+      const topicMatches = !normalizedModuleSearch || smartMatch(moduleSearch, [topic.title]);
       const resources = [...topic.resources].sort(
         (left, right) => (left.sort_order ?? Number.MAX_SAFE_INTEGER) - (right.sort_order ?? Number.MAX_SAFE_INTEGER) || left.id - right.id,
       ).filter((resource) => {
         const typeMatches = resourceMatchesType(resource, moduleTypeFilter);
-        const fileMatches = !normalizedModuleSearch || topicMatches || `${resource.title} ${resource.original_filename}`.toLowerCase().includes(normalizedModuleSearch);
+        const fileMatches = !normalizedModuleSearch || topicMatches || smartMatch(moduleSearch, [resource.title, resource.original_filename]);
         return typeMatches && fileMatches;
       });
       return topicMatches || resources.length ? [{ ...topic, resources }] : [];
@@ -8352,13 +8378,9 @@ function RecordedVideoLibraryPage({ user }: { user: User | null }) {
 
   const visibleItems = useMemo(() => {
     const items = library?.items ?? [];
-    const normalizedQuery = searchQuery.trim().toLowerCase();
-    const filtered = normalizedQuery
-      ? items.filter((item) => {
-          const chunk = `${item.display_name ?? ""} ${item.meeting_name ?? ""} ${item.name ?? ""} ${item.session_label ?? ""}`.toLowerCase();
-          return chunk.includes(normalizedQuery);
-        })
-      : items;
+    const filtered = items.filter((item) =>
+  smartMatch(searchQuery, [item.display_name, item.meeting_name, item.name, item.session_label]),
+);
 
     if (sortBy === "manual") return [...filtered].sort((a, b) => (a.display_order ?? Number.MAX_SAFE_INTEGER) - (b.display_order ?? Number.MAX_SAFE_INTEGER) || a.id.localeCompare(b.id));
     return [...filtered].sort((a, b) => {
@@ -10338,12 +10360,12 @@ function Admin({ user }: { user: User | null }) {
   const filteredGroupedModules = useMemo(() => {
     const query = directorySearch.trim().toLowerCase();
     return groupedModules.flatMap((module) => {
-      const moduleMatches = module.title.toLowerCase().includes(query);
+      const moduleMatches = !query || smartMatch(directorySearch, [module.title]);
       const topics = (module.topics || []).flatMap((topic) => {
-        const topicMatches = topic.title.toLowerCase().includes(query);
+        const topicMatches = !query || smartMatch(directorySearch, [topic.title]);
         const resources = (topic.resources || []).filter((resource) => {
           const typeMatches = directoryTypeFilter === "all" || resource.resource_type === directoryTypeFilter;
-          const textMatches = !query || moduleMatches || topicMatches || `${resource.title} ${resource.original_filename}`.toLowerCase().includes(query);
+          const textMatches = !query || moduleMatches || topicMatches || smartMatch(directorySearch, [resource.title, resource.original_filename]);
           return typeMatches && textMatches;
         });
         return query && !moduleMatches && !topicMatches && resources.length === 0
