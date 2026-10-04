@@ -164,6 +164,41 @@ function smartMatch(rawQuery: string, fields: unknown[]): boolean {
   }
   return false;
 }
+function paginate<T>(items: T[], page: number, pageSize: number) {
+  const totalPages = Math.max(1, Math.ceil(items.length / pageSize));
+  const safePage = Math.min(Math.max(page, 1), totalPages);
+  return {
+    items: items.slice((safePage - 1) * pageSize, safePage * pageSize),
+    page: safePage,
+    totalPages,
+    total: items.length,
+  };
+}
+
+function PaginationBar({
+  page,
+  totalPages,
+  onChange,
+  label,
+}: {
+  page: number;
+  totalPages: number;
+  onChange: (page: number) => void;
+  label: string;
+}) {
+  if (totalPages <= 1) return null;
+  return (
+    <div className="pagination-row" aria-label={label}>
+      <button type="button" className="button button-small button-outline" disabled={page <= 1} onClick={() => onChange(page - 1)}>
+        <ChevronLeft size={14} /> Previous
+      </button>
+      <span>Page {page} of {totalPages}</span>
+      <button type="button" className="button button-small button-outline" disabled={page >= totalPages} onClick={() => onChange(page + 1)}>
+        Next <ChevronRight size={14} />
+      </button>
+    </div>
+  );
+}
 function readQuizDraft(user: User | null): QuizDraftState | null {
   if (typeof window === "undefined") return null;
   const key = quizDraftKey(user);
@@ -4730,6 +4765,8 @@ function RegisteredCoursesPage({ user }: { user: User | null }) {
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [page, setPage] = useState(1);
+  const pageSize = 6;
 
   const load = async () => {
     setLoading(true);
@@ -4757,6 +4794,8 @@ function RegisteredCoursesPage({ user }: { user: User | null }) {
 
   if (!user) return <Navigate to="/login" replace />;
 
+  const paged = paginate(courses, page, pageSize);
+
   return (
     <div className="container page-shell registered-page">
       <section className="section-heading registered-page-header">
@@ -4771,7 +4810,7 @@ function RegisteredCoursesPage({ user }: { user: User | null }) {
         </div>
       </section>
 
-      {loading ? (
+      {loading && courses.length === 0 ? (
         <div className="empty-state">Loading your registered courses…</div>
       ) : error ? (
         <div className="empty-state">
@@ -4789,59 +4828,61 @@ function RegisteredCoursesPage({ user }: { user: User | null }) {
           <Link className="button button-dark" to="/courses">Browse Courses</Link>
         </div>
       ) : (
-        <div className="registered-courses-grid">
-          {courses.map((course) => {
-            const progress = Math.max(0, Math.min(100, Number(course.progress ?? 0)));
-            const isAdminGranted = course.enrollment_source === "admin" || course.enrollment_source === "manual";
-            const isLiveEnabled = Boolean(course.live_access_enabled);
+        <>
+          <div className="registered-courses-grid">
+            {paged.items.map((course) => {
+              const progress = Math.max(0, Math.min(100, Number(course.progress ?? 0)));
+              const isAdminGranted = course.enrollment_source === "admin" || course.enrollment_source === "manual";
+              const isLiveEnabled = Boolean(course.live_access_enabled);
 
-            return (
-              <article className="registered-course-card" key={course.id}>
-                <div className="registered-course-card__top">
-                  <span className="registered-course-status">
-                    <span className="registered-course-status__dot" aria-hidden="true" />
-                    Active
-                  </span>
-                </div>
+              return (
+                <article className="registered-course-card" key={course.id}>
+                  <div className="registered-course-card__top">
+                    <span className="registered-course-status">
+                      <span className="registered-course-status__dot" aria-hidden="true" />
+                      Active
+                    </span>
+                  </div>
 
-                <div className="registered-course-card__body">
-                  <h3>{course.title}</h3>
-                  <p>{course.description || "Continue your learning journey with this course."}</p>
+                  <div className="registered-course-card__body">
+                    <h3>{course.title}</h3>
+                    <p>{course.description || "Continue your learning journey with this course."}</p>
 
-                  <div className="registered-progress-block">
-                    <div className="registered-progress-meta">
-                      <span>Your progress</span>
-                      <strong>{progress}%</strong>
+                    <div className="registered-progress-block">
+                      <div className="registered-progress-meta">
+                        <span>Your progress</span>
+                        <strong>{progress}%</strong>
+                      </div>
+                      <div className="registered-progress-bar" aria-label={`${progress}% complete`}>
+                        <span style={{ width: `${progress}%` }} />
+                      </div>
                     </div>
-                    <div className="registered-progress-bar" aria-label={`${progress}% complete`}>
-                      <span style={{ width: `${progress}%` }} />
+
+                    <div className="registered-badges">
+                      {isAdminGranted && <span className="registered-badge">Admin Granted</span>}
+                      {!isAdminGranted && <span className="registered-badge registered-badge--neutral">Paid Enrollment</span>}
+                      {isLiveEnabled && <span className="registered-badge registered-badge--accent">Live Classes Enabled</span>}
                     </div>
                   </div>
 
-                  <div className="registered-badges">
-                    {isAdminGranted && <span className="registered-badge">Admin Granted</span>}
-                    {!isAdminGranted && <span className="registered-badge registered-badge--neutral">Paid Enrollment</span>}
-                    {isLiveEnabled && <span className="registered-badge registered-badge--accent">Live Classes Enabled</span>}
+                  <div className="registered-course-card__footer">
+                    <Link
+                      className="button button-dark registered-continue-btn"
+                      to={course.next_topic_id ? `/course/${course.slug}#topic-${course.next_topic_id}` : `/course/${course.slug}`}
+                    >
+                      Continue Course <ArrowRight size={16} />
+                    </Link>
                   </div>
-                </div>
-
-                <div className="registered-course-card__footer">
-                  <Link
-                    className="button button-dark registered-continue-btn"
-                    to={course.next_topic_id ? `/course/${course.slug}#topic-${course.next_topic_id}` : `/course/${course.slug}`}
-                  >
-                    Continue Course <ArrowRight size={16} />
-                  </Link>
-                </div>
-              </article>
-            );
-          })}
-        </div>
+                </article>
+              );
+            })}
+          </div>
+          <PaginationBar page={paged.page} totalPages={paged.totalPages} onChange={setPage} label="Registered courses pagination" />
+        </>
       )}
     </div>
   );
 }
-
 function ModuleBlock({
   module,
   courseAccess,
@@ -7811,6 +7852,8 @@ function QuestionBankPage({ user }: { user: User | null }) {
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [showArchivePaywall, setShowArchivePaywall] = useState(false);
   const [expandedYears, setExpandedYears] = useState<Record<string, boolean>>({});
+  const [archivePage, setArchivePage] = useState(1);
+  const archivePageSize = 20;
   const load = () => {
     setLoading(true);
     setError("");
@@ -7868,9 +7911,12 @@ function QuestionBankPage({ user }: { user: User | null }) {
     }
   }, [library]);
 
+  useEffect(() => {
+    setArchivePage(1);
+  }, [searchQuery, yearFilter, typeFilter, categoryFilter]);
+
   const visibleYears = useMemo(() => {
     if (!library) return [];
-    const normalizedQuery = searchQuery.trim().toLowerCase();
 
     return library.years
       .map((group) => {
@@ -7879,13 +7925,13 @@ function QuestionBankPage({ user }: { user: User | null }) {
           const fileType = getLibraryFileType(file.name);
           const category = getLibraryCategory(file);
           const matchesSearch = smartMatch(searchQuery, [
-  file.name,
-  file.relative_path,
-  category,
-  fileType,
-  group.year === "Other" ? "Other" : `UGC NET ${group.year}`,
-  group.year,
-]);
+            file.name,
+            file.relative_path,
+            category,
+            fileType,
+            group.year === "Other" ? "Other" : `UGC NET ${group.year}`,
+            group.year,
+          ]);
           const matchesYear =
             yearFilter === "all" ||
             (yearFilter === "Other" && group.year === "Other") ||
@@ -7904,6 +7950,24 @@ function QuestionBankPage({ user }: { user: User | null }) {
       })
       .filter((group) => group.filteredFiles.length > 0);
   }, [library, searchQuery, yearFilter, typeFilter, categoryFilter]);
+
+  const totalVisibleFiles = visibleYears.reduce((sum, group) => sum + group.filteredFiles.length, 0);
+  const archiveTotalPages = Math.max(1, Math.ceil(totalVisibleFiles / archivePageSize));
+  const safeArchivePage = Math.min(archivePage, archiveTotalPages);
+
+  const pagedYears = useMemo(() => {
+    const start = (safeArchivePage - 1) * archivePageSize;
+    const end = start + archivePageSize;
+    let cursor = 0;
+    return visibleYears.flatMap((group) => {
+      const groupStart = cursor;
+      cursor += group.filteredFiles.length;
+      const from = Math.max(start - groupStart, 0);
+      const to = Math.min(end - groupStart, group.filteredFiles.length);
+      if (to <= from) return [];
+      return [{ ...group, totalInYear: group.filteredFiles.length, filteredFiles: group.filteredFiles.slice(from, to) }];
+    });
+  }, [visibleYears, safeArchivePage]);
 
   useEffect(() => {
     if (!user) {
@@ -8097,15 +8161,16 @@ function QuestionBankPage({ user }: { user: User | null }) {
               <small>formats</small>
             </span>
           </div>
-          {visibleYears.length === 0 ? (
+          {pagedYears.length === 0 ? (
             <div className="empty-state archive-empty-state">
               <FileText size={24} />
               <h3>No files match these filters.</h3>
               <p>Try a different search phrase, year, or file type.</p>
             </div>
           ) : (
+            <>
             <div className="archive-year-list">
-              {visibleYears.map((group) => {
+              {pagedYears.map((group) => {
                 const isExpanded = expandedYears[group.yearKey] ?? true;
                 return (
                   <section className="archive-year" key={group.yearKey}>
@@ -8131,7 +8196,7 @@ function QuestionBankPage({ user }: { user: User | null }) {
                         </h2>
                       </div>
                       <span className="status-pill archive-year-count">
-                        {group.filteredFiles.length} files
+                        {group.totalInYear} files
                       </span>
                     </div>
                     {isExpanded && (
@@ -8266,13 +8331,14 @@ function QuestionBankPage({ user }: { user: User | null }) {
                 );
               })}
             </div>
+            <PaginationBar page={safeArchivePage} totalPages={archiveTotalPages} onChange={setArchivePage} label="Question archive pagination" />
+            </>
           )}
         </>
       )}
     </div>
   );
 }
-
 function LearnerRecordedThumbnail({ path }: { path: string }) {
   const [url, setUrl] = useState("");
   useEffect(() => {
@@ -8301,12 +8367,18 @@ function RecordedVideoLibraryPage({ user }: { user: User | null }) {
   const [error, setError] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<"manual" | "newest" | "oldest" | "alpha">("manual");
+  const [page, setPage] = useState(1);
+  const pageSize = 6;
 
   useEffect(() => {
     return () => {
       if (playingUrl?.startsWith("blob:")) URL.revokeObjectURL(playingUrl);
     };
   }, [playingUrl]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [searchQuery, sortBy]);
 
   const authenticatedMediaPath = (value: string) => {
     const mediaUrl = new URL(value, API_URL);
@@ -8384,8 +8456,8 @@ function RecordedVideoLibraryPage({ user }: { user: User | null }) {
   const visibleItems = useMemo(() => {
     const items = library?.items ?? [];
     const filtered = items.filter((item) =>
-  smartMatch(searchQuery, [item.display_name, item.meeting_name, item.name, item.session_label]),
-);
+      smartMatch(searchQuery, [item.display_name, item.meeting_name, item.name, item.session_label]),
+    );
 
     if (sortBy === "manual") return [...filtered].sort((a, b) => (a.display_order ?? Number.MAX_SAFE_INTEGER) - (b.display_order ?? Number.MAX_SAFE_INTEGER) || a.id.localeCompare(b.id));
     return [...filtered].sort((a, b) => {
@@ -8397,6 +8469,14 @@ function RecordedVideoLibraryPage({ user }: { user: User | null }) {
       return sortBy === "oldest" ? left - right : right - left;
     });
   }, [library, searchQuery, sortBy]);
+
+  const paged = paginate(visibleItems, page, pageSize);
+
+  const changePage = (next: number) => {
+    setPlayingId(null);
+    setPlayingUrl(null);
+    setPage(next);
+  };
 
   const load = () => {
     setLoading(true);
@@ -8575,7 +8655,7 @@ function RecordedVideoLibraryPage({ user }: { user: User | null }) {
           </div>
 
           <section className="recorded-library-grid">
-            {visibleItems.map((item, visibleIndex) => {
+            {paged.items.map((item, visibleIndex) => {
               const meetingName =
                 item.meeting_name?.trim() ||
                 item.display_name?.trim() ||
@@ -8604,7 +8684,7 @@ function RecordedVideoLibraryPage({ user }: { user: User | null }) {
                       type="button"
                       onClick={() => void playRecordedVideo(item)}
                       disabled={loadingRecordingId === item.id}
-                    
+
                       aria-label={`Play recording: ${meetingName}`}
                     >
                       {item.thumbnail_url && <LearnerRecordedThumbnail path={item.thumbnail_url} />}
@@ -8619,7 +8699,7 @@ function RecordedVideoLibraryPage({ user }: { user: User | null }) {
                       <span className="recording-tag">
                         <span className="dot" /> LIVE CLASS · {item.recorded_at ? new Date(item.recorded_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : item.session_label || "Recorded class"}
                       </span>
-                      <span className="recording-order-badge">Video #{(item.display_order ?? visibleIndex) + 1}</span>
+                      <span className="recording-order-badge">Video #{(item.display_order ?? ((paged.page - 1) * pageSize + visibleIndex)) + 1}</span>
                       <h3>{meetingName}</h3>
                     </div>
 
@@ -8675,12 +8755,12 @@ function RecordedVideoLibraryPage({ user }: { user: User | null }) {
               );
             })}
           </section>
+          <PaginationBar page={paged.page} totalPages={paged.totalPages} onChange={changePage} label="Recorded classes pagination" />
         </>
       )}
     </div>
   );
 }
-
 function ContactPage() {
   return (
     <div className="container contact-page">
