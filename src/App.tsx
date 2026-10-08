@@ -1,4 +1,4 @@
-import {
+import { useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -198,6 +198,37 @@ function PaginationBar({
       </button>
     </div>
   );
+}
+
+const REFRESH_MS = 10_000;
+
+function useAutoRefresh(
+  task: () => Promise<unknown> | unknown,
+  enabled: boolean = true,
+  interval: number = REFRESH_MS,
+) {
+  const taskRef = useRef(task);
+  taskRef.current = task;
+  const running = useRef(false);
+
+  useEffect(() => {
+    if (!enabled) return;
+    const tick = async () => {
+      if (running.current || document.visibilityState !== "visible") return;
+      running.current = true;
+      try { await taskRef.current(); } catch { /* silent */ }
+      finally { running.current = false; }
+    };
+    const timer = window.setInterval(tick, interval);
+    const onWake = () => { if (document.visibilityState === "visible") void tick(); };
+    document.addEventListener("visibilitychange", onWake);
+    window.addEventListener("online", onWake);
+    return () => {
+      window.clearInterval(timer);
+      document.removeEventListener("visibilitychange", onWake);
+      window.removeEventListener("online", onWake);
+    };
+  }, [enabled, interval]);
 }
 function readQuizDraft(user: User | null): QuizDraftState | null {
   if (typeof window === "undefined") return null;
@@ -859,25 +890,23 @@ function NotificationCenter({ user }: { user: User | null }) {
   const navigate = useNavigate();
   const notifications = useNotifications();
 
-  const reload = async () => {
+    const reload = async (silent = false) => {
     if (!user) return;
-    setLoading(true);
+    if (!silent) setLoading(true);
     try {
-      const next = await api<Notification[]>("/notifications?include_read=true");
-      setItems(next);
+      setItems(await api<Notification[]>("/notifications?include_read=true"));
     } catch {
-      setItems([]);
+      if (!silent) setItems([]);
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   };
 
   useEffect(() => {
-    if (!user) return;
-    void reload();
-    const timer = window.setInterval(() => void reload(), 30000);
-    return () => window.clearInterval(timer);
+    if (user) void reload();
   }, [user?.id]);
+
+  useAutoRefresh(() => reload(true), !!user);   
 
   useEffect(() => {
     if (!isOpen) return;
@@ -1264,36 +1293,31 @@ function DashboardPage({ user }: { user: User | null }) {
   const [globalFilePage, setGlobalFilePage] = useState(1);
   const [globalFileBusy, setGlobalFileBusy] = useState<number | null>(null);
 
+    const load = async (silent = false) => {
+    if (!silent) { setLoading(true); setFetchError(""); }
+    try {
+      const [courseResult, notificationResult, attemptResult, globalFileResult] = await Promise.all([
+        api<Course[]>('/courses/dashboard'),
+        api<Notification[]>('/notifications?include_read=true').catch(() => []),
+        api<QuizAttempt[]>('/quizzes/attempts/me').catch(() => []),
+        api<PaginatedGlobalFiles>(`/global-files?page=${globalFilePage}&page_size=6`).catch(() => null),
+      ]);
+      setCourses(courseResult);
+      setNotifications(notificationResult.slice(0, 5));
+      setAttempts(attemptResult.slice(0, 3));
+      setGlobalFiles(globalFileResult);
+    } catch (cause) {
+      if (!silent) setFetchError((cause as Error).message || "Unable to load your dashboard right now.");
+    } finally {
+      if (!silent) setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    if (!user) return;
-    let active = true;
-    const load = async () => {
-      setLoading(true);
-      setFetchError("");
-      try {
-        const [courseResult, notificationResult, attemptResult, globalFileResult] = await Promise.all([
-          api<Course[]>('/courses/dashboard'),
-          api<Notification[]>('/notifications?include_read=true').catch(() => []),
-          api<QuizAttempt[]>('/quizzes/attempts/me').catch(() => []),
-          api<PaginatedGlobalFiles>(`/global-files?page=${globalFilePage}&page_size=6`).catch(() => null),
-        ]);
-        if (!active) return;
-        setCourses(courseResult);
-        setNotifications(notificationResult.slice(0, 5));
-        setAttempts(attemptResult.slice(0, 3));
-        setGlobalFiles(globalFileResult);
-      } catch (cause) {
-        if (!active) return;
-        setFetchError((cause as Error).message || "Unable to load your dashboard right now.");
-      } finally {
-        if (active) setLoading(false);
-      }
-    };
-    void load();
-    return () => {
-      active = false;
-    };
+    if (user) void load();
   }, [user?.id, globalFilePage]);
+
+  useAutoRefresh(() => load(true), !!user);
 
   if (!user) return <Navigate to="/login" replace />;
 
@@ -1536,27 +1560,22 @@ function MyLearningPage({ user }: { user: User | null }) {
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState("");
 
+    const load = async (silent = false) => {
+    if (!silent) { setLoading(true); setFetchError(""); }
+    try {
+      setCourses(await api<Course[]>('/courses/dashboard'));
+    } catch (cause) {
+      if (!silent) setFetchError((cause as Error).message || "Unable to load My Learning right now.");
+    } finally {
+      if (!silent) setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    if (!user) return;
-    let active = true;
-    const load = async () => {
-      setLoading(true);
-      setFetchError("");
-      try {
-        const result = await api<Course[]>('/courses/dashboard');
-        if (active) setCourses(result);
-      } catch (cause) {
-        if (!active) return;
-        setFetchError((cause as Error).message || "Unable to load My Learning right now.");
-      } finally {
-        if (active) setLoading(false);
-      }
-    };
-    void load();
-    return () => {
-      active = false;
-    };
+    if (user) void load();
   }, [user?.id]);
+
+  useAutoRefresh(() => load(true), !!user);
 
   if (!user) return <Navigate to="/login" replace />;
 
@@ -1692,21 +1711,21 @@ function NotificationsPage({ user }: { user: User | null }) {
   const [filter, setFilter] = useState<"all" | "unread">("all");
   const [loading, setLoading] = useState(true);
 
-  const reload = async () => {
+    const reload = async (silent = false) => {
     if (!user) return;
-    setLoading(true);
+    if (!silent) setLoading(true);
     try {
-      const result = await api<Notification[]>('/notifications?include_read=true');
-      setItems(result);
+      setItems(await api<Notification[]>('/notifications?include_read=true'));
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   };
 
   useEffect(() => {
-    if (!user) return;
-    void reload();
+    if (user) void reload();
   }, [user?.id]);
+
+  useAutoRefresh(() => reload(true), !!user);
 
   if (!user) return <Navigate to="/login" replace />;
 
@@ -2668,7 +2687,7 @@ function Home({ user }: { user: User | null }) {
       active = false;
     };
   }, [user, page, limit, searchTerm, subjectFilter, retry]);
-
+  useAutoRefresh(() => setRetry((v) => v + 1));
   const featuredCourse = pinnedCourse ?? courses[0] ?? null;
   const defaultCourseSlug = featuredCourse?.slug || "aagaz-batch-paper-1";
   const handlePageChange = (nextPage: number) => setPage(Math.min(Math.max(nextPage, 1), totalPages));
@@ -4270,33 +4289,27 @@ function CoursePage({ user }: { user: User | null }) {
   const [moduleTypeFilter, setModuleTypeFilter] = useState("all");
   const [message, setMessage] = useState("");
   const [liveRefresh, setLiveRefresh] = useState(0);
-
-  useEffect(() => {
+       const [tick, setTick] = useState(0);
+     useAutoRefresh(() => setTick((v) => v + 1));
+    useEffect(() => {
     if (!slug) return;
     let active = true;
-    void api<Course>(`/courses/${slug}`)
-      .then((result) => {
-        if (active) setCourse(result);
+    Promise.all([
+      api<Course>(`/courses/${slug}`),
+      user ? api<Course[]>("/courses/dashboard").catch(() => null) : Promise.resolve(null),
+    ])
+      .then(([result, items]) => {
+        if (!active) return;
+        const state = items?.find((item) => item.slug === slug);
+        setCourse(state ? { ...result, ...state } : result);
       })
       .catch((e) => {
         if (active) setMessage(e.message);
       });
-    if (user) {
-      void api<Course[]>("/courses/dashboard")
-        .then((items) => {
-          const state = items.find((item) => item.slug === slug);
-          if (active && state)
-            setCourse((current) =>
-              current ? { ...current, ...state } : state,
-            );
-        })
-        .catch(() => undefined);
-    }
     return () => {
       active = false;
     };
-  }, [slug, user]);
-
+  }, [slug, user, tick]);
   useEffect(() => {
     if (!course?.id) return;
     let active = true;
@@ -4768,29 +4781,24 @@ function RegisteredCoursesPage({ user }: { user: User | null }) {
   const [page, setPage] = useState(1);
   const pageSize = 6;
 
-  const load = async () => {
-    setLoading(true);
-    setError("");
+    const load = async (silent = false) => {
+    if (!silent) { setLoading(true); setError(""); }
     try {
       const items = await api<Course[]>("/courses/dashboard");
       const enrolled = items.filter((course) => course.is_enrolled);
-      const deduped = Array.from(new Map(enrolled.map((course) => [course.id, course])).values());
-      setCourses(deduped);
+      setCourses(Array.from(new Map(enrolled.map((c) => [c.id, c])).values()));
     } catch (cause) {
-      setError((cause as Error).message || "Unable to load your registered courses.");
+      if (!silent) setError((cause as Error).message || "Unable to load your registered courses.");
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   };
 
   useEffect(() => {
     if (user) void load();
-    if (!user) return;
-    const timer = window.setInterval(() => void load(), 15000);
-    const refreshOnReturn = () => { if (document.visibilityState === "visible") void load(); };
-    document.addEventListener("visibilitychange", refreshOnReturn);
-    return () => { window.clearInterval(timer); document.removeEventListener("visibilitychange", refreshOnReturn); };
   }, [user?.id]);
+
+  useAutoRefresh(() => load(true), !!user);
 
   if (!user) return <Navigate to="/login" replace />;
 
@@ -7854,31 +7862,27 @@ function QuestionBankPage({ user }: { user: User | null }) {
   const [expandedYears, setExpandedYears] = useState<Record<string, boolean>>({});
   const [archivePage, setArchivePage] = useState(1);
   const archivePageSize = 20;
-  const load = () => {
-    setLoading(true);
-    setError("");
-    void Promise.allSettled([
+    const load = (silent = false) => {
+    if (!silent) { setLoading(true); setError(""); }
+    return Promise.allSettled([
       api<PremiumAccess>("/payments/status"),
       api<QuestionLibrary>("/library/question-bank"),
     ])
       .then(([paymentResult, archiveResult]) => {
-        if (paymentResult.status === "fulfilled")
-          setAccess(paymentResult.value);
-        if (archiveResult.status === "fulfilled")
-          setLibrary(archiveResult.value);
-        const failure =
-          archiveResult.status === "rejected"
-            ? archiveResult.reason
-            : paymentResult.status === "rejected"
-              ? paymentResult.reason
-              : null;
-        if (failure)
-          setError(
-            (failure as Error).message ||
-              "Could not load the question archive.",
-          );
+        if (paymentResult.status === "fulfilled") setAccess(paymentResult.value);
+        if (archiveResult.status === "fulfilled") setLibrary(archiveResult.value);
+        if (!silent) {
+          const failure =
+            archiveResult.status === "rejected"
+              ? archiveResult.reason
+              : paymentResult.status === "rejected"
+                ? paymentResult.reason
+                : null;
+          if (failure)
+            setError((failure as Error).message || "Could not load the question archive.");
+        }
       })
-      .finally(() => setLoading(false));
+      .finally(() => { if (!silent) setLoading(false); });
   };
   const fileTypeOptions = useMemo(
     () =>
@@ -7969,13 +7973,15 @@ function QuestionBankPage({ user }: { user: User | null }) {
     });
   }, [visibleYears, safeArchivePage]);
 
-  useEffect(() => {
+    useEffect(() => {
     if (!user) {
       setLoading(false);
       return;
     }
-    load();
+    void load();
   }, [user]);
+
+  useAutoRefresh(() => load(true), !!user);
   const openPreview = async (file: QuestionLibraryFile) => {
     if (preview?.file.id === file.id) {
       setPreview(null);
@@ -8478,39 +8484,38 @@ function RecordedVideoLibraryPage({ user }: { user: User | null }) {
     setPage(next);
   };
 
-  const load = () => {
-    setLoading(true);
-    setError("");
-    void Promise.allSettled([
+    const load = (silent = false) => {
+    if (!silent) { setLoading(true); setError(""); }
+    return Promise.allSettled([
       api<PremiumAccess>("/payments/status"),
       api<RecordedLibrary>("/library/recorded-videos"),
       api<Course[]>("/courses"),
     ])
       .then(([paymentResult, videosResult, coursesResult]) => {
-        if (paymentResult.status === "fulfilled")
-          setAccess(paymentResult.value);
+        if (paymentResult.status === "fulfilled") setAccess(paymentResult.value);
         if (videosResult.status === "fulfilled") setLibrary(videosResult.value);
         if (coursesResult.status === "fulfilled") setPaymentCourses(coursesResult.value);
-        const failure =
-          videosResult.status === "rejected"
-            ? videosResult.reason
-            : coursesResult.status === "rejected"
-              ? coursesResult.reason
-              : paymentResult.status === "rejected"
-              ? paymentResult.reason
-              : null;
-        if (failure)
-          setError(
-            (failure as Error).message ||
-              "Could not load the recorded classroom.",
-          );
+        if (!silent) {
+          const failure =
+            videosResult.status === "rejected"
+              ? videosResult.reason
+              : coursesResult.status === "rejected"
+                ? coursesResult.reason
+                : paymentResult.status === "rejected"
+                  ? paymentResult.reason
+                  : null;
+          if (failure)
+            setError((failure as Error).message || "Could not load the recorded classroom.");
+        }
       })
-      .finally(() => setLoading(false));
+      .finally(() => { if (!silent) setLoading(false); });
   };
-  useEffect(() => {
-    if (user) load();
+    useEffect(() => {
+    if (user) void load();
     else setLoading(false);
   }, [user]);
+
+  useAutoRefresh(() => load(true), !!user);
   const openRecordedVideoInDrive = async (item: RecordedLibrary["items"][number]) => {
     const driveWindow = window.open("about:blank", "_blank");
     if (driveWindow) driveWindow.opener = null;
@@ -12441,19 +12446,16 @@ function CourseLiveClasses({
   const [error, setError] = useState("");
   const [googleAuthOpen, setGoogleAuthOpen] = useState(false);
 
+  const refresh = (silent = false) =>
+    api<MeetClassSummary[]>("/live-classes/available")
+      .then((items) => setClasses(items.filter((item) => item.course_id === courseId)))
+      .catch((cause) => { if (!silent) setError((cause as Error).message); });
+
   useEffect(() => {
-    if (!user) return;
-    const refresh = () =>
-      api<MeetClassSummary[]>("/live-classes/available")
-        .then((items) =>
-          setClasses(items.filter((item) => item.course_id === courseId)),
-        )
-        .catch((cause) => setError((cause as Error).message));
-    void refresh();
-    const timer = window.setInterval(refresh, 15000);
-    return () => window.clearInterval(timer);
+    if (user) void refresh();
   }, [courseId, user]);
 
+  useAutoRefresh(() => refresh(true), !!user);
   const join = async (id: number) => {
     try {
       setError("");
@@ -12566,7 +12568,7 @@ function UnifiedLivePage({ user }: { user: User | null }) {
   const [error, setError] = useState("");
   const [googleAuthOpen, setGoogleAuthOpen] = useState(false);
 
-  const refresh = async () => {
+    const refresh = async (silent = false) => {
     try {
       const [items, courses] = await Promise.all([
         api<MeetClassSummary[]>("/live-classes/available"),
@@ -12577,16 +12579,15 @@ function UnifiedLivePage({ user }: { user: User | null }) {
       );
       setClasses(items.filter((item) => enrolledCourseIds.has(item.course_id)));
     } catch (cause) {
-      setError((cause as Error).message);
+      if (!silent) setError((cause as Error).message);
     }
   };
+
   useEffect(() => {
-    if (!user) return;
-    void refresh();
-    const timer = window.setInterval(refresh, 15000);
-    return () => window.clearInterval(timer);
+    if (user) void refresh();
   }, [user]);
 
+  useAutoRefresh(() => refresh(true), !!user);
   const join = async (id: number) => {
     try {
       const result = await api<MeetJoin>(`/live-classes/${id}/join`, {
